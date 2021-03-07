@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "workspaces": [
+    "./docs",
+    "./packages/*"
+  ],
+  "scripts": {
+    "dev:docs": "next dev ./docs",
+    "fix": "yarn prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  }
+}
