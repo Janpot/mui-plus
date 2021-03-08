@@ -1,35 +1,54 @@
 import * as React from 'react';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, createSvgIcon } from '@material-ui/core';
+import clsx from 'clsx';
 
-const useStyles = makeStyles(() => ({
-  root: {},
-  resizing: {},
-  datagrid: {
-    display: 'grid',
+const useStyles = makeStyles((theme) => ({
+  root: {
     '&$resizing': {
       userSelect: 'none',
     },
+    overflow: 'auto',
+    borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${theme.palette.divider}`,
+  },
+  resizing: {},
+  grid: {
+    display: 'grid',
   },
   cell: {
-    padding: '3px 6px',
+    height: 56,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    display: 'flex',
+    alignItems: 'center',
+  },
+  textContent: {
+    padding: '0 16px',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
   },
   cellHead: {
     position: 'relative',
-    borderBottom: '1px solid blue',
+    fontWeight: theme.typography.fontWeightBold,
   },
   cellBody: {},
   virtualPadding: {
     gridColumn: '1 / -1',
   },
   resizer: {
+    color: theme.palette.divider,
+    display: 'inline-flex',
+    alignItems: 'center',
     position: 'absolute',
-    background: 'blue',
-    width: 10,
     top: 0,
     bottom: 0,
     right: 0,
     cursor: 'col-resize',
-    zZndex: 1,
+    zIndex: 1,
+    transform: 'translateX(50%)',
+    '&:hover': {
+      color: theme.palette.action.active,
+    },
   },
 }));
 
@@ -76,10 +95,6 @@ export interface DataGridProps<RowType = any> {
 
 interface HeaderElms {
   [key: string]: HTMLDivElement | null | undefined;
-}
-
-function className(...names: (string | null | undefined)[]): string {
-  return names.filter(Boolean).join(' ');
 }
 
 function useVisibleColumns(
@@ -228,6 +243,8 @@ function useColumnResizing({
   };
 }
 
+const SeparatorIcon = createSvgIcon(<path d="M11 19V5h2v14z" />, 'Separator');
+
 export default function DataGrid({ columns, data, getKey }: DataGridProps) {
   const classes = useStyles();
 
@@ -259,58 +276,61 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
     gridRoot,
   });
 
-  const gridClasses = [];
-  if (state.resizingColumn) {
-    gridClasses.push(classes.resizing);
-  }
-
   return (
     <div
-      ref={gridRoot}
-      className={className(classes.datagrid, ...gridClasses)}
-      style={{ gridTemplateColumns }}
-    >
-      {visibleColumns.map((columnKey) => {
-        const column = columns[columnKey];
-        return (
-          <div
-            ref={(elm) => (headerElms.current[columnKey] = elm)}
-            key={columnKey}
-            className={className(classes.cell, classes.cellHead)}
-          >
-            {column?.header || columnKey}
-            <div
-              className={className(classes.resizer)}
-              onMouseDown={handleResizerMouseDown}
-              data-column={columnKey}
-            />
-          </div>
-        );
+      className={clsx(classes.root, {
+        [classes.resizing]: !!state.resizingColumn,
       })}
+    >
       <div
-        className={className(classes.virtualPadding)}
-        style={{ height: 0 }}
-      />
-      {data.map((row) => {
-        const rowKey = getKey(row);
-        return visibleColumns.map((columnKey) => {
-          const column = columns[columnKey]!;
-          // TODO: Guarantee uniqueness?
-          const cellKey = `${rowKey}:${columnKey}`;
+        ref={gridRoot}
+        className={clsx(classes.grid)}
+        style={{ gridTemplateColumns }}
+      >
+        {visibleColumns.map((columnKey) => {
+          const column = columns[columnKey];
           return (
             <div
-              key={cellKey}
-              className={className(classes.cell, classes.cellBody)}
+              ref={(elm) => (headerElms.current[columnKey] = elm)}
+              key={columnKey}
+              className={clsx(classes.cell, classes.cellHead)}
             >
-              {column.getValue ? column.getValue(row) : row[columnKey]}
+              <div className={classes.textContent}>
+                {column?.header || columnKey}
+              </div>
+              <div
+                className={clsx(classes.resizer)}
+                onMouseDown={handleResizerMouseDown}
+                data-column={columnKey}
+              >
+                <SeparatorIcon />
+              </div>
             </div>
           );
-        });
-      })}
-      <div
-        className={className(classes.virtualPadding)}
-        style={{ height: 0 }}
-      />
+        })}
+        <div className={classes.virtualPadding} style={{ height: 0 }} />
+        {data.map((row) => {
+          const rowKey = getKey(row);
+          return visibleColumns.map((columnKey) => {
+            const column = columns[columnKey]!;
+            // TODO: Guarantee uniqueness?
+            const cellKey = `${rowKey}:${columnKey}`;
+            return (
+              <div
+                key={cellKey}
+                className={clsx(classes.cell, classes.cellBody)}
+              >
+                <div className={classes.textContent}>
+                  {String(
+                    column.getValue ? column.getValue(row) : row[columnKey]
+                  )}
+                </div>
+              </div>
+            );
+          });
+        })}
+        <div className={classes.virtualPadding} style={{ height: 0 }} />
+      </div>
     </div>
   );
 }
