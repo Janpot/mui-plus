@@ -1,5 +1,37 @@
 import * as React from 'react';
-import './DataGrid.css';
+import { makeStyles } from '@material-ui/core';
+
+const useStyles = makeStyles(() => ({
+  root: {},
+  resizing: {},
+  datagrid: {
+    display: 'grid',
+    '&$resizing': {
+      userSelect: 'none',
+    },
+  },
+  cell: {
+    padding: '3px 6px',
+  },
+  cellHead: {
+    position: 'relative',
+    borderBottom: '1px solid blue',
+  },
+  cellBody: {},
+  virtualPadding: {
+    gridColumn: '1 / -1',
+  },
+  resizer: {
+    position: 'absolute',
+    background: 'blue',
+    width: 10,
+    top: 0,
+    bottom: 0,
+    right: 0,
+    cursor: 'col-resize',
+    zZndex: 1,
+  },
+}));
 
 interface ResizingColumn {
   key: string;
@@ -47,10 +79,7 @@ interface HeaderElms {
 }
 
 function className(...names: (string | null | undefined)[]): string {
-  return names
-    .filter(Boolean)
-    .map((name) => `DataGrid_${name}`)
-    .join(' ');
+  return names.filter(Boolean).join(' ');
 }
 
 function useVisibleColumns(
@@ -200,6 +229,8 @@ function useColumnResizing({
 }
 
 export default function DataGrid({ columns, data, getKey }: DataGridProps) {
+  const classes = useStyles();
+
   const [state, setState] = React.useState<DataGridState>({});
   const { columnWidths } = state;
   const visibleColumns = useVisibleColumns(columns, state);
@@ -228,15 +259,15 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
     gridRoot,
   });
 
-  const classes = [];
+  const gridClasses = [];
   if (state.resizingColumn) {
-    classes.push('resizing');
+    gridClasses.push(classes.resizing);
   }
 
   return (
     <div
       ref={gridRoot}
-      className={className('root', ...classes)}
+      className={className(classes.datagrid, ...gridClasses)}
       style={{ gridTemplateColumns }}
     >
       {visibleColumns.map((columnKey) => {
@@ -245,18 +276,21 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
           <div
             ref={(elm) => (headerElms.current[columnKey] = elm)}
             key={columnKey}
-            className={className('cell', 'header')}
+            className={className(classes.cell, classes.cellHead)}
           >
             {column?.header || columnKey}
             <div
-              className={className('resizer')}
+              className={className(classes.resizer)}
               onMouseDown={handleResizerMouseDown}
               data-column={columnKey}
             />
           </div>
         );
       })}
-      <div className={className('virtual-padding')} style={{ height: 0 }} />
+      <div
+        className={className(classes.virtualPadding)}
+        style={{ height: 0 }}
+      />
       {data.map((row) => {
         const rowKey = getKey(row);
         return visibleColumns.map((columnKey) => {
@@ -264,13 +298,19 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
           // TODO: Guarantee uniqueness?
           const cellKey = `${rowKey}:${columnKey}`;
           return (
-            <div key={cellKey} className={className('cell', 'body')}>
+            <div
+              key={cellKey}
+              className={className(classes.cell, classes.cellBody)}
+            >
               {column.getValue ? column.getValue(row) : row[columnKey]}
             </div>
           );
         });
       })}
-      <div className={className('virtual-padding')} style={{ height: 0 }} />
+      <div
+        className={className(classes.virtualPadding)}
+        style={{ height: 0 }}
+      />
     </div>
   );
 }

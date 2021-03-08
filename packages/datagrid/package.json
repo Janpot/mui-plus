@@ -2,23 +2,25 @@
   "name": "@mui-plus/datagrid",
   "version": "1.0.0",
   "devDependencies": {
-    "@babel/core": "^7.13.8",
-    "@storybook/addon-actions": "^6.1.21",
-    "@storybook/addon-essentials": "^6.1.21",
-    "@storybook/addon-links": "^6.1.21",
-    "@storybook/react": "^6.1.21",
-    "babel-loader": "^8.2.2",
+    "microbundle": "^0.13.0",
     "react": "^17.0.1",
     "typescript": "^4.1.5"
   },
+  "source": "./src/index.ts",
   "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "module": "./dist/index.module.js",
+  "exports": "./dist/foo.modern.js",
   "scripts": {
+    "build": "microbundle --jsx 'React.createElement'",
+    "dev": "microbundle watch --jsx 'React.createElement'",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
   "peerDependencies": {
     "react": "^17.0.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2"
+  }
 }

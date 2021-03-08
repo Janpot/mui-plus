@@ -1,8 +1,8 @@
 {
   "private": true,
   "workspaces": [
-    "./docs",
-    "./packages/*"
+    "docs",
+    "packages/*"
   ],
   "scripts": {
     "dev:docs": "next dev ./docs",

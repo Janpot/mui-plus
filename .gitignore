@@ -36,3 +36,5 @@ yarn-error.log*
 /public/analytics.js.map
 /public/tag.js
 /public/tag.js.map
+
+dist
