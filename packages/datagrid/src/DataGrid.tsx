@@ -199,8 +199,9 @@ function useColumnResizing({
       if (!resizedColumn) {
         return columnWidths;
       }
+      const { left: resizedColumnLeft } = resizedColumn.getBoundingClientRect();
       const desiredPosition = mouseX - resizingColumn.mouseOffset;
-      const desiredWidth = desiredPosition - resizedColumn.offsetLeft;
+      const desiredWidth = desiredPosition - resizedColumnLeft;
       const width = Math.max(
         Math.min(desiredWidth, column.maxWidth || Infinity),
         column.minWidth || 0
