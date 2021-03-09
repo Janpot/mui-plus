@@ -7,6 +7,7 @@ const useStyles = makeStyles((theme) => ({
     '&$resizing': {
       userSelect: 'none',
     },
+    height: '100%',
     overflow: 'auto',
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.divider}`,
@@ -16,7 +17,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'grid',
   },
   cell: {
-    height: 56,
     borderBottom: `1px solid ${theme.palette.divider}`,
     display: 'flex',
     alignItems: 'center',
@@ -28,10 +28,12 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: 'ellipsis',
   },
   cellHead: {
-    position: 'relative',
+    height: 56,
     fontWeight: theme.typography.fontWeightBold,
   },
-  cellBody: {},
+  cellBody: {
+    height: 52,
+  },
   virtualPadding: {
     gridColumn: '1 / -1',
   },
