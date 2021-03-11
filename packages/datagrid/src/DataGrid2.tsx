@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { makeStyles, createSvgIcon } from '@material-ui/core';
 import useResizeObserver from './useResizeObserver';
+import useEventListener from './useEventListener';
+import useCombinedRefs from './useCombinedRefs';
 
 const useStyles = makeStyles((theme) => ({
   resizing: {},
@@ -20,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
   },
   cellHead: {
     height: 56,
-    fontWeight: theme.typography.fontWeightBold,
   },
   cellBody: {
     height: 52,
@@ -52,19 +53,38 @@ const useStyles = makeStyles((theme) => ({
     border: `1px solid ${theme.palette.divider}`,
   },
   tableHeadViewport: {
+    overflow: 'hidden',
     borderBottom: `1px solid ${theme.palette.divider}`,
     height: 56,
-    overflow: 'auto',
   },
   tableBodyViewport: {
     flex: 1,
     overflow: 'auto',
   },
   tableHead: {
-    height: 56,
+    position: 'relative',
   },
   tableBody: {
+    position: 'relative',
     flex: 1,
+  },
+  headerCell: {
+    fontWeight: theme.typography.fontWeightBold,
+    position: 'absolute',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  tableCell: {
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    position: 'absolute',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  cellContent: {
+    padding: '0 16px',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
   },
 }));
 
@@ -295,6 +315,20 @@ function findNextColumn(
   }
 }
 
+interface BoundingRect {
+  top: number;
+  height: number;
+  left: number;
+  width: number;
+}
+
+interface GridVirtualSlice {
+  startRow: number;
+  endRow: number;
+  startColumn: number;
+  endColumn: number;
+}
+
 interface Dimensions {
   width: number;
   height: number;
@@ -306,6 +340,8 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
   const [state, setState] = React.useState<DataGridState>({});
   const visibleColumns = useVisibleColumns(columns, state);
   const rowHeight = 52;
+
+  const [virtualSlice, setVirtualSlice] = React.useState<GridVirtualSlice>();
 
   const columnSizings: ColumnSizings = React.useMemo(() => {
     const result: ColumnSizings = {};
@@ -333,12 +369,28 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
 
   const totalHeight = rowHeight * data.length;
 
-  const { ref: tableBodyRef, rect: viewportRect } = useResizeObserver();
+  const tableHeaderRef = React.useRef<HTMLDivElement>(null);
+  const { ref: bodyResizeRef, rect: viewportRect } = useResizeObserver();
 
-  const handleScroll = React.useCallback(
-    (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+  const getCellBoundingrect = React.useCallback(
+    (row: number, column: number): BoundingRect => {
+      const top = row * rowHeight;
+      const { left, width } = columnSizings[visibleColumns[column]]!;
+      return {
+        top,
+        height: rowHeight,
+        left,
+        width,
+      };
+    },
+    [rowHeight, visibleColumns, columnSizings]
+  );
+
+  const rowCount = data.length;
+
+  const updateVirtualSlice = React.useCallback(
+    (scrollLeft: number, scrollTop: number) => {
       if (!viewportRect) return;
-      const { scrollLeft, scrollTop } = event.currentTarget;
       const firstVisibleRow = Math.floor(scrollTop / rowHeight);
       const lastVisibleRow = Math.floor(
         (scrollTop + viewportRect.height) / rowHeight
@@ -350,16 +402,32 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
         columnSizings,
         scrollLeft + viewportRect.width
       );
-      console.log(
-        firstVisibleRow,
-        lastVisibleRow,
-        firstVisibleColumn,
-        lastVisibleColumn
-      );
+      const overscan = 3;
+      setVirtualSlice((slice) => {
+        if (
+          slice?.startRow === firstVisibleRow &&
+          slice?.endRow === lastVisibleRow &&
+          slice?.startColumn === firstVisibleColumn &&
+          slice?.endColumn === lastVisibleColumn
+        ) {
+          return slice;
+        } else {
+          return {
+            startRow: Math.max(0, firstVisibleRow - overscan),
+            endRow: Math.min(rowCount - 1, lastVisibleRow + overscan),
+            startColumn: Math.max(0, firstVisibleColumn - overscan),
+            endColumn: Math.min(
+              visibleColumns.length - 1,
+              lastVisibleColumn + overscan
+            ),
+          };
+        }
+      });
     },
     [
       viewportRect,
       rowHeight,
+      rowCount,
       totalHeight,
       visibleColumns,
       columnSizings,
@@ -367,20 +435,103 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
     ]
   );
 
+  React.useEffect(() => updateVirtualSlice(0, 0), [updateVirtualSlice]);
+
+  const {
+    headerElms,
+    bodyElms,
+  }: {
+    headerElms: JSX.Element[];
+    bodyElms: JSX.Element[];
+  } = React.useMemo(() => {
+    if (!virtualSlice) {
+      return {
+        headerElms: [],
+        bodyElms: [],
+      };
+    }
+    const headerElms = [];
+    const bodyElms = [];
+    for (
+      let columnIdx = virtualSlice.startColumn;
+      columnIdx <= virtualSlice.endColumn;
+      columnIdx += 1
+    ) {
+      const columnKey = visibleColumns[columnIdx];
+      headerElms.push(
+        <div
+          key={columnKey}
+          className={classes.headerCell}
+          style={{ ...getCellBoundingrect(0, columnIdx), height: 56 }}
+        >
+          <div className={classes.cellContent}>{columnKey}</div>
+        </div>
+      );
+      for (
+        let rowIdx = virtualSlice.startRow;
+        rowIdx <= virtualSlice.endRow;
+        rowIdx += 1
+      ) {
+        const value = data[rowIdx][columnKey];
+        bodyElms.push(
+          <div
+            key={`${rowIdx}:${columnKey}`}
+            className={classes.tableCell}
+            style={getCellBoundingrect(rowIdx, columnIdx)}
+          >
+            <div className={classes.cellContent}>{String(value)}</div>
+          </div>
+        );
+      }
+    }
+    return { headerElms, bodyElms };
+  }, [virtualSlice, getCellBoundingrect, visibleColumns, data]);
+
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = React.useCallback(
+    (e: Event) => {
+      if (!e.currentTarget) {
+        return;
+      }
+      const { scrollLeft, scrollTop } = e.currentTarget as HTMLDivElement;
+      e.preventDefault();
+      e.stopPropagation();
+      if (bodyRef.current) {
+        bodyRef.current.scrollLeft = scrollLeft;
+        bodyRef.current.scrollTop = scrollTop;
+        updateVirtualSlice(
+          bodyRef.current.scrollLeft,
+          bodyRef.current.scrollTop
+        );
+      }
+      if (tableHeaderRef.current) {
+        tableHeaderRef.current.scrollLeft = scrollLeft;
+      }
+    },
+    [updateVirtualSlice]
+  );
+
+  const wheelEventRef = useEventListener('scroll', handleScroll, {
+    passive: false,
+  });
+
+  const tableBodyRef = useCombinedRefs(bodyResizeRef, wheelEventRef, bodyRef);
+
   return (
     <div className={classes.root}>
-      <div className={classes.tableHeadViewport}>
-        <div className={classes.tableHead} style={{ width: totalWidth }}></div>
+      <div ref={tableHeaderRef} className={classes.tableHeadViewport}>
+        <div className={classes.tableHead} style={{ width: totalWidth }}>
+          {headerElms}
+        </div>
       </div>
-      <div
-        ref={tableBodyRef}
-        className={classes.tableBodyViewport}
-        onScroll={handleScroll}
-      >
+      <div ref={tableBodyRef} className={classes.tableBodyViewport}>
         <div
           className={classes.tableBody}
           style={{ width: totalWidth, height: totalHeight }}
-        ></div>
+        >
+          {bodyElms}
+        </div>
       </div>
     </div>
   );

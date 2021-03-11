@@ -1,4 +1,5 @@
 import * as React from 'react';
+import useRefEffect from './useRefEffect';
 
 interface Rect {
   width: number;
@@ -8,20 +9,6 @@ interface Rect {
 interface UseResizeObserver<T> {
   ref: React.RefCallback<T>;
   rect?: Rect;
-}
-
-function useRefEffect<T>(
-  effect: (elm: T) => void | (() => void)
-): React.RefCallback<T> {
-  const cleanupRef = React.useRef<null | (() => void)>(null);
-
-  const ref = React.useCallback((elm: T) => {
-    cleanupRef.current?.();
-    cleanupRef.current = null;
-    cleanupRef.current = effect(elm) || null;
-  }, []);
-
-  return ref;
 }
 
 export default function useResizeObserver<
@@ -51,7 +38,7 @@ export default function useResizeObserver<
       observer.observe(elm);
       return () => observer.unobserve(elm);
     }
-  });
+  }, []);
 
   return {
     ref,
