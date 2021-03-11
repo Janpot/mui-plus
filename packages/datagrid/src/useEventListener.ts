@@ -17,6 +17,7 @@ export default function useEventListener<
         once,
         passive,
       });
+      return () => elm.removeEventListener<K>(event, listener);
     },
     [event, listener, capture, once, passive]
   );
