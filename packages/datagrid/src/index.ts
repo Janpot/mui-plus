@@ -1,2 +1,2 @@
-export { default } from './DataGrid';
+export { default } from './DataGrid2';
 export * from './DataGrid';

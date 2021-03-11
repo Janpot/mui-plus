@@ -2,6 +2,7 @@
   "name": "@mui-plus/datagrid",
   "version": "1.0.0",
   "devDependencies": {
+    "@types/resize-observer-browser": "^0.1.5",
     "microbundle": "^0.13.0",
     "react": "^17.0.1",
     "typescript": "^4.1.5"
