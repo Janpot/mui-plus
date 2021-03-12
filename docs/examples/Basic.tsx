@@ -30,7 +30,7 @@ function useData() {
   }, []);
 }
 
-export default function Index() {
+export default function Basic() {
   const classes = useStyles();
 
   const rows = useData();
