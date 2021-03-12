@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
   tableHead: {
     position: 'relative',
+    height: '100%',
   },
   tableBody: {
     position: 'relative',
@@ -107,22 +108,17 @@ export interface ColumnDefinitons {
 export interface DataGridProps<RowType = any> {
   columns: ColumnDefinitons;
   data: RowType[];
-  getKey: (row: RowType) => string;
   state?: DataGridState;
   setState?: (newState: DataGridState) => void;
 }
 
-interface HeaderElms {
-  [key: string]: HTMLDivElement | null | undefined;
-}
-
-interface ColumnSizing {
+interface ColumnDimensions {
   left: number;
   width: number;
 }
 
-interface ColumnSizings {
-  [key: string]: ColumnSizing | undefined;
+interface ColumnDimensionsMap {
+  [key: string]: ColumnDimensions | undefined;
 }
 
 function useVisibleColumns(
@@ -149,7 +145,7 @@ function useVisibleColumns(
 interface UseColumnResizingParams {
   state: DataGridState;
   setState: React.Dispatch<React.SetStateAction<DataGridState>>;
-  columnSizings: ColumnSizings;
+  columnSizings: ColumnDimensionsMap;
 }
 
 function useColumnResizing({
@@ -233,7 +229,7 @@ const clamp = (value: number, lower: number, upper: number): number =>
 
 function findNextColumn(
   visibleColumns: string[],
-  columnSizing: ColumnSizings,
+  columnSizing: ColumnDimensionsMap,
   x: number,
   first = 0,
   last = visibleColumns.length - 1
@@ -265,12 +261,7 @@ interface GridVirtualSlice {
   endColumn: number;
 }
 
-interface Dimensions {
-  width: number;
-  height: number;
-}
-
-export default function DataGrid({ columns, data, getKey }: DataGridProps) {
+export default function DataGrid({ columns, data }: DataGridProps) {
   const classes = useStyles();
 
   const [state, setState] = React.useState<DataGridState>({});
@@ -279,8 +270,8 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
 
   const [virtualSlice, setVirtualSlice] = React.useState<GridVirtualSlice>();
 
-  const columnSizings: ColumnSizings = React.useMemo(() => {
-    const result: ColumnSizings = {};
+  const columnSizings: ColumnDimensionsMap = React.useMemo(() => {
+    const result: ColumnDimensionsMap = {};
     let left = 0;
     for (const columnKey of visibleColumns) {
       const column = columns[columnKey]!;
@@ -400,13 +391,15 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
       columnIdx += 1
     ) {
       const columnKey = visibleColumns[columnIdx];
+      const column = columns[columnKey];
+      const headerContent = column?.header ?? columnKey;
       headerElms.push(
         <div
           key={columnKey}
           className={classes.headerCell}
           style={{ ...getCellBoundingrect(0, columnIdx), height: 56 }}
         >
-          <div className={classes.cellContent}>{columnKey}</div>
+          <div className={classes.cellContent}>{headerContent}</div>
           <div
             className={classes.resizer}
             onMouseDown={handleResizerMouseDown}
@@ -434,26 +427,31 @@ export default function DataGrid({ columns, data, getKey }: DataGridProps) {
       }
     }
     return { headerElms, bodyElms };
-  }, [virtualSlice, getCellBoundingrect, visibleColumns, data]);
+  }, [virtualSlice, getCellBoundingrect, visibleColumns, data, columns]);
 
   const handleWheel = React.useCallback(
     (e: WheelEvent) => {
-      if (!e.currentTarget) {
+      if (!e.currentTarget || !viewportRect) {
         return;
       }
       const { scrollLeft, scrollTop } = e.currentTarget as HTMLDivElement;
       e.preventDefault();
       e.stopPropagation();
+      const newScrollLeft = clamp(
+        scrollLeft + e.deltaX,
+        0,
+        totalWidth - viewportRect.width
+      );
       if (bodyRef.current) {
-        bodyRef.current.scrollLeft = scrollLeft + e.deltaX;
+        bodyRef.current.scrollLeft = newScrollLeft;
         bodyRef.current.scrollTop = scrollTop + e.deltaY;
         updateVirtualSlice();
       }
       if (tableHeaderRef.current) {
-        tableHeaderRef.current.scrollLeft = scrollLeft + e.deltaX;
+        tableHeaderRef.current.scrollLeft = newScrollLeft;
       }
     },
-    [updateVirtualSlice]
+    [updateVirtualSlice, viewportRect, totalWidth]
   );
 
   const wheelEventRef = useEventListener('wheel', handleWheel, {
