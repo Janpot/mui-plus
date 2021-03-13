@@ -71,7 +71,7 @@ function getComponents({
     a: Link,
     code: ({ className, highlight, ...props }) => (
       <Code
-        language={className.replace(/language-/, '')}
+        language={className ? className.slice('language-'.length) : undefined}
         highlight={highlight ? highlight.split(',').map(Number) : []}
         {...props}
       />

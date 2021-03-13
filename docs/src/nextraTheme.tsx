@@ -10,7 +10,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import MdxTheme from './MdxTheme';
 import Link from '../src/Link';
-import { Container } from '@material-ui/core';
+import { Collapse, Container } from '@material-ui/core';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import { useRouter } from 'next/router';
 
 const drawerWidth = 240;
 
@@ -40,6 +43,86 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+interface SideBarItemProps {
+  level?: number;
+  entry: NextraPageMapEntry;
+}
+
+function SideBarItem({ entry, ...props }: SideBarItemProps) {
+  if (entry.children) {
+    return <SideBarFolderItem entry={entry} {...props} />;
+  } else {
+    return <SideBarFileItem entry={entry} {...props} />;
+  }
+}
+
+interface SideBarFileItemProps {
+  level?: number;
+  entry: NextraPageMapFileEntry;
+}
+
+function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
+  const { route } = useRouter();
+  const isActive = route === entry.route;
+  return (
+    <ListItem
+      selected={isActive}
+      button
+      component={Link}
+      naked
+      href={entry.route}
+      style={{ paddingLeft: 16 + level * 16 }}
+    >
+      <ListItemText primary={entry.frontMatter?.title ?? entry.name} />
+    </ListItem>
+  );
+}
+
+interface SideBarItemListProps {
+  level?: number;
+  entries: PageMap;
+}
+
+function SideBarItemList({ entries, level = 0 }: SideBarItemListProps) {
+  return (
+    <List dense>
+      {entries.map((entry, i) => {
+        if (entry.name.startsWith('_')) {
+          return null;
+        }
+        return <SideBarItem key={i} entry={entry} level={level} />;
+      })}
+    </List>
+  );
+}
+
+interface SideBarFolderItemProps {
+  level?: number;
+  entry: NextraPageMapFolderEntry;
+}
+
+function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
+  const { route } = useRouter();
+  const isOpen = route === entry.route || route.startsWith(entry.route + '/');
+  const [open, setOpen] = React.useState(isOpen);
+
+  return (
+    <>
+      <ListItem
+        button
+        onClick={() => setOpen((open) => !open)}
+        style={{ paddingLeft: 16 + level * 16 }}
+      >
+        <ListItemText primary={entry.frontMatter?.title ?? entry.name} />
+        {open ? <ExpandLess /> : <ExpandMore />}
+      </ListItem>
+      <Collapse in={open}>
+        <SideBarItemList entries={entry.children} level={level + 1} />
+      </Collapse>
+    </>
+  );
+}
+
 interface LayoutProps {
   children?: React.ReactNode;
   opts: NextraOptions;
@@ -68,24 +151,7 @@ function Layout({ children, opts, config }: LayoutProps) {
           </Typography>
         </Toolbar>
         <Divider />
-        <List>
-          {opts.pageMap.map((entry, i) => {
-            if (entry.name.startsWith('_')) {
-              return null;
-            }
-            return (
-              <ListItem
-                key={i}
-                button
-                component={Link}
-                naked
-                href={entry.route}
-              >
-                <ListItemText primary={entry.name} />
-              </ListItem>
-            );
-          })}
-        </List>
+        <SideBarItemList entries={opts.pageMap} />
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
@@ -97,16 +163,29 @@ function Layout({ children, opts, config }: LayoutProps) {
   );
 }
 
-interface NextraPageMapEntry {
+type PageMap = NextraPageMapEntry[];
+
+interface NextraPageMapEntryBase {
   name: string;
   route: string;
+  frontMatter?: any;
 }
+
+interface NextraPageMapFileEntry extends NextraPageMapEntryBase {
+  children?: undefined;
+}
+
+interface NextraPageMapFolderEntry extends NextraPageMapEntryBase {
+  children: PageMap;
+}
+
+type NextraPageMapEntry = NextraPageMapFileEntry | NextraPageMapFolderEntry;
 
 interface NextraOptions {
   filename: string;
   route: string;
   meta: any;
-  pageMap: NextraPageMapEntry[];
+  pageMap: PageMap;
 }
 
 interface NextraRootProps {
@@ -122,7 +201,6 @@ export default function createTheme(
   config: MuiNextraThemeConfig | null
 ) {
   const NextraRoot = (props: NextraRootProps) => {
-    console.log(opts, config, props);
     return <Layout {...props} opts={opts} config={config || {}} />;
   };
   return NextraRoot;
