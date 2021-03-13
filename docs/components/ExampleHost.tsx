@@ -1,4 +1,10 @@
-import { Collapse, IconButton, makeStyles, Toolbar } from '@material-ui/core';
+import {
+  Collapse,
+  IconButton,
+  makeStyles,
+  Snackbar,
+  Toolbar,
+} from '@material-ui/core';
 import * as React from 'react';
 import Code from './Code';
 import CodeIcon from '@material-ui/icons/Code';
@@ -23,6 +29,17 @@ interface ExampleHostProps {
 export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+
+  const handleCopy = React.useCallback(() => {
+    navigator.clipboard.writeText(code).then(
+      () => {
+        setSnackbarOpen(true);
+      },
+      () => {}
+    );
+  }, [code]);
+
   return (
     <div className={classes.root}>
       <div className={classes.container}>{renderExample()}</div>
@@ -30,7 +47,7 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
         <IconButton onClick={() => setExpanded((expanded) => !expanded)}>
           <CodeIcon />
         </IconButton>
-        <IconButton onClick={() => setExpanded((expanded) => !expanded)}>
+        <IconButton onClick={handleCopy}>
           <FileCopyIcon />
         </IconButton>
       </Toolbar>
@@ -41,6 +58,16 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
           </Code>
         </CodeBlock>
       </Collapse>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        message="The code sample has been copied."
+      />
     </div>
   );
 }
