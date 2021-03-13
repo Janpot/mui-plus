@@ -51,7 +51,7 @@ function Layout({ children, opts, config }: LayoutProps) {
 
   return (
     <div className={classes.root}>
-      <AppBar position="fixed" className={classes.appBar}>
+      <AppBar position="fixed" color="default" className={classes.appBar}>
         <Toolbar></Toolbar>
       </AppBar>
       <Drawer
@@ -122,6 +122,7 @@ export default function createTheme(
   config: MuiNextraThemeConfig | null
 ) {
   const NextraRoot = (props: NextraRootProps) => {
+    console.log(opts, config, props);
     return <Layout {...props} opts={opts} config={config || {}} />;
   };
   return NextraRoot;

@@ -4,6 +4,30 @@ import Highlight, {
   Language,
   PrismTheme,
 } from 'prism-react-renderer';
+import { makeStyles } from '@material-ui/core';
+import clsx from 'clsx';
+
+const useStyles = makeStyles(() => ({
+  line: {
+    display: 'table-row',
+    '&$highlight': {
+      background: 'var(--c-highlight)',
+      margin: '0 -1rem',
+      padding: '0 1rem',
+    },
+  },
+  highlight: {},
+  lineNumber: {
+    display: 'table-cell',
+    textAlign: 'right',
+    paddingRight: '1em',
+    userSelect: 'none',
+    opacity: 0.5,
+  },
+  lineContent: {
+    display: 'table-cell',
+  },
+}));
 
 const THEME = {
   plain: {
@@ -49,18 +73,20 @@ const THEME = {
 export interface CodeProps {
   children: string;
   language?: string;
-  highlight?: string;
+  highlight?: number[];
+  lineNumbers?: boolean;
 }
 
 export default function Code({
   children,
   language,
-  highlight = '',
+  highlight = [],
+  lineNumbers,
   ...props
 }: CodeProps) {
-  if (!language) return <code {...props}>{children}</code>;
+  const classes = useStyles();
 
-  const highlightedLines = highlight ? highlight.split(',').map(Number) : [];
+  if (!language) return <code {...props}>{children}</code>;
 
   // https://mdxjs.com/guides/syntax-highlighting#all-together
   return (
@@ -72,25 +98,27 @@ export default function Code({
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
         <code className={className} style={{ ...style }}>
-          {tokens.map((line, i) => (
-            <div
-              key={i}
-              {...getLineProps({ line, key: i })}
-              style={
-                highlightedLines.includes(i + 1)
-                  ? {
-                      background: 'var(--c-highlight)',
-                      margin: '0 -1rem',
-                      padding: '0 1rem',
-                    }
-                  : undefined
-              }
-            >
-              {line.map((token, key) => (
-                <span key={key} {...getTokenProps({ token, key })} />
-              ))}
-            </div>
-          ))}
+          {tokens.map((line, i) => {
+            const { className, ...props } = getLineProps({ line, key: i });
+            return (
+              <div
+                key={i}
+                className={clsx(className, classes.line, {
+                  [classes.highlight]: highlight.includes(i + 1),
+                })}
+                {...props}
+              >
+                {lineNumbers ? (
+                  <span className={classes.lineNumber}>{i + 1}</span>
+                ) : null}
+                <span className={classes.lineContent}>
+                  {line.map((token, key) => (
+                    <span key={key} {...getTokenProps({ token, key })} />
+                  ))}
+                </span>
+              </div>
+            );
+          })}
         </code>
       )}
     </Highlight>

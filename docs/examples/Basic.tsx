@@ -1,20 +1,19 @@
 import * as React from 'react';
 import DataGrid from '@mui-plus/datagrid';
-import faker from 'faker';
+import { Paper } from '@material-ui/core';
 
 function useData() {
   return React.useMemo(() => {
     const result = [];
     for (let i = 0; i < 25; i++) {
       result.push({
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        address: faker.address.streetAddress(),
-        birthDate: faker.date.past(90),
-        email: faker.internet.email(),
-        userName: faker.internet.userName(),
-        phone: faker.phone.phoneNumber(),
-        timeZone: faker.address.timeZone(),
+        firstName: 'Bill',
+        lastName: 'Becker',
+        address: '6922 Colleen Square',
+        birthDate: new Date(448816240341),
+        email: 'bill.becker@email.com',
+        userName: 'billyboy123',
+        phone: '251-526-5211',
       });
     }
     return result;
@@ -35,15 +34,14 @@ const columns = {
   email: {},
   userName: {},
   phone: {},
-  timeZone: {},
 };
 
 export default function Basic() {
   const rows = useData();
 
   return (
-    <div style={{ height: 300 }}>
+    <Paper style={{ height: 300 }}>
       <DataGrid data={rows} columns={columns} />
-    </div>
+    </Paper>
   );
 }

@@ -1,10 +1,13 @@
+---
+title: Example Page
+description: Lorem ipsum dolor sit amet.
+---
+
 import Basic from '../examples/Basic';
 import srcBasic from '../examples/Basic?raw';
-import Code from '../components/Code';
+import ExampleHost from '../components/ExampleHost';
 
 ## Basic
-
-<Basic />
 
 ```js
 function hello() {
@@ -12,6 +15,4 @@ function hello() {
 }
 ```
 
-<pre>
-  <Code language="ts">{srcBasic}</Code>
-</pre>
+<ExampleHost code={srcBasic} renderExample={() => <Basic />} />

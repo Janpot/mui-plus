@@ -1,10 +1,11 @@
-import { MDXProvider } from '@mdx-js/react';
+import { MDXProvider, MDXProviderComponents } from '@mdx-js/react';
 import Slugger from 'github-slugger';
 import Link from './Link';
 import * as React from 'react';
 import { makeStyles, Typography, TypographyProps } from '@material-ui/core';
 import innerText from 'react-innertext';
-import Code, { CodeProps } from '../components/Code';
+import Code from '../components/Code';
+import CodeBlock from '../components/CodeBlock';
 
 const useStyles = makeStyles(() => ({
   headerLink: {
@@ -57,19 +58,26 @@ interface GetComponentsOptions {
   slugger: Slugger;
 }
 
-function getComponents({ slugger }: GetComponentsOptions) {
+function getComponents({
+  slugger,
+}: GetComponentsOptions): MDXProviderComponents {
   return {
-    h1: (props: TypographyProps) => <Typography variant="h1" {...props} />,
+    h1: (props) => <Typography variant="h1" {...props} />,
     h2: createHeaderLink('h2', slugger),
     h3: createHeaderLink('h3', slugger),
     h4: createHeaderLink('h4', slugger),
     h5: createHeaderLink('h5', slugger),
     h6: createHeaderLink('h6', slugger),
     a: Link,
-    code: ({ className, ...props }: CodeProps & { className: string }) => (
-      <Code language={className.replace(/language-/, '')} {...props} />
+    code: ({ className, highlight, ...props }) => (
+      <Code
+        language={className.replace(/language-/, '')}
+        highlight={highlight ? highlight.split(',').map(Number) : []}
+        {...props}
+      />
     ),
-  };
+    pre: CodeBlock,
+  } as MDXProviderComponents;
 }
 
 interface MdxThemeProps {
