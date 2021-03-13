@@ -19,6 +19,11 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: theme.shape.borderRadius,
     padding: theme.spacing(6),
   },
+  tools: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    flexDirection: theme.direction === 'rtl' ? 'row-reverse' : 'row',
+  },
 }));
 
 interface ExampleHostProps {
@@ -43,7 +48,7 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
   return (
     <div className={classes.root}>
       <div className={classes.container}>{renderExample()}</div>
-      <Toolbar disableGutters>
+      <Toolbar className={classes.tools} disableGutters>
         <IconButton onClick={() => setExpanded((expanded) => !expanded)}>
           <CodeIcon />
         </IconButton>
@@ -61,7 +66,7 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
       <Snackbar
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
         open={snackbarOpen}
         autoHideDuration={6000}
