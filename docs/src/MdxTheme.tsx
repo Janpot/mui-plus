@@ -4,6 +4,7 @@ import Link from './Link';
 import * as React from 'react';
 import { makeStyles, Typography, TypographyProps } from '@material-ui/core';
 import innerText from 'react-innertext';
+import Code, { CodeProps } from '../components/Code';
 
 const useStyles = makeStyles(() => ({
   headerLink: {
@@ -65,6 +66,9 @@ function getComponents({ slugger }: GetComponentsOptions) {
     h5: createHeaderLink('h5', slugger),
     h6: createHeaderLink('h6', slugger),
     a: Link,
+    code: ({ className, ...props }: CodeProps & { className: string }) => (
+      <Code language={className.replace(/language-/, '')} {...props} />
+    ),
   };
 }
 

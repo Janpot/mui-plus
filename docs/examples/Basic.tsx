@@ -1,15 +1,6 @@
 import * as React from 'react';
-import Container from '@material-ui/core/Container';
 import DataGrid from '@mui-plus/datagrid';
 import faker from 'faker';
-import { makeStyles } from '@material-ui/core';
-
-const useStyles = makeStyles((theme) => ({
-  example: {
-    margin: theme.spacing(4),
-    height: 400,
-  },
-}));
 
 function useData() {
   return React.useMemo(() => {
@@ -30,36 +21,29 @@ function useData() {
   }, []);
 }
 
-export default function Basic() {
-  const classes = useStyles();
+const columns = {
+  firstName: {
+    header: 'First Name',
+  },
+  lastName: {
+    header: 'Last Name',
+  },
+  address: {
+    minWidth: 200,
+  },
+  birthDate: {},
+  email: {},
+  userName: {},
+  phone: {},
+  timeZone: {},
+};
 
+export default function Basic() {
   const rows = useData();
 
-  const columns = React.useMemo(
-    () => ({
-      firstName: {
-        header: 'First Name',
-      },
-      lastName: {
-        header: 'Last Name',
-      },
-      address: {
-        minWidth: 200,
-      },
-      birthDate: {},
-      email: {},
-      userName: {},
-      phone: {},
-      timeZone: {},
-    }),
-    []
-  );
-
   return (
-    <Container maxWidth="md">
-      <div className={classes.example}>
-        <DataGrid data={rows} columns={columns} getKey={(row) => row.key} />
-      </div>
-    </Container>
+    <div style={{ height: 300 }}>
+      <DataGrid data={rows} columns={columns} />
+    </div>
   );
 }

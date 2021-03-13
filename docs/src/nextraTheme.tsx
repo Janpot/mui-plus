@@ -10,6 +10,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import MdxTheme from './MdxTheme';
 import Link from '../src/Link';
+import { Container } from '@material-ui/core';
 
 const drawerWidth = 240;
 
@@ -88,7 +89,9 @@ function Layout({ children, opts, config }: LayoutProps) {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <MdxTheme>{children}</MdxTheme>
+        <Container maxWidth="md">
+          <MdxTheme>{children}</MdxTheme>
+        </Container>
       </main>
     </div>
   );

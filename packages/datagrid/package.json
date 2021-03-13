@@ -10,7 +10,8 @@
   "source": "./src/index.ts",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.module.js",
-  "exports": "./dist/foo.modern.js",
+  "exports": "./dist/index.modern.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "microbundle --jsx 'React.createElement'",
     "dev": "microbundle watch --jsx 'React.createElement' --no-compress --raw --format es",
@@ -18,7 +19,8 @@
     "build-storybook": "build-storybook"
   },
   "peerDependencies": {
-    "react": "^17.0.1"
+    "react": "^17.0.1",
+    "react-dom": "*"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.3",

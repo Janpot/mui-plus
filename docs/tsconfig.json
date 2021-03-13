@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@mui-plus/datagrid": ["../packages/datagrid/dist/index.js"]
+    },
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
