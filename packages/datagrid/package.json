@@ -8,13 +8,13 @@
     "typescript": "^4.1.5"
   },
   "source": "./src/index.ts",
-  "main": "./dist/index.cjs.js",
+  "main": "./dist/index.js",
   "module": "./dist/index.module.js",
   "exports": "./dist/index.modern.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "microbundle --jsx 'React.createElement'",
-    "dev": "microbundle watch --jsx 'React.createElement' --no-compress --raw --format es",
+    "build": "microbundle --jsx 'React.createElement' --format es,cjs,modern",
+    "dev": "microbundle watch --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },

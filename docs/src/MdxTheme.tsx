@@ -5,7 +5,7 @@ import * as React from 'react';
 import { makeStyles, Typography, TypographyProps } from '@material-ui/core';
 import innerText from 'react-innertext';
 import Code from '../components/Code';
-import CodeBlock from '../components/CodeBlock';
+import Pre from '../components/CodeBlock';
 
 const useStyles = makeStyles(() => ({
   headerLink: {
@@ -15,6 +15,10 @@ const useStyles = makeStyles(() => ({
   },
   linkIcon: {
     visibility: 'hidden',
+  },
+  anchor: {
+    position: 'absolute',
+    marginTop: -100,
   },
 }));
 
@@ -28,7 +32,7 @@ const HeaderLink = ({ children, slugger, ...props }: HeaderLinkProps) => {
 
   return (
     <Typography {...props}>
-      <span id={slug} />
+      <span id={slug} className={classes.anchor} />
 
       <Link
         href={'#' + slug}
@@ -54,6 +58,20 @@ function createHeaderLink(
   return Header;
 }
 
+function H1(props: any) {
+  return <Typography variant="h1" {...props} />;
+}
+
+function CodeBlock({ className, highlight, ...props }: any) {
+  return (
+    <Code
+      language={className ? className.slice('language-'.length) : undefined}
+      highlight={highlight ? highlight.split(',').map(Number) : []}
+      {...props}
+    />
+  );
+}
+
 interface GetComponentsOptions {
   slugger: Slugger;
 }
@@ -62,21 +80,15 @@ function getComponents({
   slugger,
 }: GetComponentsOptions): MDXProviderComponents {
   return {
-    h1: (props) => <Typography variant="h1" {...props} />,
+    h1: H1,
     h2: createHeaderLink('h2', slugger),
     h3: createHeaderLink('h3', slugger),
     h4: createHeaderLink('h4', slugger),
     h5: createHeaderLink('h5', slugger),
     h6: createHeaderLink('h6', slugger),
     a: Link,
-    code: ({ className, highlight, ...props }) => (
-      <Code
-        language={className ? className.slice('language-'.length) : undefined}
-        highlight={highlight ? highlight.split(',').map(Number) : []}
-        {...props}
-      />
-    ),
-    pre: CodeBlock,
+    code: CodeBlock,
+    pre: Pre,
   } as MDXProviderComponents;
 }
 

@@ -12,6 +12,7 @@ export default function useRefEffect<T>(
     cleanupRef.current?.();
     cleanupRef.current = null;
     cleanupRef.current = effectRef.current(elm) || null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   return ref;

@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-has-content */
 import * as React from 'react';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
@@ -39,6 +38,7 @@ const NextComposed = React.forwardRef<HTMLAnchorElement, NextComposedProps>(
     );
   }
 );
+NextComposed.displayName = 'NextComposed';
 
 interface LinkPropsBase {
   activeClassName?: string;
@@ -52,7 +52,7 @@ export type LinkProps = LinkPropsBase &
 
 // A styled version of the Next.js Link component:
 // https://nextjs.org/docs/#with-link
-function Link(props: LinkProps) {
+function LinkBase(props: LinkProps) {
   const {
     href,
     activeClassName = 'active',
@@ -90,6 +90,9 @@ function Link(props: LinkProps) {
   );
 }
 
-export default React.forwardRef<HTMLAnchorElement, LinkProps>((props, ref) => (
-  <Link {...props} innerRef={ref} />
+const Link = React.forwardRef<HTMLAnchorElement, LinkProps>((props, ref) => (
+  <LinkBase {...props} innerRef={ref} />
 ));
+Link.displayName = 'Link';
+
+export default Link;

@@ -19,5 +19,6 @@ export default function useCombinedRefs<E>(
     });
 
     prevRefs.current = refs;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, refs);
 }

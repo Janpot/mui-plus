@@ -53,9 +53,6 @@ const DARK = createMuiTheme({
     secondary: {
       main: '#19857b',
     },
-    background: {
-      default: '#212121',
-    },
   },
 });
 
@@ -153,11 +150,11 @@ interface SideBarItemListProps {
 function SideBarItemList({ entries, level = 0 }: SideBarItemListProps) {
   return (
     <List dense>
-      {entries.map((entry, i) => {
+      {entries.map((entry) => {
         if (entry.name.startsWith('_')) {
           return null;
         }
-        return <SideBarItem key={i} entry={entry} level={level} />;
+        return <SideBarItem key={entry.name} entry={entry} level={level} />;
       })}
     </List>
   );
@@ -344,7 +341,7 @@ export interface MuiNextraThemeConfig {
 const DarkThemeContext = React.createContext(false);
 const SetDarkThemeContext = React.createContext<
   React.Dispatch<React.SetStateAction<boolean>>
->(() => {});
+>(() => undefined);
 
 interface NextraThemeProps {
   props: NextraRootProps;

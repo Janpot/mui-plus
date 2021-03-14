@@ -70,10 +70,6 @@ interface KeyFilter {
 
 export type Filter = KeyFilter[];
 
-type FilterObject = {
-  [key: string]: FilterPrimitive | FilterPrimitive[];
-};
-
 interface DataFilterProps {
   children?: React.ReactNode;
   value: Filter;
@@ -82,7 +78,7 @@ interface DataFilterProps {
 }
 
 function useKeyGenerator() {
-  let nextKey = React.useRef(0);
+  const nextKey = React.useRef(0);
   const filterKeyMap = React.useRef(new WeakMap());
 
   return (value: any) => {
@@ -209,27 +205,6 @@ export default function DataFilter({
   });
 
   const getKey = useKeyGenerator();
-
-  function arrayFilterToObject(arrayFilter: Filter): FilterObject {
-    return arrayFilter.reduce((result, filterItem) => {
-      const { property, condition } = filterItem;
-      if (result.hasOwnProperty(property)) {
-        const existingCondition = result[property];
-        const existingAsArray = Array.isArray(existingCondition)
-          ? existingCondition
-          : [existingCondition];
-        if (Array.isArray(condition)) {
-          existingAsArray.push(...condition);
-        } else {
-          existingAsArray.push(condition);
-        }
-        result[property] = existingAsArray;
-      } else {
-        result[property] = condition;
-      }
-      return result;
-    }, {} as FilterObject);
-  }
 
   return (
     <Box display="flex" alignItems="center" flexWrap="wrap">

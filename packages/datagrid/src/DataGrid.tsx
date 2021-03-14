@@ -76,8 +76,6 @@ interface ResizingColumn {
   width: number;
 }
 
-export interface ColumnState {}
-
 interface ColumnWidths {
   [key: string]: number | undefined;
 }
@@ -142,6 +140,17 @@ function useVisibleColumns(
   }, [columns, state.columnOrder, state.columnVisibility]);
 }
 
+function useIsMounted() {
+  const isMounted = React.useRef(false);
+  React.useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  return isMounted;
+}
+
 interface UseColumnResizingParams {
   state: DataGridState;
   setState: React.Dispatch<React.SetStateAction<DataGridState>>;
@@ -153,6 +162,7 @@ function useColumnResizing({
   setState,
   columnSizings,
 }: UseColumnResizingParams) {
+  const isMounted = useIsMounted();
   const handleResizerMouseDown = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       const columnKey = event.currentTarget.dataset.column!;
@@ -162,6 +172,9 @@ function useColumnResizing({
       }
       const { left, width } = sizing;
       const right = left + width;
+      if (!isMounted.current) {
+        console.warn('resizing state on unmounted component x');
+      }
       setState((state) => ({
         ...state,
         resizingColumn: {
@@ -172,7 +185,7 @@ function useColumnResizing({
         },
       }));
     },
-    [columnSizings, setState]
+    [columnSizings, setState, isMounted]
   );
 
   const { resizingColumn } = state;
@@ -195,6 +208,9 @@ function useColumnResizing({
     };
 
     const handleDocMouseMove = (event: MouseEvent) => {
+      if (!isMounted.current) {
+        console.warn('mousemove on unmounted component');
+      }
       setState((state) => ({
         ...state,
         columnWidths: calculateColumnWidths(state, event.clientX),
@@ -202,19 +218,22 @@ function useColumnResizing({
     };
 
     const handleDocMouseUp = (event: MouseEvent) => {
+      if (!isMounted.current) {
+        console.warn('mouseup on unmounted component');
+      }
       setState(({ resizingColumn: _, ...state }) => ({
         ...state,
         columnWidths: calculateColumnWidths(state, event.clientX),
       }));
     };
 
-    document.addEventListener('mousemove', handleDocMouseMove);
-    document.addEventListener('mouseup', handleDocMouseUp);
+    window.addEventListener('mousemove', handleDocMouseMove);
+    window.addEventListener('mouseup', handleDocMouseUp);
     return () => {
-      document.removeEventListener('mousemove', handleDocMouseMove);
-      document.removeEventListener('mouseup', handleDocMouseUp);
+      window.removeEventListener('mousemove', handleDocMouseMove);
+      window.removeEventListener('mouseup', handleDocMouseUp);
     };
-  }, [resizingColumn]);
+  }, [resizingColumn, setState, isMounted]);
 
   return {
     handleResizerMouseDown,
@@ -317,6 +336,8 @@ export default function DataGrid({ columns, data }: DataGridProps) {
 
   const bodyRef = React.useRef<HTMLDivElement>(null);
 
+  const isMounted = useIsMounted();
+
   const updateVirtualSlice = React.useCallback(() => {
     if (!viewportRect || !bodyRef.current) return;
     const { scrollLeft, scrollTop } = bodyRef.current;
@@ -332,6 +353,9 @@ export default function DataGrid({ columns, data }: DataGridProps) {
       scrollLeft + viewportRect.width
     );
     const overscan = 3;
+    if (!isMounted.current) {
+      console.warn('updating slice on unmounted component');
+    }
     setVirtualSlice((slice) => {
       if (
         slice?.startRow === firstVisibleRow &&
@@ -356,10 +380,9 @@ export default function DataGrid({ columns, data }: DataGridProps) {
     viewportRect,
     rowHeight,
     rowCount,
-    totalHeight,
     visibleColumns,
     columnSizings,
-    totalWidth,
+    isMounted,
   ]);
 
   React.useEffect(() => updateVirtualSlice(), [updateVirtualSlice]);
@@ -427,7 +450,18 @@ export default function DataGrid({ columns, data }: DataGridProps) {
       }
     }
     return { headerElms, bodyElms };
-  }, [virtualSlice, getCellBoundingrect, visibleColumns, data, columns]);
+  }, [
+    virtualSlice,
+    getCellBoundingrect,
+    visibleColumns,
+    data,
+    columns,
+    handleResizerMouseDown,
+    classes.cellContent,
+    classes.headerCell,
+    classes.resizer,
+    classes.tableCell,
+  ]);
 
   const handleWheel = React.useCallback(
     (e: WheelEvent) => {
@@ -454,11 +488,11 @@ export default function DataGrid({ columns, data }: DataGridProps) {
     [updateVirtualSlice, viewportRect, totalWidth]
   );
 
-  const wheelEventRef = useEventListener('wheel', handleWheel, {
+  useEventListener(bodyRef, 'wheel', handleWheel, {
     passive: false,
   });
 
-  const tableBodyRef = useCombinedRefs(bodyResizeRef, wheelEventRef, bodyRef);
+  const tableBodyRef = useCombinedRefs(bodyResizeRef, bodyRef);
 
   return (
     <div

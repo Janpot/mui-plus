@@ -41,7 +41,7 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
       () => {
         setSnackbarOpen(true);
       },
-      () => {}
+      () => undefined
     );
   }, [code]);
 
