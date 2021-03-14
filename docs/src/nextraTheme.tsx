@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -10,10 +9,49 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import MdxTheme from './MdxTheme';
 import Link from '../src/Link';
-import { Collapse, Container } from '@material-ui/core';
+import {
+  createMuiTheme,
+  createStyles,
+  Theme,
+  makeStyles,
+  ThemeProvider,
+  Collapse,
+  Container,
+  CssBaseline,
+  IconButton,
+} from '@material-ui/core';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import DarkIcon from '@material-ui/icons/Brightness3';
+import LightIcon from '@material-ui/icons/BrightnessHigh';
 import { useRouter } from 'next/router';
+
+const LIGHT = createMuiTheme({
+  palette: {
+    type: 'light',
+    primary: {
+      main: '#556cd6',
+    },
+    secondary: {
+      main: '#19857b',
+    },
+  },
+});
+
+const DARK = createMuiTheme({
+  palette: {
+    type: 'dark',
+    primary: {
+      main: '#556cd6',
+    },
+    secondary: {
+      main: '#19857b',
+    },
+    background: {
+      default: '#212121',
+    },
+  },
+});
 
 const drawerWidth = 240;
 
@@ -33,12 +71,14 @@ const useStyles = makeStyles((theme: Theme) =>
     drawerPaper: {
       width: drawerWidth,
     },
-    // necessary for content to be below app bar
-    toolbar: theme.mixins.toolbar,
     content: {
       flexGrow: 1,
       backgroundColor: theme.palette.background.default,
       padding: theme.spacing(3),
+    },
+    appBarToolbar: {
+      display: 'flex',
+      justifyContent: 'flex-end',
     },
   })
 );
@@ -131,11 +171,17 @@ interface LayoutProps {
 
 function Layout({ children, opts, config }: LayoutProps) {
   const classes = useStyles();
+  const darkTheme = React.useContext(DarkThemeContext);
+  const setDarkTheme = React.useContext(SetDarkThemeContext);
 
   return (
     <div className={classes.root}>
       <AppBar position="fixed" color="default" className={classes.appBar}>
-        <Toolbar></Toolbar>
+        <Toolbar className={classes.appBarToolbar}>
+          <IconButton onClick={() => setDarkTheme((dark) => !dark)}>
+            {darkTheme ? <LightIcon /> : <DarkIcon />}
+          </IconButton>
+        </Toolbar>
       </AppBar>
       <Drawer
         className={classes.drawer}
@@ -154,7 +200,7 @@ function Layout({ children, opts, config }: LayoutProps) {
         <SideBarItemList entries={opts.pageMap} />
       </Drawer>
       <main className={classes.content}>
-        <div className={classes.toolbar} />
+        <Toolbar />
         <Container maxWidth="md">
           <MdxTheme>{children}</MdxTheme>
         </Container>
@@ -196,12 +242,28 @@ export interface MuiNextraThemeConfig {
   logo?: React.ReactNode;
 }
 
+const DarkThemeContext = React.createContext(false);
+const SetDarkThemeContext = React.createContext<
+  React.Dispatch<React.SetStateAction<boolean>>
+>(() => {});
+
 export default function createTheme(
   opts: NextraOptions,
   config: MuiNextraThemeConfig | null
 ) {
   const NextraRoot = (props: NextraRootProps) => {
-    return <Layout {...props} opts={opts} config={config || {}} />;
+    const [darkTheme, setDarkTheme] = React.useState(false);
+    return (
+      <ThemeProvider theme={darkTheme ? DARK : LIGHT}>
+        <DarkThemeContext.Provider value={darkTheme}>
+          <SetDarkThemeContext.Provider value={setDarkTheme}>
+            <CssBaseline />
+            <Layout {...props} opts={opts} config={config || {}} />
+          </SetDarkThemeContext.Provider>
+        </DarkThemeContext.Provider>
+      </ThemeProvider>
+    );
+    return;
   };
   return NextraRoot;
 }
