@@ -8,7 +8,7 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import MdxTheme from './MdxTheme';
-import Link from '../src/Link';
+import Link from './Link';
 import {
   createMuiTheme,
   createStyles,
@@ -19,12 +19,18 @@ import {
   Container,
   CssBaseline,
   IconButton,
+  useTheme,
+  Hidden,
+  Box,
 } from '@material-ui/core';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import ExpandLess from '@material-ui/icons/ArrowDropUp';
+import ExpandMore from '@material-ui/icons/ArrowDropDown';
 import DarkIcon from '@material-ui/icons/Brightness3';
+import MenuIcon from '@material-ui/icons/Menu';
 import LightIcon from '@material-ui/icons/BrightnessHigh';
 import { useRouter } from 'next/router';
+import Slugger from 'github-slugger';
+import innerText from 'react-innertext';
 
 const LIGHT = createMuiTheme({
   palette: {
@@ -60,13 +66,23 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       display: 'flex',
     },
-    appBar: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth,
-    },
     drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
+      [theme.breakpoints.up('lg')]: {
+        width: drawerWidth,
+        flexShrink: 0,
+      },
+    },
+    appBar: {
+      [theme.breakpoints.up('lg')]: {
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
+      },
+    },
+    menuButton: {
+      marginRight: theme.spacing(2),
+      [theme.breakpoints.up('lg')]: {
+        display: 'none',
+      },
     },
     drawerPaper: {
       width: drawerWidth,
@@ -75,10 +91,21 @@ const useStyles = makeStyles((theme: Theme) =>
       flexGrow: 1,
       backgroundColor: theme.palette.background.default,
       padding: theme.spacing(3),
+      overflow: 'hidden',
     },
-    appBarToolbar: {
-      display: 'flex',
-      justifyContent: 'flex-end',
+    flexFill: {
+      flex: 1,
+    },
+    docOutline: {
+      width: 180,
+      flexShrink: 0,
+      position: 'sticky',
+      top: 0,
+      height: '100vh',
+      overflow: 'auto',
+      [theme.breakpoints.down('xs')]: {
+        display: 'none',
+      },
     },
   })
 );
@@ -171,40 +198,112 @@ interface LayoutProps {
 
 function Layout({ children, opts, config }: LayoutProps) {
   const classes = useStyles();
+  const theme = useTheme();
   const darkTheme = React.useContext(DarkThemeContext);
   const setDarkTheme = React.useContext(SetDarkThemeContext);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  const slugger = new Slugger();
+  const docOutline = React.Children.toArray(children).flatMap((child) => {
+    if (!React.isValidElement(child)) {
+      return [];
+    }
+    const match = /^h(\d+)$/.exec(child.props.mdxType);
+    if (!match) {
+      return [];
+    }
+    const level = Number(match[1]) - 1;
+    const text = innerText(child) || '';
+    const slug = slugger.slug(text);
+    return [{ level, text, slug }];
+  });
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const drawer = (
+    <div>
+      <Toolbar>
+        <Typography variant="h6" noWrap>
+          {config.logo}
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <SideBarItemList entries={opts.pageMap} />
+    </div>
+  );
 
   return (
     <div className={classes.root}>
+      <CssBaseline />
       <AppBar position="fixed" color="default" className={classes.appBar}>
-        <Toolbar className={classes.appBarToolbar}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            className={classes.menuButton}
+          >
+            <MenuIcon />
+          </IconButton>
+          <div className={classes.flexFill} />
           <IconButton onClick={() => setDarkTheme((dark) => !dark)}>
             {darkTheme ? <LightIcon /> : <DarkIcon />}
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Drawer
-        className={classes.drawer}
-        variant="permanent"
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-        anchor="left"
-      >
-        <Toolbar>
-          <Typography variant="h6" noWrap>
-            {config.logo}
-          </Typography>
-        </Toolbar>
-        <Divider />
-        <SideBarItemList entries={opts.pageMap} />
-      </Drawer>
+      <nav className={classes.drawer} aria-label="mailbox folders">
+        <Hidden lgUp implementation="css">
+          <Drawer
+            variant="temporary"
+            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            classes={{
+              paper: classes.drawerPaper,
+            }}
+            ModalProps={{
+              keepMounted: true,
+            }}
+          >
+            {drawer}
+          </Drawer>
+        </Hidden>
+        <Hidden mdDown implementation="css">
+          <Drawer
+            classes={{
+              paper: classes.drawerPaper,
+            }}
+            variant="permanent"
+            open
+          >
+            {drawer}
+          </Drawer>
+        </Hidden>
+      </nav>
       <main className={classes.content}>
         <Toolbar />
         <Container maxWidth="md">
           <MdxTheme>{children}</MdxTheme>
         </Container>
       </main>
+      <div className={classes.docOutline}>
+        <Toolbar />
+        <Box padding={2}>
+          <Typography component="p" variant="subtitle1">
+            Content:
+          </Typography>
+          {docOutline.map((item) => {
+            return (
+              <div key={item.slug}>
+                <Link href={`#${item.slug}`}>{item.text}</Link>
+              </div>
+            );
+          })}
+        </Box>
+      </div>
     </div>
   );
 }
@@ -227,14 +326,14 @@ interface NextraPageMapFolderEntry extends NextraPageMapEntryBase {
 
 type NextraPageMapEntry = NextraPageMapFileEntry | NextraPageMapFolderEntry;
 
-interface NextraOptions {
+export interface NextraOptions {
   filename: string;
   route: string;
   meta: any;
   pageMap: PageMap;
 }
 
-interface NextraRootProps {
+export interface NextraRootProps {
   children?: React.ReactNode;
 }
 
@@ -247,23 +346,22 @@ const SetDarkThemeContext = React.createContext<
   React.Dispatch<React.SetStateAction<boolean>>
 >(() => {});
 
-export default function createTheme(
-  opts: NextraOptions,
-  config: MuiNextraThemeConfig | null
-) {
-  const NextraRoot = (props: NextraRootProps) => {
-    const [darkTheme, setDarkTheme] = React.useState(false);
-    return (
-      <ThemeProvider theme={darkTheme ? DARK : LIGHT}>
-        <DarkThemeContext.Provider value={darkTheme}>
-          <SetDarkThemeContext.Provider value={setDarkTheme}>
-            <CssBaseline />
-            <Layout {...props} opts={opts} config={config || {}} />
-          </SetDarkThemeContext.Provider>
-        </DarkThemeContext.Provider>
-      </ThemeProvider>
-    );
-    return;
-  };
-  return NextraRoot;
+interface NextraThemeProps {
+  props: NextraRootProps;
+  opts: NextraOptions;
+  config: MuiNextraThemeConfig;
+}
+
+export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
+  const [darkTheme, setDarkTheme] = React.useState(false);
+  return (
+    <ThemeProvider theme={darkTheme ? DARK : LIGHT}>
+      <DarkThemeContext.Provider value={darkTheme}>
+        <SetDarkThemeContext.Provider value={setDarkTheme}>
+          <CssBaseline />
+          <Layout {...props} opts={opts} config={config || {}} />
+        </SetDarkThemeContext.Provider>
+      </DarkThemeContext.Provider>
+    </ThemeProvider>
+  );
 }
