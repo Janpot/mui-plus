@@ -6,6 +6,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     background: theme.palette.background.paper,
     borderRadius: theme.shape.borderRadius,
+    overflow: 'hidden',
   },
 }));
 

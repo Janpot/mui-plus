@@ -108,6 +108,7 @@ export interface DataGridProps<RowType = any> {
   data: RowType[];
   state?: DataGridState;
   setState?: (newState: DataGridState) => void;
+  component?: string | React.FunctionComponent<any>;
 }
 
 interface ColumnDimensions {
@@ -280,7 +281,11 @@ interface GridVirtualSlice {
   endColumn: number;
 }
 
-export default function DataGrid({ columns, data }: DataGridProps) {
+export default function DataGrid({
+  component: Component = 'div',
+  columns,
+  data,
+}: DataGridProps) {
   const classes = useStyles();
 
   const [state, setState] = React.useState<DataGridState>({});
@@ -496,6 +501,7 @@ export default function DataGrid({ columns, data }: DataGridProps) {
 
   return (
     <div
+      as={Component}
       className={clsx(classes.root, {
         [classes.resizing]: !!state.resizingColumn,
       })}

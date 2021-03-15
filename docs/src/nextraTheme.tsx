@@ -23,14 +23,16 @@ import {
   Hidden,
   Box,
 } from '@material-ui/core';
-import ExpandLess from '@material-ui/icons/ArrowDropUp';
-import ExpandMore from '@material-ui/icons/ArrowDropDown';
+import ArrowRight from '@material-ui/icons/ArrowRight';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import DarkIcon from '@material-ui/icons/Brightness3';
 import MenuIcon from '@material-ui/icons/Menu';
 import LightIcon from '@material-ui/icons/BrightnessHigh';
 import { useRouter } from 'next/router';
 import Slugger from 'github-slugger';
 import innerText from 'react-innertext';
+import { ScrollSpyProvider, useActiveSection } from './useScrollSpy';
+import clsx from 'clsx';
 
 const LIGHT = createMuiTheme({
   palette: {
@@ -94,16 +96,23 @@ const useStyles = makeStyles((theme: Theme) =>
       flex: 1,
     },
     docOutline: {
-      width: 180,
+      width: 240,
       flexShrink: 0,
       position: 'sticky',
       top: 0,
       height: '100vh',
       overflow: 'auto',
-      [theme.breakpoints.down('xs')]: {
+      [theme.breakpoints.down('sm')]: {
         display: 'none',
       },
     },
+    docOutlineSection: {
+      borderLeft: `2px solid transparent`,
+      '&$active': {
+        borderLeft: `2px solid ${theme.palette.divider}`,
+      },
+    },
+    active: {},
   })
 );
 
@@ -135,7 +144,7 @@ function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
       component={Link}
       naked
       href={entry.route}
-      style={{ paddingLeft: 16 + level * 16 }}
+      style={{ paddingLeft: 8 + level * 16 + 24 }}
     >
       <ListItemText primary={entry.frontMatter?.title ?? entry.name} />
     </ListItem>
@@ -175,10 +184,10 @@ function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
       <ListItem
         button
         onClick={() => setOpen((open) => !open)}
-        style={{ paddingLeft: 16 + level * 16 }}
+        style={{ paddingLeft: 8 + level * 16 }}
       >
+        {open ? <ArrowDropDown /> : <ArrowRight />}
         <ListItemText primary={entry.frontMatter?.title ?? entry.name} />
-        {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
       <Collapse in={open}>
         <SideBarItemList entries={entry.children} level={level + 1} />
@@ -218,6 +227,8 @@ function Layout({ children, opts, config }: LayoutProps) {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  const activeSection = useActiveSection();
 
   const drawer = (
     <div>
@@ -289,13 +300,27 @@ function Layout({ children, opts, config }: LayoutProps) {
       <div className={classes.docOutline}>
         <Toolbar />
         <Box padding={2}>
-          <Typography component="p" variant="subtitle1">
-            Content:
-          </Typography>
-          {docOutline.map((item) => {
+          <Typography variant="subtitle1">Content:</Typography>
+          {docOutline.map(({ level, slug, text }) => {
+            const minLevel = 1;
+            if (level < minLevel) {
+              return null;
+            }
+            const isACtive = slug === activeSection;
             return (
-              <div key={item.slug}>
-                <Link href={`#${item.slug}`}>{item.text}</Link>
+              <div
+                className={clsx(classes.docOutlineSection, {
+                  [classes.active]: isACtive,
+                })}
+                key={slug}
+                style={{ paddingLeft: 8 + (level - minLevel) * 8 }}
+              >
+                <Link
+                  href={`#${slug}`}
+                  color={isACtive ? 'primary' : 'inherit'}
+                >
+                  {text}
+                </Link>
               </div>
             );
           })}
@@ -356,7 +381,9 @@ export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
       <DarkThemeContext.Provider value={darkTheme}>
         <SetDarkThemeContext.Provider value={setDarkTheme}>
           <CssBaseline />
-          <Layout {...props} opts={opts} config={config || {}} />
+          <ScrollSpyProvider>
+            <Layout {...props} opts={opts} config={config || {}} />
+          </ScrollSpyProvider>
         </SetDarkThemeContext.Provider>
       </DarkThemeContext.Provider>
     </ThemeProvider>
