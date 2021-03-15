@@ -50,7 +50,7 @@ const DARK = createMuiTheme({
   palette: {
     type: 'dark',
     primary: {
-      main: '#556cd6',
+      main: '#0097a7',
     },
     secondary: {
       main: '#19857b',
@@ -107,7 +107,9 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     docOutlineSection: {
+      ...theme.typography.body2,
       borderLeft: `2px solid transparent`,
+      color: theme.palette.text.disabled,
       '&$active': {
         borderLeft: `2px solid ${theme.palette.divider}`,
       },
