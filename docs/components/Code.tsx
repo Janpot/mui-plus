@@ -1,13 +1,16 @@
 import * as React from 'react';
-import Highlight, {
-  defaultProps,
-  Language,
-  PrismTheme,
-} from 'prism-react-renderer';
-import { makeStyles } from '@material-ui/core';
+import Highlight, { defaultProps, Language } from 'prism-react-renderer';
+import { makeStyles, useTheme } from '@material-ui/core';
 import clsx from 'clsx';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
+  root: {
+    whiteSpace: 'pre',
+    display: 'block',
+    borderRadius: theme.shape.borderRadius,
+    overflow: 'scroll',
+    padding: theme.spacing(2),
+  },
   line: {
     display: 'table-row',
     '&$highlight': {
@@ -29,47 +32,6 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const THEME = {
-  plain: {
-    backgroundColor: 'transparent',
-  },
-  styles: [
-    {
-      types: ['keyword', 'builtin'],
-      style: {
-        color: '#ff0078',
-        fontWeight: 'bold',
-      },
-    },
-    {
-      types: ['comment'],
-      style: {
-        color: '#999',
-        fontStyle: 'italic',
-      },
-    },
-    {
-      types: ['variable', 'language-javascript'],
-      style: {
-        color: '#0076ff',
-      },
-    },
-    {
-      types: ['attr-name'],
-      style: {
-        color: '#d9931e',
-        fontStyle: 'normal',
-      },
-    },
-    {
-      types: ['boolean', 'regex'],
-      style: {
-        color: '#d9931e',
-      },
-    },
-  ],
-} as PrismTheme;
-
 export interface CodeProps {
   children: string;
   language?: string;
@@ -82,11 +44,9 @@ export default function Code({
   language,
   highlight = [],
   lineNumbers,
-  ...props
 }: CodeProps) {
   const classes = useStyles();
-
-  if (!language) return <code {...props}>{children}</code>;
+  const theme = useTheme();
 
   // https://mdxjs.com/guides/syntax-highlighting#all-together
   return (
@@ -94,10 +54,10 @@ export default function Code({
       {...defaultProps}
       code={children.trim()}
       language={language as Language}
-      theme={THEME}
+      theme={theme.prism}
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
-        <code className={className} style={{ ...style }}>
+        <code className={clsx(className, classes.root)} style={style}>
           {tokens.map((line, i) => {
             const { className, ...props } = getLineProps({ line, key: i });
             return (

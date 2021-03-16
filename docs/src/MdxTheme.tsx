@@ -5,12 +5,14 @@ import * as React from 'react';
 import { makeStyles, Typography, TypographyProps } from '@material-ui/core';
 import innerText from 'react-innertext';
 import Code from '../components/Code';
-import Pre from '../components/CodeBlock';
 import { useSection } from './useScrollSpy';
 import LinkIcon from '@material-ui/icons/Link';
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    '& pre code': {
+      display: 'block',
+    },
     '& h1': {
       ...theme.typography.h3,
       fontSize: 40,
@@ -126,7 +128,6 @@ function getComponents({
     h6: createHeaderLink('h6', slugger),
     a: Link,
     code: CodeBlock,
-    pre: Pre,
   } as MDXProviderComponents;
 }
 

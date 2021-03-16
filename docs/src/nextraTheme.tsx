@@ -33,6 +33,19 @@ import Slugger from 'github-slugger';
 import innerText from 'react-innertext';
 import { ScrollSpyProvider, useActiveSection } from './useScrollSpy';
 import clsx from 'clsx';
+import prismLight from 'prism-react-renderer/themes/vsLight';
+import prismDark from 'prism-react-renderer/themes/vsDark';
+import { PrismTheme } from 'prism-react-renderer';
+import GitHubIcon from '@material-ui/icons/GitHub';
+
+declare module '@material-ui/core' {
+  interface ThemeOptions {
+    prism?: PrismTheme;
+  }
+  interface Theme {
+    prism?: PrismTheme;
+  }
+}
 
 const LIGHT = createMuiTheme({
   palette: {
@@ -44,6 +57,7 @@ const LIGHT = createMuiTheme({
       main: '#19857b',
     },
   },
+  prism: prismLight,
 });
 
 const DARK = createMuiTheme({
@@ -56,6 +70,7 @@ const DARK = createMuiTheme({
       main: '#19857b',
     },
   },
+  prism: prismDark,
 });
 
 const drawerWidth = 240;
@@ -259,6 +274,9 @@ function Layout({ children, opts, config }: LayoutProps) {
             <MenuIcon />
           </IconButton>
           <div className={classes.flexFill} />
+          <IconButton component={Link} naked href="https://github.com/...">
+            <GitHubIcon />
+          </IconButton>
           <IconButton onClick={() => setDarkTheme((dark) => !dark)}>
             {darkTheme ? <LightIcon /> : <DarkIcon />}
           </IconButton>

@@ -9,7 +9,6 @@ import * as React from 'react';
 import Code from './Code';
 import CodeIcon from '@material-ui/icons/Code';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import CodeBlock from './CodeBlock';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -57,11 +56,9 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
         </IconButton>
       </Toolbar>
       <Collapse in={expanded}>
-        <CodeBlock>
-          <Code language="ts" lineNumbers>
-            {code}
-          </Code>
-        </CodeBlock>
+        <Code language="ts" lineNumbers>
+          {code}
+        </Code>
       </Collapse>
       <Snackbar
         anchorOrigin={{
