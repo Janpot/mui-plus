@@ -14,12 +14,12 @@ import {
   createStyles,
   Theme,
   makeStyles,
-  ThemeProvider,
+  ThemeProvider as MuiThemeProvider,
   Collapse,
   Container,
   CssBaseline,
   IconButton,
-  useTheme,
+  useTheme as useMuiTheme,
   Hidden,
   Box,
 } from '@material-ui/core';
@@ -37,6 +37,9 @@ import prismLight from 'prism-react-renderer/themes/vsLight';
 import prismDark from 'prism-react-renderer/themes/vsDark';
 import { PrismTheme } from 'prism-react-renderer';
 import GitHubIcon from '@material-ui/icons/GitHub';
+import { ThemeProvider, useTheme } from 'next-themes';
+import useIsMounted from './useIsMounted';
+import { Skeleton } from '@material-ui/lab';
 
 declare module '@material-ui/core' {
   interface ThemeOptions {
@@ -213,6 +216,29 @@ function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
   );
 }
 
+function ThemeSwitcher() {
+  const { theme, setTheme } = useTheme();
+  const mounted = useIsMounted();
+
+  const toggleTheme = React.useCallback(() => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  }, [theme, setTheme]);
+
+  return (
+    <IconButton disabled={!mounted} onClick={toggleTheme}>
+      {mounted ? (
+        theme === 'dark' ? (
+          <LightIcon />
+        ) : (
+          <DarkIcon />
+        )
+      ) : (
+        <Skeleton variant="circle" height={24} width={24} />
+      )}
+    </IconButton>
+  );
+}
+
 interface LayoutProps {
   children?: React.ReactNode;
   opts: NextraOptions;
@@ -221,9 +247,7 @@ interface LayoutProps {
 
 function Layout({ children, opts, config }: LayoutProps) {
   const classes = useStyles();
-  const theme = useTheme();
-  const darkTheme = React.useContext(DarkThemeContext);
-  const setDarkTheme = React.useContext(SetDarkThemeContext);
+  const muiTheme = useMuiTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const slugger = new Slugger();
@@ -277,16 +301,14 @@ function Layout({ children, opts, config }: LayoutProps) {
           <IconButton component={Link} naked href="https://github.com/...">
             <GitHubIcon />
           </IconButton>
-          <IconButton onClick={() => setDarkTheme((dark) => !dark)}>
-            {darkTheme ? <LightIcon /> : <DarkIcon />}
-          </IconButton>
+          <ThemeSwitcher />
         </Toolbar>
       </AppBar>
       <nav className={classes.drawer} aria-label="mailbox folders">
         <Hidden lgUp implementation="css">
           <Drawer
             variant="temporary"
-            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+            anchor={muiTheme.direction === 'rtl' ? 'right' : 'left'}
             open={mobileOpen}
             onClose={handleDrawerToggle}
             classes={{
@@ -383,10 +405,18 @@ export interface MuiNextraThemeConfig {
   logo?: React.ReactNode;
 }
 
-const DarkThemeContext = React.createContext(false);
-const SetDarkThemeContext = React.createContext<
-  React.Dispatch<React.SetStateAction<boolean>>
->(() => undefined);
+interface MuiThemedContentProps {
+  children?: React.ReactNode;
+}
+
+function MuiThemedContent({ children }: MuiThemedContentProps) {
+  const { theme } = useTheme();
+  return (
+    <MuiThemeProvider theme={theme === 'dark' ? DARK : LIGHT}>
+      {children}
+    </MuiThemeProvider>
+  );
+}
 
 interface NextraThemeProps {
   props: NextraRootProps;
@@ -395,17 +425,14 @@ interface NextraThemeProps {
 }
 
 export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
-  const [darkTheme, setDarkTheme] = React.useState(false);
   return (
-    <ThemeProvider theme={darkTheme ? DARK : LIGHT}>
-      <DarkThemeContext.Provider value={darkTheme}>
-        <SetDarkThemeContext.Provider value={setDarkTheme}>
-          <CssBaseline />
-          <ScrollSpyProvider>
-            <Layout {...props} opts={opts} config={config || {}} />
-          </ScrollSpyProvider>
-        </SetDarkThemeContext.Provider>
-      </DarkThemeContext.Provider>
+    <ThemeProvider>
+      <MuiThemedContent>
+        <CssBaseline />
+        <ScrollSpyProvider>
+          <Layout {...props} opts={opts} config={config || {}} />
+        </ScrollSpyProvider>
+      </MuiThemedContent>
     </ThemeProvider>
   );
 }
