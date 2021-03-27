@@ -20,28 +20,31 @@ function useData() {
   }, []);
 }
 
-const columns = {
-  firstName: {
+const columns = [
+  {
+    key: 'firstName',
     header: 'First Name',
   },
-  lastName: {
+  {
+    key: 'lastName',
     header: 'Last Name',
   },
-  address: {
+  {
+    key: 'address',
     minWidth: 200,
   },
-  birthDate: {},
-  email: {},
-  userName: {},
-  phone: {},
-};
+  { key: 'birthDate' },
+  { key: 'email' },
+  { key: 'userName' },
+  { key: 'phone' },
+];
 
 export default function Basic() {
   const rows = useData();
 
   return (
     <Paper style={{ height: 300 }}>
-      <DataGrid data={rows} columns={columns} />
+      <DataGrid data={rows} defaultColumns={columns} />
     </Paper>
   );
 }
