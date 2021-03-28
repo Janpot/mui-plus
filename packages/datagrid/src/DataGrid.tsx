@@ -5,6 +5,7 @@ import useEventListener from './useEventListener';
 import useCombinedRefs from './useCombinedRefs';
 import clsx from 'clsx';
 import useIsMounted from './useIsMounted';
+import { useControlled } from './useControlled';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -100,6 +101,7 @@ export interface DataGridProps<RowType = any> {
   onColumnsChange?: (newValue: ColumnDefinitons) => void;
   defaultColumns?: ColumnDefinitons;
   data: RowType[];
+  rowHeight?: number;
 }
 
 interface ColumnDimensions {
@@ -262,10 +264,19 @@ function calculateColumnSizing(
   return result;
 }
 
-export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
+export default function DataGrid({
+  data,
+  columns: columnsProp,
+  onColumnsChange: onColumnsChangeProp,
+  defaultColumns = [],
+  rowHeight = 52,
+}: DataGridProps) {
   const classes = useStyles();
 
-  const [columns, setColumns] = React.useState<ColumnDefinitons>(
+  const [columns, setColumns] = useControlled(
+    'columns',
+    columnsProp,
+    onColumnsChangeProp,
     defaultColumns
   );
 
@@ -273,8 +284,6 @@ export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
     // TODO: stabilize further in case the visibility doesn't change?
     return columns.filter((column) => column.visible ?? true);
   }, [columns]);
-
-  const rowHeight = 52;
 
   const [virtualSlice, setVirtualSlice] = React.useState<GridVirtualSlice>();
 
@@ -394,7 +403,12 @@ export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
     }
     const headerElms = [];
     const bodyElms = [];
-    for (const column of visibleColumns) {
+    for (
+      let columnIdx = virtualSlice.startColumn;
+      columnIdx <= virtualSlice.endColumn;
+      columnIdx += 1
+    ) {
+      const column = visibleColumns[columnIdx];
       const headerContent = column?.header ?? column.key;
       headerElms.push(
         <div
@@ -419,8 +433,15 @@ export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
       rowIdx += 1
     ) {
       const rowElms: JSX.Element[] = [];
-      for (const column of visibleColumns) {
-        const value = data[rowIdx][column.key];
+      for (
+        let columnIdx = virtualSlice.startColumn;
+        columnIdx <= virtualSlice.endColumn;
+        columnIdx += 1
+      ) {
+        const column = visibleColumns[columnIdx];
+        const value = column.getValue
+          ? column.getValue(data[rowIdx])
+          : data[rowIdx][column.key];
         const { left, width } = getCellBoundingrect(rowIdx, column.key);
         rowElms.push(
           <div
@@ -434,6 +455,7 @@ export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
       }
       bodyElms.push(
         <div
+          key={rowIdx}
           className={classes.bodyRow}
           style={{
             top: rowIdx * rowHeight,
@@ -451,6 +473,7 @@ export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
     visibleColumns,
     data,
     handleResizerMouseDown,
+    rowHeight,
     classes.cellContent,
     classes.headerCell,
     classes.resizer,
