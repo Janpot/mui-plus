@@ -30,10 +30,16 @@ const useStyles = makeStyles((theme) => ({
   tableHead: {
     position: 'relative',
     height: '100%',
+    overflow: 'hidden',
   },
   tableBody: {
     position: 'relative',
     flex: 1,
+  },
+  bodyRow: {
+    position: 'absolute',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    width: '100%',
   },
   headerCell: {
     fontWeight: theme.typography.fontWeightBold,
@@ -42,10 +48,10 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   tableCell: {
-    borderBottom: `1px solid ${theme.palette.divider}`,
     position: 'absolute',
     display: 'flex',
     alignItems: 'center',
+    height: '100%',
   },
   cellContent: {
     padding: '0 16px',
@@ -406,22 +412,37 @@ export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
           </div>
         </div>
       );
-      for (
-        let rowIdx = virtualSlice.startRow;
-        rowIdx <= virtualSlice.endRow;
-        rowIdx += 1
-      ) {
+    }
+    for (
+      let rowIdx = virtualSlice.startRow;
+      rowIdx <= virtualSlice.endRow;
+      rowIdx += 1
+    ) {
+      const rowElms: JSX.Element[] = [];
+      for (const column of visibleColumns) {
         const value = data[rowIdx][column.key];
-        bodyElms.push(
+        const { left, width } = getCellBoundingrect(rowIdx, column.key);
+        rowElms.push(
           <div
             key={`${rowIdx}:${column.key}`}
             className={classes.tableCell}
-            style={getCellBoundingrect(rowIdx, column.key)}
+            style={{ left, width }}
           >
             <div className={classes.cellContent}>{String(value)}</div>
           </div>
         );
       }
+      bodyElms.push(
+        <div
+          className={classes.bodyRow}
+          style={{
+            top: rowIdx * rowHeight,
+            height: rowHeight,
+          }}
+        >
+          {rowElms}
+        </div>
+      );
     }
     return { headerElms, bodyElms };
   }, [
@@ -434,6 +455,7 @@ export default function DataGrid({ data, defaultColumns = [] }: DataGridProps) {
     classes.headerCell,
     classes.resizer,
     classes.tableCell,
+    classes.bodyRow,
   ]);
 
   const handleWheel = React.useCallback(
