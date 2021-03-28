@@ -3,7 +3,7 @@ import DataGrid, { ColumnDefinitons } from '@mui-plus/datagrid';
 import { Paper } from '@material-ui/core';
 
 const ROWS = 100000;
-const COLUMNS = 10000;
+const COLUMNS = 100000;
 
 const columns: ColumnDefinitons = [];
 const rows: { idx: number }[] = [];
