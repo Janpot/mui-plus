@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { makeStyles, createSvgIcon } from '@material-ui/core';
 import useResizeObserver from './useResizeObserver';
-import useEventListener from './useEventListener';
+// import useEventListener from './useEventListener';
 import useCombinedRefs from './useCombinedRefs';
 import clsx from 'clsx';
 import useIsMounted from './useIsMounted';
@@ -19,24 +19,30 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   resizing: {},
-  tableHeadViewport: {
+
+  tableHeadRenderViewport: {
     overflow: 'hidden',
     borderBottom: `1px solid ${theme.palette.divider}`,
     height: 56,
   },
-  tableBodyViewport: {
-    flex: 1,
-    overflow: 'auto',
-  },
-  tableHead: {
+  tableHeadRenderPane: {
     position: 'relative',
     height: '100%',
     overflow: 'hidden',
   },
-  tableBody: {
-    position: 'relative',
+  tableBodyScrollViewport: {
     flex: 1,
+    overflow: 'auto',
+    position: 'relative',
   },
+  tableBodyScrollPane: {},
+  tableBodyRenderViewport: {
+    position: 'sticky',
+    top: 0,
+    left: 0,
+  },
+  tableBodyRenderPane: {},
+
   bodyRow: {
     position: 'absolute',
     borderBottom: `1px solid ${theme.palette.divider}`,
@@ -302,7 +308,7 @@ export default function DataGrid({
 
   const totalHeight = rowHeight * data.length;
 
-  const tableHeaderRef = React.useRef<HTMLDivElement>(null);
+  const tableHeadRenderPaneRef = React.useRef<HTMLDivElement>(null);
   const { ref: bodyResizeRef, rect: viewportRect } = useResizeObserver();
 
   const rowCount = data.length;
@@ -460,6 +466,7 @@ export default function DataGrid({
           style={{
             top: rowIdx * rowHeight,
             height: rowHeight,
+            width: totalWidth,
           }}
         >
           {rowElms}
@@ -474,6 +481,7 @@ export default function DataGrid({
     data,
     handleResizerMouseDown,
     rowHeight,
+    totalWidth,
     classes.cellContent,
     classes.headerCell,
     classes.resizer,
@@ -481,36 +489,27 @@ export default function DataGrid({
     classes.bodyRow,
   ]);
 
-  const handleWheel = React.useCallback(
-    (e: WheelEvent) => {
-      if (!e.currentTarget || !viewportRect) {
-        return;
+  const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = React.useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      updateVirtualSlice();
+      const { scrollLeft, scrollTop } = event.currentTarget;
+      if (tableBodyRenderPaneRef.current) {
+        tableBodyRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
       }
-      const { scrollLeft, scrollTop } = e.currentTarget as HTMLDivElement;
-      e.preventDefault();
-      e.stopPropagation();
-      const newScrollLeft = clamp(
-        scrollLeft + e.deltaX,
-        0,
-        totalWidth - viewportRect.width
-      );
-      if (bodyRef.current) {
-        bodyRef.current.scrollLeft = newScrollLeft;
-        bodyRef.current.scrollTop = scrollTop + e.deltaY;
-        updateVirtualSlice();
-      }
-      if (tableHeaderRef.current) {
-        tableHeaderRef.current.scrollLeft = newScrollLeft;
+      if (tableHeadRenderPaneRef.current) {
+        tableHeadRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, 0px)`;
       }
     },
-    [updateVirtualSlice, viewportRect, totalWidth]
+    [updateVirtualSlice]
   );
 
-  useEventListener(bodyRef, 'wheel', handleWheel, {
-    passive: false,
-  });
+  // useEventListener(bodyRef, 'wheel', handleWheel, {
+  //   passive: false,
+  // });
 
-  const tableBodyRef = useCombinedRefs(bodyResizeRef, bodyRef);
+  const tableBodyScrollViewportRef = useCombinedRefs(bodyResizeRef, bodyRef);
 
   return (
     <div
@@ -518,17 +517,35 @@ export default function DataGrid({
         [classes.resizing]: !!resizingColumn,
       })}
     >
-      <div ref={tableHeaderRef} className={classes.tableHeadViewport}>
-        <div className={classes.tableHead} style={{ width: totalWidth }}>
+      <div className={classes.tableHeadRenderViewport}>
+        <div
+          ref={tableHeadRenderPaneRef}
+          className={classes.tableHeadRenderPane}
+          style={{ width: totalWidth }}
+        >
           {headerElms}
         </div>
       </div>
-      <div ref={tableBodyRef} className={classes.tableBodyViewport}>
+      <div
+        ref={tableBodyScrollViewportRef}
+        className={classes.tableBodyScrollViewport}
+        onScroll={handleScroll}
+      >
         <div
-          className={classes.tableBody}
+          className={classes.tableBodyScrollPane}
           style={{ width: totalWidth, height: totalHeight }}
         >
-          {bodyElms}
+          <div
+            className={classes.tableBodyRenderViewport}
+            style={{ width: viewportRect?.width, height: viewportRect?.height }}
+          >
+            <div
+              ref={tableBodyRenderPaneRef}
+              className={classes.tableBodyRenderPane}
+            >
+              {bodyElms}
+            </div>
+          </div>
         </div>
       </div>
     </div>
