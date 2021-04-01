@@ -26,8 +26,10 @@ const useStyles = makeStyles((theme) => ({
     height: 56,
   },
   tableHeadRenderPane: {
+    fontWeight: theme.typography.fontWeightBold,
     position: 'relative',
     height: '100%',
+    display: 'flex',
     overflow: 'hidden',
   },
   tableBodyScrollViewport: {
@@ -40,25 +42,24 @@ const useStyles = makeStyles((theme) => ({
     position: 'sticky',
     top: 0,
     left: 0,
+    overflow: 'hidden',
   },
   tableBodyRenderPane: {},
 
-  bodyRow: {
-    position: 'absolute',
+  tableRow: {
     borderBottom: `1px solid ${theme.palette.divider}`,
     width: '100%',
-  },
-  headerCell: {
-    fontWeight: theme.typography.fontWeightBold,
-    position: 'absolute',
+    position: 'relative',
     display: 'flex',
-    alignItems: 'center',
+    overflow: 'hidden',
   },
   tableCell: {
-    position: 'absolute',
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     height: '100%',
+    flexShrink: 0,
+    flexgrow: 0,
   },
   cellContent: {
     padding: '0 16px',
@@ -270,6 +271,34 @@ function calculateColumnSizing(
   return result;
 }
 
+interface TableRowProps {
+  height: number;
+  children?: React.ReactNode;
+}
+
+function TableRow({ height, children }: TableRowProps) {
+  const classes = useStyles();
+  return (
+    <div className={classes.tableRow} style={{ height }}>
+      {children}
+    </div>
+  );
+}
+
+interface TableCellProps {
+  width: number;
+  children?: React.ReactNode;
+}
+
+function TableCell({ width, children }: TableCellProps) {
+  const classes = useStyles();
+  return (
+    <div className={classes.tableCell} style={{ width }}>
+      {children}
+    </div>
+  );
+}
+
 export default function DataGrid({
   data,
   columns: columnsProp,
@@ -398,79 +427,71 @@ export default function DataGrid({
     headerElms,
     bodyElms,
   }: {
-    headerElms: JSX.Element[];
+    headerElms: JSX.Element;
     bodyElms: JSX.Element[];
   } = React.useMemo(() => {
     if (!virtualSlice) {
       return {
-        headerElms: [],
+        headerElms: <React.Fragment></React.Fragment>,
         bodyElms: [],
       };
     }
-    const headerElms = [];
-    const bodyElms = [];
-    for (
-      let columnIdx = virtualSlice.startColumn;
-      columnIdx <= virtualSlice.endColumn;
-      columnIdx += 1
-    ) {
-      const column = visibleColumns[columnIdx];
-      const headerContent = column?.header ?? column.key;
-      headerElms.push(
-        <div
-          key={column.key}
-          className={classes.headerCell}
-          style={{ ...getCellBoundingrect(0, column.key), height: 56 }}
-        >
-          <div className={classes.cellContent}>{headerContent}</div>
-          <div
-            className={classes.resizer}
-            onMouseDown={handleResizerMouseDown}
-            data-column={column.key}
-          >
-            <SeparatorIcon />
-          </div>
-        </div>
-      );
-    }
+
+    const columnsSlice = visibleColumns.slice(
+      virtualSlice.startColumn,
+      virtualSlice.endColumn
+    );
+
+    const leftMargin = getCellBoundingrect(
+      0,
+      visibleColumns[virtualSlice.startColumn].key
+    ).left;
+
+    const headerElms = (
+      <React.Fragment>
+        <TableCell width={leftMargin} />
+        {columnsSlice.map((column) => {
+          const headerContent = column?.header ?? column.key;
+          const { width } = getCellBoundingrect(0, column.key);
+          return (
+            <TableCell key={column.key} width={width}>
+              <div className={classes.cellContent}>{headerContent}</div>
+              <div
+                className={classes.resizer}
+                onMouseDown={handleResizerMouseDown}
+                data-column={column.key}
+              >
+                <SeparatorIcon />
+              </div>
+            </TableCell>
+          );
+        })}
+      </React.Fragment>
+    );
+
+    const bodyElms = [
+      <TableRow key={-1} height={virtualSlice.startRow * rowHeight} />,
+    ];
     for (
       let rowIdx = virtualSlice.startRow;
       rowIdx <= virtualSlice.endRow;
       rowIdx += 1
     ) {
-      const rowElms: JSX.Element[] = [];
-      for (
-        let columnIdx = virtualSlice.startColumn;
-        columnIdx <= virtualSlice.endColumn;
-        columnIdx += 1
-      ) {
-        const column = visibleColumns[columnIdx];
-        const value = column.getValue
-          ? column.getValue(data[rowIdx])
-          : data[rowIdx][column.key];
-        const { left, width } = getCellBoundingrect(rowIdx, column.key);
-        rowElms.push(
-          <div
-            key={`${rowIdx}:${column.key}`}
-            className={classes.tableCell}
-            style={{ left, width }}
-          >
-            <div className={classes.cellContent}>{String(value)}</div>
-          </div>
-        );
-      }
       bodyElms.push(
-        <div
-          key={rowIdx}
-          className={classes.bodyRow}
-          style={{
-            top: rowIdx * rowHeight,
-            height: rowHeight,
-            width: totalWidth,
-          }}
-        >
-          {rowElms}
-        </div>
+        <TableRow key={rowIdx} height={rowHeight}>
+          <TableCell width={leftMargin} />
+          {columnsSlice.map((column) => {
+            const value = column.getValue
+              ? column.getValue(data[rowIdx])
+              : data[rowIdx][column.key];
+            const { width } = getCellBoundingrect(rowIdx, column.key);
+            return (
+              <TableCell key={column.key} width={width}>
+                <div className={classes.cellContent}>{String(value)}</div>
+              </TableCell>
+            );
+          })}
+        </TableRow>
       );
     }
     return { headerElms, bodyElms };
@@ -481,12 +502,8 @@ export default function DataGrid({
     data,
     handleResizerMouseDown,
     rowHeight,
-    totalWidth,
     classes.cellContent,
-    classes.headerCell,
     classes.resizer,
-    classes.tableCell,
-    classes.bodyRow,
   ]);
 
   const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
@@ -542,6 +559,7 @@ export default function DataGrid({
             <div
               ref={tableBodyRenderPaneRef}
               className={classes.tableBodyRenderPane}
+              style={{ width: totalWidth, height: totalHeight }}
             >
               {bodyElms}
             </div>
