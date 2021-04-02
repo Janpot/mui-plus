@@ -88,7 +88,6 @@ interface ResizingColumn {
   key: string;
   mouseOffset: number;
   left: number;
-  width: number;
 }
 
 export interface ColumnDefiniton {
@@ -121,16 +120,19 @@ interface ColumnDimensionsMap {
 }
 
 interface UseColumnResizingParams {
+  rootRef: React.RefObject<HTMLDivElement>;
   columnSizings: ColumnDimensionsMap;
   columns: ColumnDefinitons;
   onColumnsChange: (newValue: ColumnDefinitons) => void;
 }
 
 function useColumnResizing({
+  rootRef,
   columnSizings,
   columns,
   onColumnsChange,
 }: UseColumnResizingParams) {
+  const classes = useStyles();
   const isMounted = useIsMounted();
   const [
     resizingColumn,
@@ -153,7 +155,6 @@ function useColumnResizing({
         key: columnKey,
         mouseOffset: event.clientX - right,
         left,
-        width,
       });
     },
     [columnSizings, isMounted]
@@ -170,13 +171,14 @@ function useColumnResizing({
     };
 
     const handleDocMouseMove = (event: MouseEvent) => {
-      if (!isMounted.current) {
-        console.warn('mousemove on unmounted component');
+      if (!rootRef.current) {
+        return;
       }
-      setResingColumn({
-        ...resizingColumn,
-        width: calculateColumnWidth(event.clientX),
-      });
+      const resizingCells = rootRef.current.querySelectorAll<HTMLDivElement>(
+        `.${classes.tableCell}[data-column=${resizingColumn.key}]`
+      );
+      const width = calculateColumnWidth(event.clientX);
+      resizingCells.forEach((cell) => (cell.style.width = `${width}px`));
     };
 
     const handleDocMouseUp = (event: MouseEvent) => {
@@ -204,7 +206,14 @@ function useColumnResizing({
       window.removeEventListener('mousemove', handleDocMouseMove);
       window.removeEventListener('mouseup', handleDocMouseUp);
     };
-  }, [resizingColumn, isMounted, columns, onColumnsChange]);
+  }, [
+    rootRef,
+    resizingColumn,
+    isMounted,
+    columns,
+    onColumnsChange,
+    classes.tableCell,
+  ]);
 
   return {
     handleResizerMouseDown,
@@ -252,16 +261,13 @@ interface GridVirtualSlice {
 }
 
 function calculateColumnSizing(
-  visibleColumns: ColumnDefinitons,
-  resizingColumn: ResizingColumn | null
+  visibleColumns: ColumnDefinitons
 ): ColumnDimensionsMap {
   const result: ColumnDimensionsMap = {};
   let left = 0;
   for (const column of visibleColumns) {
     const width = clamp(
-      resizingColumn && resizingColumn.key === column.key
-        ? resizingColumn.width
-        : column.width ?? 100,
+      column.width ?? 100,
       column.minWidth ?? 50,
       column.maxWidth ?? Infinity
     );
@@ -287,13 +293,18 @@ function TableRow({ height, children }: TableRowProps) {
 
 interface TableCellProps {
   width: number;
+  columnKey?: string;
   children?: React.ReactNode;
 }
 
-function TableCell({ width, children }: TableCellProps) {
+function TableCell({ width, columnKey, children }: TableCellProps) {
   const classes = useStyles();
   return (
-    <div className={classes.tableCell} style={{ width }}>
+    <div
+      className={classes.tableCell}
+      style={{ width }}
+      data-column={columnKey}
+    >
       {children}
     </div>
   );
@@ -307,6 +318,7 @@ export default function DataGrid({
   rowHeight = 52,
 }: DataGridProps) {
   const classes = useStyles();
+  const rootRef = React.useRef<HTMLDivElement>(null);
 
   const [columns, setColumns] = useControlled(
     'columns',
@@ -323,7 +335,7 @@ export default function DataGrid({
   const [virtualSlice, setVirtualSlice] = React.useState<GridVirtualSlice>();
 
   const columnSizings: ColumnDimensionsMap = React.useMemo(() => {
-    return calculateColumnSizing(visibleColumns, null);
+    return calculateColumnSizing(visibleColumns);
   }, [visibleColumns]);
 
   const totalWidth = React.useMemo(() => {
@@ -396,23 +408,16 @@ export default function DataGrid({
   React.useEffect(() => updateVirtualSlice(), [updateVirtualSlice]);
 
   const { handleResizerMouseDown, resizingColumn } = useColumnResizing({
+    rootRef,
     columns,
     onColumnsChange: setColumns,
     columnSizings,
   });
 
-  const columnSizingWithResizing = React.useMemo(() => {
-    if (!resizingColumn) {
-      return columnSizings;
-    } else {
-      return calculateColumnSizing(visibleColumns, resizingColumn);
-    }
-  }, [columnSizings, resizingColumn, visibleColumns]);
-
   const getCellBoundingrect = React.useCallback(
     (row: number, columnKey: string): BoundingRect => {
       const top = row * rowHeight;
-      const { left, width } = columnSizingWithResizing[columnKey]!;
+      const { left, width } = columnSizings[columnKey]!;
       return {
         top,
         height: rowHeight,
@@ -420,7 +425,7 @@ export default function DataGrid({
         width,
       };
     },
-    [rowHeight, columnSizingWithResizing]
+    [rowHeight, columnSizings]
   );
 
   const {
@@ -454,7 +459,7 @@ export default function DataGrid({
           const headerContent = column?.header ?? column.key;
           const { width } = getCellBoundingrect(0, column.key);
           return (
-            <TableCell key={column.key} width={width}>
+            <TableCell key={column.key} width={width} columnKey={column.key}>
               <div className={classes.cellContent}>{headerContent}</div>
               <div
                 className={classes.resizer}
@@ -486,7 +491,7 @@ export default function DataGrid({
               : data[rowIdx][column.key];
             const { width } = getCellBoundingrect(rowIdx, column.key);
             return (
-              <TableCell key={column.key} width={width}>
+              <TableCell key={column.key} width={width} columnKey={column.key}>
                 <div className={classes.cellContent}>{String(value)}</div>
               </TableCell>
             );
@@ -530,6 +535,7 @@ export default function DataGrid({
 
   return (
     <div
+      ref={rootRef}
       className={clsx(classes.root, {
         [classes.resizing]: !!resizingColumn,
       })}
