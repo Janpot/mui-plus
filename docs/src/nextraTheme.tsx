@@ -11,9 +11,7 @@ import MdxTheme from './MdxTheme';
 import Link from './Link';
 import {
   createMuiTheme,
-  createStyles,
-  Theme,
-  makeStyles,
+  styled,
   ThemeProvider as MuiThemeProvider,
   Collapse,
   Container,
@@ -78,63 +76,68 @@ const DARK = createMuiTheme({
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-    },
-    drawer: {
-      [theme.breakpoints.up('lg')]: {
-        width: drawerWidth,
-        flexShrink: 0,
-      },
-    },
-    appBar: {
-      [theme.breakpoints.up('lg')]: {
-        width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: drawerWidth,
-      },
-    },
-    menuButton: {
-      marginRight: theme.spacing(2),
-      [theme.breakpoints.up('lg')]: {
-        display: 'none',
-      },
-    },
-    drawerPaper: {
-      width: drawerWidth,
-    },
-    content: {
-      flexGrow: 1,
-      backgroundColor: theme.palette.background.default,
-      padding: theme.spacing(3),
-      overflow: 'hidden',
-    },
-    flexFill: {
-      flex: 1,
-    },
-    docOutline: {
-      width: 240,
-      flexShrink: 0,
-      position: 'sticky',
-      top: 0,
-      height: '100vh',
-      overflow: 'auto',
-      [theme.breakpoints.down('sm')]: {
-        display: 'none',
-      },
-    },
-    docOutlineSection: {
-      ...theme.typography.body2,
-      borderLeft: `2px solid transparent`,
-      color: theme.palette.text.disabled,
-      '&$active': {
-        borderLeft: `2px solid ${theme.palette.divider}`,
-      },
-    },
-    active: {},
-  })
-);
+const LayoutRoot = styled('div')({
+  display: 'flex',
+});
+
+const DocsNavigation = styled('nav')(({ theme }) => ({
+  [theme.breakpoints.up('lg')]: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+}));
+
+const DocsMain = styled('main')(({ theme }) => ({
+  flexGrow: 1,
+  backgroundColor: theme.palette.background.default,
+  padding: theme.spacing(3),
+  overflow: 'hidden',
+}));
+
+const DocsHeader = styled(AppBar)(({ theme }) => ({
+  [theme.breakpoints.up('lg')]: {
+    width: `calc(100% - ${drawerWidth}px)`,
+    marginLeft: drawerWidth,
+  },
+}));
+
+const DocsOutline = styled('nav')(({ theme }) => ({
+  width: 240,
+  flexShrink: 0,
+  position: 'sticky',
+  top: 0,
+  height: '100vh',
+  overflow: 'auto',
+  [theme.breakpoints.down('sm')]: {
+    display: 'none',
+  },
+}));
+
+const CLASS_ACTIVE = 'NextraMuiThemeActive';
+
+const DocsOutlineSection = styled('div')(({ theme }) => ({
+  // ...theme.typography.body2,
+  borderLeft: `2px solid transparent`,
+  color: theme.palette.text.disabled,
+  [`&.${CLASS_ACTIVE}`]: {
+    borderLeft: `2px solid ${theme.palette.divider}`,
+  },
+}));
+
+const FlexFill = styled('div')({ flex: 1 });
+
+const DocsMenuButton = styled(IconButton)(({ theme }) => ({
+  marginRight: theme.spacing(2),
+  [theme.breakpoints.up('lg')]: {
+    display: 'none',
+  },
+}));
+
+const DocsDrawer = styled(Drawer)({
+  '& .MuiDrawer-paper': {
+    width: drawerWidth,
+  },
+});
 
 interface SideBarItemProps {
   level?: number;
@@ -246,7 +249,6 @@ interface LayoutProps {
 }
 
 function Layout({ children, opts, config }: LayoutProps) {
-  const classes = useStyles();
   const muiTheme = useMuiTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -284,62 +286,52 @@ function Layout({ children, opts, config }: LayoutProps) {
   );
 
   return (
-    <div className={classes.root}>
+    <LayoutRoot>
       <CssBaseline />
-      <AppBar position="fixed" color="default" className={classes.appBar}>
+      <DocsHeader position="fixed" color="default">
         <Toolbar>
-          <IconButton
+          <DocsMenuButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            className={classes.menuButton}
           >
             <MenuIcon />
-          </IconButton>
-          <div className={classes.flexFill} />
+          </DocsMenuButton>
+          <FlexFill />
           <IconButton component={Link} naked href="https://github.com/...">
             <GitHubIcon />
           </IconButton>
           <ThemeSwitcher />
         </Toolbar>
-      </AppBar>
-      <nav className={classes.drawer} aria-label="mailbox folders">
+      </DocsHeader>
+      <DocsNavigation>
         <Hidden lgUp implementation="css">
-          <Drawer
+          <DocsDrawer
             variant="temporary"
             anchor={muiTheme.direction === 'rtl' ? 'right' : 'left'}
             open={mobileOpen}
             onClose={handleDrawerToggle}
-            classes={{
-              paper: classes.drawerPaper,
-            }}
             ModalProps={{
               keepMounted: true,
             }}
           >
             {drawer}
-          </Drawer>
+          </DocsDrawer>
         </Hidden>
         <Hidden mdDown implementation="css">
-          <Drawer
-            classes={{
-              paper: classes.drawerPaper,
-            }}
-            variant="permanent"
-            open
-          >
+          <DocsDrawer variant="permanent" open>
             {drawer}
-          </Drawer>
+          </DocsDrawer>
         </Hidden>
-      </nav>
-      <main className={classes.content}>
+      </DocsNavigation>
+      <DocsMain>
         <Toolbar />
         <Container maxWidth="md">
           <MdxTheme>{children}</MdxTheme>
         </Container>
-      </main>
-      <div className={classes.docOutline}>
+      </DocsMain>
+      <DocsOutline>
         <Toolbar />
         <Box padding={2}>
           <Typography variant="subtitle1">Content:</Typography>
@@ -350,10 +342,8 @@ function Layout({ children, opts, config }: LayoutProps) {
             }
             const isACtive = slug === activeSection;
             return (
-              <div
-                className={clsx(classes.docOutlineSection, {
-                  [classes.active]: isACtive,
-                })}
+              <DocsOutlineSection
+                className={clsx({ [CLASS_ACTIVE]: isACtive })}
                 key={slug}
                 style={{ paddingLeft: 8 + (level - minLevel) * 8 }}
               >
@@ -363,12 +353,12 @@ function Layout({ children, opts, config }: LayoutProps) {
                 >
                   {text}
                 </Link>
-              </div>
+              </DocsOutlineSection>
             );
           })}
         </Box>
-      </div>
-    </div>
+      </DocsOutline>
+    </LayoutRoot>
   );
 }
 
