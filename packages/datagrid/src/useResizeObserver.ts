@@ -18,27 +18,25 @@ export default function useResizeObserver<
   const observerRef = React.useRef<ResizeObserver>();
 
   const ref = useRefEffect<T>((elm) => {
-    if (elm) {
-      if (!observerRef.current) {
-        observerRef.current = new ResizeObserver(
-          (entries: ResizeObserverEntry[]) => {
-            if (entries.length <= 0) {
-              return;
-            }
-            setRect((rect) => {
-              const { width, height } = entries[0].contentRect;
-              return rect?.width === width && rect?.height === height
-                ? rect
-                : { width, height };
-            });
+    if (!observerRef.current) {
+      observerRef.current = new ResizeObserver(
+        (entries: ResizeObserverEntry[]) => {
+          if (entries.length <= 0) {
+            return;
           }
-        );
-      }
-      const observer = observerRef.current;
-      observer.observe(elm);
-      return () => observer.unobserve(elm);
+          const { width, height } = entries[0].contentRect;
+          setRect((rect) => {
+            return rect?.width === width && rect?.height === height
+              ? rect
+              : { width, height };
+          });
+        }
+      );
     }
-  }, []);
+    const observer = observerRef.current;
+    observer.observe(elm);
+    return () => observer.unobserve(elm);
+  });
 
   return {
     ref,

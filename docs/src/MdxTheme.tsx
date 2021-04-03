@@ -108,6 +108,10 @@ function CodeBlock({ className, highlight, ...props }: any) {
   );
 }
 
+function Table({ children }: any) {
+  return <table>{children}</table>;
+}
+
 interface GetComponentsOptions {
   slugger: Slugger;
 }
@@ -124,6 +128,7 @@ function getComponents({
     h6: createMdxHeader('h6', slugger),
     a: Link,
     code: CodeBlock,
+    table: Table,
   } as MDXProviderComponents;
 }
 
