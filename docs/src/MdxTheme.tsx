@@ -2,56 +2,57 @@ import { MDXProvider, MDXProviderComponents } from '@mdx-js/react';
 import Slugger from 'github-slugger';
 import Link from './Link';
 import * as React from 'react';
-import { makeStyles, Typography, TypographyProps } from '@material-ui/core';
+import { styled, Typography, TypographyProps } from '@material-ui/core';
 import innerText from 'react-innertext';
 import Code from '../components/Code';
 import { useSection } from './useScrollSpy';
 import LinkIcon from '@material-ui/icons/Link';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '& pre code': {
-      display: 'block',
-    },
-    '& h1': {
-      ...theme.typography.h3,
-      fontSize: 40,
-      margin: '16px 0',
-    },
-    '& h2': {
-      ...theme.typography.h4,
-      fontSize: 30,
-      margin: '40px 0 16px',
-    },
-    '& h3': {
-      ...theme.typography.h5,
-      margin: '40px 0 16px',
-    },
-    '& h4': {
-      ...theme.typography.h6,
-      margin: '32px 0 16px',
-    },
-    '& h5': {
-      ...theme.typography.subtitle1,
-      margin: '32px 0 16px',
-    },
-    '& h6': {
-      ...theme.typography.subtitle2,
-      margin: '32px 0 16px',
-    },
+const Article = styled('article')(({ theme }) => ({
+  '& pre code': {
+    display: 'block',
   },
-  headerLink: {},
-  headerLinkAnchor: {
-    padding: theme.spacing(0, 1),
-    verticalAlign: 'middle',
-    visibility: 'hidden',
-    '$headerLink:hover &': {
-      visibility: 'visible',
-    },
+  '& h1': {
+    ...theme.typography.h3,
+    fontSize: 40,
+    margin: '16px 0',
   },
-  anchor: {
-    position: 'absolute',
-    marginTop: -100,
+  '& h2': {
+    ...theme.typography.h4,
+    fontSize: 30,
+    margin: '40px 0 16px',
+  },
+  '& h3': {
+    ...theme.typography.h5,
+    margin: '40px 0 16px',
+  },
+  '& h4': {
+    ...theme.typography.h6,
+    margin: '32px 0 16px',
+  },
+  '& h5': {
+    ...theme.typography.subtitle1,
+    margin: '32px 0 16px',
+  },
+  '& h6': {
+    ...theme.typography.subtitle2,
+    margin: '32px 0 16px',
+  },
+}));
+
+const Anchor = styled('span')({
+  position: 'absolute',
+  marginTop: -100,
+});
+
+const CLASS_HEADER = 'NextraMuiThemeHeader';
+
+const HeaderLink = styled(Link)(({ theme }) => ({
+  padding: theme.spacing(0, 1),
+  verticalAlign: 'middle',
+  visibility: 'hidden',
+  [`.${CLASS_HEADER}:hover &`]: {
+    visibility: 'visible',
   },
 }));
 
@@ -59,43 +60,36 @@ interface HeaderLinkProps extends TypographyProps {
   slugger: Slugger;
 }
 
-const HeaderLink = ({ children, slugger, ...props }: HeaderLinkProps) => {
+const Header = ({ children, slugger, ...props }: HeaderLinkProps) => {
   const slug = slugger.slug(innerText(children) || '');
-  const classes = useStyles();
 
   const ref = useSection(slug);
 
   return (
-    <Typography className={classes.headerLink} {...props}>
-      <span ref={ref} id={slug} className={classes.anchor} />
+    <Typography className={CLASS_HEADER} {...props}>
+      <Anchor ref={ref} id={slug} />
 
       {children}
-      <Link
-        href={'#' + slug}
-        className={classes.headerLinkAnchor}
-        underline="none"
-        color="inherit"
-      >
+      <HeaderLink href={'#' + slug} underline="none" color="inherit">
         <LinkIcon fontSize="small" />
-      </Link>
+      </HeaderLink>
     </Typography>
   );
 };
 
-function createHeaderLink(
+function createHeader(
   variant: TypographyProps['variant'],
   slugger: Slugger,
   predefinedProps?: TypographyProps
 ) {
-  const Header = (props: TypographyProps) => (
-    <HeaderLink
+  return (props: TypographyProps) => (
+    <Header
       variant={variant}
       slugger={slugger}
       {...predefinedProps}
       {...props}
     />
   );
-  return Header;
 }
 
 function H1(props: any) {
@@ -121,11 +115,11 @@ function getComponents({
 }: GetComponentsOptions): MDXProviderComponents {
   return {
     h1: H1,
-    h2: createHeaderLink('h2', slugger),
-    h3: createHeaderLink('h3', slugger),
-    h4: createHeaderLink('h4', slugger),
-    h5: createHeaderLink('h5', slugger),
-    h6: createHeaderLink('h6', slugger),
+    h2: createHeader('h2', slugger),
+    h3: createHeader('h3', slugger),
+    h4: createHeader('h4', slugger),
+    h5: createHeader('h5', slugger),
+    h6: createHeader('h6', slugger),
     a: Link,
     code: CodeBlock,
   } as MDXProviderComponents;
@@ -136,11 +130,10 @@ interface MdxThemeProps {
 }
 
 export default function MdxTheme({ children }: MdxThemeProps) {
-  const classes = useStyles();
   const slugger = new Slugger();
   return (
     <MDXProvider components={getComponents({ slugger })}>
-      <article className={classes.root}>{children}</article>
+      <Article>{children}</Article>
     </MDXProvider>
   );
 }
