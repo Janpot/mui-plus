@@ -77,19 +77,21 @@ const Header = ({ children, slugger, ...props }: HeaderLinkProps) => {
   );
 };
 
-function createHeader(
+function createMdxHeader(
   variant: TypographyProps['variant'],
   slugger: Slugger,
   predefinedProps?: TypographyProps
 ) {
-  return (props: TypographyProps) => (
-    <Header
-      variant={variant}
-      slugger={slugger}
-      {...predefinedProps}
-      {...props}
-    />
-  );
+  return function MdxHeader(props: TypographyProps) {
+    return (
+      <Header
+        variant={variant}
+        slugger={slugger}
+        {...predefinedProps}
+        {...props}
+      />
+    );
+  };
 }
 
 function H1(props: any) {
@@ -115,11 +117,11 @@ function getComponents({
 }: GetComponentsOptions): MDXProviderComponents {
   return {
     h1: H1,
-    h2: createHeader('h2', slugger),
-    h3: createHeader('h3', slugger),
-    h4: createHeader('h4', slugger),
-    h5: createHeader('h5', slugger),
-    h6: createHeader('h6', slugger),
+    h2: createMdxHeader('h2', slugger),
+    h3: createMdxHeader('h3', slugger),
+    h4: createMdxHeader('h4', slugger),
+    h5: createMdxHeader('h5', slugger),
+    h6: createMdxHeader('h6', slugger),
     a: Link,
     code: CodeBlock,
   } as MDXProviderComponents;

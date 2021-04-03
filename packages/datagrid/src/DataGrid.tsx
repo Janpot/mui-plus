@@ -6,6 +6,11 @@ import useCombinedRefs from './useCombinedRefs';
 import clsx from 'clsx';
 import useIsMounted from './useIsMounted';
 import { useControlled } from './useControlled';
+import { clamp } from './math';
+import {
+  getVirtualSliceFixed,
+  getVirtualSliceVariable,
+} from './virtualization';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -116,7 +121,7 @@ interface ColumnDimensions {
 }
 
 interface ColumnDimensionsMap {
-  [key: string]: ColumnDimensions | undefined;
+  [key: string]: ColumnDimensions;
 }
 
 interface UseColumnResizingParams {
@@ -222,29 +227,6 @@ function useColumnResizing({
 }
 
 const SeparatorIcon = createSvgIcon(<path d="M11 19V5h2v14z" />, 'Separator');
-
-const clamp = (value: number, lower: number, upper: number): number =>
-  Math.min(Math.max(value, lower), upper);
-
-function findNextColumn(
-  visibleColumns: ColumnDefinitons,
-  columnSizing: ColumnDimensionsMap,
-  x: number,
-  first = 0,
-  last = visibleColumns.length - 1
-): number {
-  if (first >= last) {
-    return first;
-  }
-
-  const pivot = first + Math.floor((last - first) / 2);
-  const pivotColumn = columnSizing[visibleColumns[pivot].key]!;
-  if (x < pivotColumn.left) {
-    return findNextColumn(visibleColumns, columnSizing, x, first, pivot);
-  } else {
-    return findNextColumn(visibleColumns, columnSizing, x, pivot + 1, last);
-  }
-}
 
 interface BoundingRect {
   top: number;
@@ -358,54 +340,63 @@ export default function DataGrid({
 
   const isMounted = useIsMounted();
 
-  const updateVirtualSlice = React.useCallback(() => {
-    if (!viewportRect || !bodyRef.current) return;
-    const { scrollLeft, scrollTop } = bodyRef.current;
-    const firstVisibleRow = Math.floor(scrollTop / rowHeight);
-    const lastVisibleRow = Math.floor(
-      (scrollTop + viewportRect.height) / rowHeight
-    );
-    const firstVisibleColumn =
-      findNextColumn(visibleColumns, columnSizings, scrollLeft) - 1;
-    const lastVisibleColumn = findNextColumn(
+  const updateVirtualSlice = React.useCallback(
+    (scrollLeft: number, scrollTop: number) => {
+      if (!viewportRect) return;
+      const columnCount = visibleColumns.length;
+      const [firstVisibleRow, lastVisibleRow] = getVirtualSliceFixed(
+        rowCount,
+        rowHeight,
+        scrollTop,
+        scrollTop + viewportRect.height
+      );
+      const getColumnLeft = (columnIndex: number) =>
+        columnSizings[visibleColumns[columnIndex].key].left;
+      const [firstVisibleColumn, lastVisibleColumn] = getVirtualSliceVariable(
+        columnCount,
+        getColumnLeft,
+        scrollLeft,
+        scrollLeft + viewportRect.width
+      );
+      const overscan = 3;
+      const startRow = Math.max(0, firstVisibleRow - overscan);
+      const endRow = Math.min(rowCount - 1, lastVisibleRow + overscan);
+      const startColumn = Math.max(0, firstVisibleColumn - overscan);
+      const endColumn = Math.min(
+        visibleColumns.length - 1,
+        lastVisibleColumn + overscan
+      );
+      if (!isMounted.current) {
+        console.warn('updating slice on unmounted component');
+      }
+      setVirtualSlice((slice) => {
+        if (
+          slice?.startRow === startRow &&
+          slice?.endRow === endRow &&
+          slice?.startColumn === startColumn &&
+          slice?.endColumn === endColumn
+        ) {
+          return slice;
+        } else {
+          return { startRow, endRow, startColumn, endColumn };
+        }
+      });
+    },
+    [
+      viewportRect,
+      rowHeight,
+      rowCount,
       visibleColumns,
       columnSizings,
-      scrollLeft + viewportRect.width
-    );
-    const overscan = 3;
-    if (!isMounted.current) {
-      console.warn('updating slice on unmounted component');
-    }
-    setVirtualSlice((slice) => {
-      if (
-        slice?.startRow === firstVisibleRow &&
-        slice?.endRow === lastVisibleRow &&
-        slice?.startColumn === firstVisibleColumn &&
-        slice?.endColumn === lastVisibleColumn
-      ) {
-        return slice;
-      } else {
-        return {
-          startRow: Math.max(0, firstVisibleRow - overscan),
-          endRow: Math.min(rowCount - 1, lastVisibleRow + overscan),
-          startColumn: Math.max(0, firstVisibleColumn - overscan),
-          endColumn: Math.min(
-            visibleColumns.length - 1,
-            lastVisibleColumn + overscan
-          ),
-        };
-      }
-    });
-  }, [
-    viewportRect,
-    rowHeight,
-    rowCount,
-    visibleColumns,
-    columnSizings,
-    isMounted,
-  ]);
+      isMounted,
+    ]
+  );
 
-  React.useEffect(() => updateVirtualSlice(), [updateVirtualSlice]);
+  React.useEffect(() => {
+    if (!bodyRef.current) return;
+    const { scrollLeft, scrollTop } = bodyRef.current;
+    updateVirtualSlice(scrollLeft, scrollTop);
+  }, [updateVirtualSlice]);
 
   const { handleResizerMouseDown, resizingColumn } = useColumnResizing({
     rootRef,
@@ -515,8 +506,8 @@ export default function DataGrid({
 
   const handleScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
-      updateVirtualSlice();
       const { scrollLeft, scrollTop } = event.currentTarget;
+      updateVirtualSlice(scrollLeft, scrollTop);
       if (tableBodyRenderPaneRef.current) {
         tableBodyRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
       }
