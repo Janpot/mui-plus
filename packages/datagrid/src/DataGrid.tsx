@@ -1,16 +1,21 @@
+/*
+TODO
+- resizing min/max width
+- ltr
+- pinned columns
+- row hover
+- flex
+*/
+
 import * as React from 'react';
 import { makeStyles, createSvgIcon } from '@material-ui/core';
 import useResizeObserver from './useResizeObserver';
 // import useEventListener from './useEventListener';
 import useCombinedRefs from './useCombinedRefs';
 import clsx from 'clsx';
-import useIsMounted from './useIsMounted';
 import { useControlled } from './useControlled';
 import { clamp } from './math';
-import {
-  getVirtualSliceFixed,
-  getVirtualSliceVariable,
-} from './virtualization';
+import { getTableVirtualSlice } from './virtualization';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -124,21 +129,23 @@ interface ColumnDimensionsMap {
   [key: string]: ColumnDimensions;
 }
 
+interface HasForEach<T> {
+  forEach(callbackfn: (value: T, key: number) => void): void;
+}
+
 interface UseColumnResizingParams {
-  rootRef: React.RefObject<HTMLDivElement>;
   columnSizings: ColumnDimensionsMap;
   columns: ColumnDefinitons;
+  getColumnElements: (columnKey: string) => HasForEach<HTMLElement>;
   onColumnsChange: (newValue: ColumnDefinitons) => void;
 }
 
 function useColumnResizing({
-  rootRef,
   columnSizings,
   columns,
   onColumnsChange,
+  getColumnElements,
 }: UseColumnResizingParams) {
-  const classes = useStyles();
-  const isMounted = useIsMounted();
   const [
     resizingColumn,
     setResingColumn,
@@ -153,16 +160,13 @@ function useColumnResizing({
       }
       const { left, width } = sizing;
       const right = left + width;
-      if (!isMounted.current) {
-        console.warn('resizing state on unmounted component x');
-      }
       setResingColumn({
         key: columnKey,
         mouseOffset: event.clientX - right,
         left,
       });
     },
-    [columnSizings, isMounted]
+    [columnSizings]
   );
 
   React.useEffect(() => {
@@ -176,20 +180,14 @@ function useColumnResizing({
     };
 
     const handleDocMouseMove = (event: MouseEvent) => {
-      if (!rootRef.current) {
-        return;
-      }
-      const resizingCells = rootRef.current.querySelectorAll<HTMLDivElement>(
-        `.${classes.tableCell}[data-column=${resizingColumn.key}]`
-      );
       const width = calculateColumnWidth(event.clientX);
-      resizingCells.forEach((cell) => (cell.style.width = `${width}px`));
+      const resizingElms = getColumnElements(resizingColumn.key);
+      resizingElms.forEach((elm) => {
+        elm.style.width = `${width}px`;
+      });
     };
 
     const handleDocMouseUp = (event: MouseEvent) => {
-      if (!isMounted.current) {
-        console.warn('mouseup on unmounted component');
-      }
       onColumnsChange(
         columns.map((column) => {
           if (column.key === resizingColumn.key) {
@@ -211,14 +209,7 @@ function useColumnResizing({
       window.removeEventListener('mousemove', handleDocMouseMove);
       window.removeEventListener('mouseup', handleDocMouseUp);
     };
-  }, [
-    rootRef,
-    resizingColumn,
-    isMounted,
-    columns,
-    onColumnsChange,
-    classes.tableCell,
-  ]);
+  }, [resizingColumn, columns, onColumnsChange, getColumnElements]);
 
   return {
     handleResizerMouseDown,
@@ -338,37 +329,24 @@ export default function DataGrid({
 
   const bodyRef = React.useRef<HTMLDivElement>(null);
 
-  const isMounted = useIsMounted();
-
   const updateVirtualSlice = React.useCallback(
     (scrollLeft: number, scrollTop: number) => {
       if (!viewportRect) return;
-      const columnCount = visibleColumns.length;
-      const [firstVisibleRow, lastVisibleRow] = getVirtualSliceFixed(
-        rowCount,
-        rowHeight,
-        scrollTop,
-        scrollTop + viewportRect.height
-      );
-      const getColumnLeft = (columnIndex: number) =>
+      const getColumnStart = (columnIndex: number) =>
         columnSizings[visibleColumns[columnIndex].key].left;
-      const [firstVisibleColumn, lastVisibleColumn] = getVirtualSliceVariable(
-        columnCount,
-        getColumnLeft,
-        scrollLeft,
-        scrollLeft + viewportRect.width
+      const { startRow, endRow, startColumn, endColumn } = getTableVirtualSlice(
+        {
+          rowCount,
+          rowHeight,
+          columnCount: visibleColumns.length,
+          getColumnStart,
+          viewportWidth: viewportRect.width,
+          viewportheight: viewportRect.height,
+          horizontalScroll: scrollLeft,
+          verticalScroll: scrollTop,
+          overscan: 3,
+        }
       );
-      const overscan = 3;
-      const startRow = Math.max(0, firstVisibleRow - overscan);
-      const endRow = Math.min(rowCount - 1, lastVisibleRow + overscan);
-      const startColumn = Math.max(0, firstVisibleColumn - overscan);
-      const endColumn = Math.min(
-        visibleColumns.length - 1,
-        lastVisibleColumn + overscan
-      );
-      if (!isMounted.current) {
-        console.warn('updating slice on unmounted component');
-      }
       setVirtualSlice((slice) => {
         if (
           slice?.startRow === startRow &&
@@ -382,14 +360,7 @@ export default function DataGrid({
         }
       });
     },
-    [
-      viewportRect,
-      rowHeight,
-      rowCount,
-      visibleColumns,
-      columnSizings,
-      isMounted,
-    ]
+    [viewportRect, rowHeight, rowCount, visibleColumns, columnSizings]
   );
 
   React.useEffect(() => {
@@ -398,9 +369,20 @@ export default function DataGrid({
     updateVirtualSlice(scrollLeft, scrollTop);
   }, [updateVirtualSlice]);
 
+  const getColumnElements = React.useCallback(
+    (columnKey: string) => {
+      return (
+        rootRef.current?.querySelectorAll<HTMLDivElement>(
+          `.${classes.tableCell}[data-column=${columnKey}]`
+        ) || []
+      );
+    },
+    [classes.tableCell]
+  );
+
   const { handleResizerMouseDown, resizingColumn } = useColumnResizing({
-    rootRef,
     columns,
+    getColumnElements,
     onColumnsChange: setColumns,
     columnSizings,
   });
@@ -435,7 +417,7 @@ export default function DataGrid({
 
     const columnsSlice = visibleColumns.slice(
       virtualSlice.startColumn,
-      virtualSlice.endColumn
+      virtualSlice.endColumn + 1
     );
 
     const leftMargin = getCellBoundingrect(

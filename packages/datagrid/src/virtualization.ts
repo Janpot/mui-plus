@@ -48,7 +48,7 @@ function getInterSectingIndexVariable(
   return _getInterSectingIndexVariable(itemCount, getItemOffset, offset);
 }
 
-export function getVirtualSliceFixed(
+function getVirtualSliceFixed(
   itemCount: number,
   itemSize: number,
   start: number,
@@ -60,7 +60,7 @@ export function getVirtualSliceFixed(
   ];
 }
 
-export function getVirtualSliceVariable(
+function getVirtualSliceVariable(
   itemCount: number,
   getItemOffset: (index: number) => number,
   start: number,
@@ -70,4 +70,51 @@ export function getVirtualSliceVariable(
     getInterSectingIndexVariable(itemCount, getItemOffset, start),
     getInterSectingIndexVariable(itemCount, getItemOffset, end),
   ];
+}
+
+interface GetVirtualSliceInput {
+  rowCount: number;
+  rowHeight: number;
+  columnCount: number;
+  getColumnStart: (index: number) => number;
+  viewportWidth: number;
+  viewportheight: number;
+  horizontalScroll: number;
+  verticalScroll: number;
+  overscan?: number;
+}
+
+export function getTableVirtualSlice({
+  rowCount,
+  rowHeight,
+  columnCount,
+  getColumnStart,
+  viewportWidth,
+  viewportheight,
+  horizontalScroll,
+  verticalScroll,
+  overscan = 0,
+}: GetVirtualSliceInput) {
+  const [firstVisibleRow, lastVisibleRow] = getVirtualSliceFixed(
+    rowCount,
+    rowHeight,
+    verticalScroll,
+    verticalScroll + viewportheight
+  );
+  const [firstVisibleColumn, lastVisibleColumn] = getVirtualSliceVariable(
+    columnCount,
+    getColumnStart,
+    horizontalScroll,
+    horizontalScroll + viewportWidth
+  );
+  const startRow = Math.max(0, firstVisibleRow - overscan);
+  const endRow = Math.min(rowCount - 1, lastVisibleRow + overscan);
+  const startColumn = Math.max(0, firstVisibleColumn - overscan);
+  const endColumn = Math.min(columnCount - 1, lastVisibleColumn + overscan);
+  return {
+    startRow,
+    endRow,
+    startColumn,
+    endColumn,
+  };
 }
