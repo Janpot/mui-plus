@@ -98,6 +98,8 @@ interface ResizingColumn {
   key: string;
   mouseOffset: number;
   left: number;
+  minWidth: number;
+  maxWidth: number;
 }
 
 export interface ColumnDefiniton {
@@ -123,6 +125,8 @@ export interface DataGridProps<RowType = any> {
 interface ColumnDimensions {
   left: number;
   width: number;
+  minWidth: number;
+  maxWidth: number;
 }
 
 interface ColumnDimensionsMap {
@@ -134,14 +138,14 @@ interface HasForEach<T> {
 }
 
 interface UseColumnResizingParams {
-  columnSizings: ColumnDimensionsMap;
+  columnDimensions: ColumnDimensionsMap;
   columns: ColumnDefinitons;
   getColumnElements: (columnKey: string) => HasForEach<HTMLElement>;
   onColumnsChange: (newValue: ColumnDefinitons) => void;
 }
 
 function useColumnResizing({
-  columnSizings,
+  columnDimensions,
   columns,
   onColumnsChange,
   getColumnElements,
@@ -154,19 +158,21 @@ function useColumnResizing({
   const handleResizerMouseDown = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       const columnKey = event.currentTarget.dataset.column!;
-      const sizing = columnSizings[columnKey];
-      if (!sizing) {
+      const dimensions = columnDimensions[columnKey];
+      if (!dimensions) {
         return;
       }
-      const { left, width } = sizing;
+      const { left, width, minWidth, maxWidth } = dimensions;
       const right = left + width;
       setResingColumn({
         key: columnKey,
         mouseOffset: event.clientX - right,
         left,
+        minWidth,
+        maxWidth,
       });
     },
-    [columnSizings]
+    [columnDimensions]
   );
 
   React.useEffect(() => {
@@ -176,7 +182,12 @@ function useColumnResizing({
 
     const calculateColumnWidth = (mouseX: number): number => {
       const desiredPosition = mouseX - resizingColumn.mouseOffset;
-      return desiredPosition - resizingColumn.left;
+      const desiredWidth = desiredPosition - resizingColumn.left;
+      return clamp(
+        desiredWidth,
+        resizingColumn.minWidth,
+        resizingColumn.maxWidth
+      );
     };
 
     const handleDocMouseMove = (event: MouseEvent) => {
@@ -213,7 +224,7 @@ function useColumnResizing({
 
   return {
     handleResizerMouseDown,
-    resizingColumn,
+    isResizing: !!resizingColumn,
   };
 }
 
@@ -233,18 +244,15 @@ interface GridVirtualSlice {
   endColumn: number;
 }
 
-function calculateColumnSizing(
+function calculateColumnDimensions(
   visibleColumns: ColumnDefinitons
 ): ColumnDimensionsMap {
   const result: ColumnDimensionsMap = {};
   let left = 0;
   for (const column of visibleColumns) {
-    const width = clamp(
-      column.width ?? 100,
-      column.minWidth ?? 50,
-      column.maxWidth ?? Infinity
-    );
-    result[column.key] = { left, width };
+    const { minWidth = 50, maxWidth = Infinity } = column;
+    const width = clamp(column.width ?? 100, minWidth, maxWidth);
+    result[column.key] = { left, width, minWidth, maxWidth };
     left += width;
   }
   return result;
@@ -307,8 +315,8 @@ export default function DataGrid({
 
   const [virtualSlice, setVirtualSlice] = React.useState<GridVirtualSlice>();
 
-  const columnSizings: ColumnDimensionsMap = React.useMemo(() => {
-    return calculateColumnSizing(visibleColumns);
+  const columnDimensions: ColumnDimensionsMap = React.useMemo(() => {
+    return calculateColumnDimensions(visibleColumns);
   }, [visibleColumns]);
 
   const totalWidth = React.useMemo(() => {
@@ -316,9 +324,9 @@ export default function DataGrid({
       return 0;
     }
     const lastColumnKey = visibleColumns[visibleColumns.length - 1].key;
-    const lastColumn = columnSizings[lastColumnKey]!;
+    const lastColumn = columnDimensions[lastColumnKey]!;
     return lastColumn.left + lastColumn.width;
-  }, [visibleColumns, columnSizings]);
+  }, [visibleColumns, columnDimensions]);
 
   const totalHeight = rowHeight * data.length;
 
@@ -333,7 +341,7 @@ export default function DataGrid({
     (scrollLeft: number, scrollTop: number) => {
       if (!viewportRect) return;
       const getColumnStart = (columnIndex: number) =>
-        columnSizings[visibleColumns[columnIndex].key].left;
+        columnDimensions[visibleColumns[columnIndex].key].left;
       const { startRow, endRow, startColumn, endColumn } = getTableVirtualSlice(
         {
           rowCount,
@@ -360,7 +368,7 @@ export default function DataGrid({
         }
       });
     },
-    [viewportRect, rowHeight, rowCount, visibleColumns, columnSizings]
+    [viewportRect, rowHeight, rowCount, visibleColumns, columnDimensions]
   );
 
   React.useEffect(() => {
@@ -380,17 +388,17 @@ export default function DataGrid({
     [classes.tableCell]
   );
 
-  const { handleResizerMouseDown, resizingColumn } = useColumnResizing({
+  const { handleResizerMouseDown, isResizing } = useColumnResizing({
     columns,
     getColumnElements,
     onColumnsChange: setColumns,
-    columnSizings,
+    columnDimensions,
   });
 
   const getCellBoundingrect = React.useCallback(
     (row: number, columnKey: string): BoundingRect => {
       const top = row * rowHeight;
-      const { left, width } = columnSizings[columnKey]!;
+      const { left, width } = columnDimensions[columnKey]!;
       return {
         top,
         height: rowHeight,
@@ -398,7 +406,7 @@ export default function DataGrid({
         width,
       };
     },
-    [rowHeight, columnSizings]
+    [rowHeight, columnDimensions]
   );
 
   const {
@@ -510,7 +518,7 @@ export default function DataGrid({
     <div
       ref={rootRef}
       className={clsx(classes.root, {
-        [classes.resizing]: !!resizingColumn,
+        [classes.resizing]: isResizing,
       })}
     >
       <div className={classes.tableHeadRenderViewport}>
