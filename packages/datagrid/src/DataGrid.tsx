@@ -68,7 +68,9 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'row',
   },
-  pinnedStartColumns: {},
+  pinnedStartColumns: {
+    // boxShadow: theme.shadows[10]
+  },
   centerColumns: {
     flex: 1,
     overflow: 'hidden',
@@ -386,18 +388,18 @@ export default function DataGrid({
   const totalWidth = pinnedStartWidth + centerWidth + pinnedEndWidth;
 
   const tableHeadRenderPaneRef = React.useRef<HTMLDivElement>(null);
-  const { ref: tableBodyRef, rect: viewportRect } = useResizeObserver();
+  const { ref: tableBodyRef, rect: bodyRect } = useResizeObserver();
 
   const rowCount = data.length;
 
   const centerViewport = React.useMemo(() => {
-    return viewportRect
+    return bodyRect
       ? {
-          width: viewportRect.width - pinnedStartWidth - pinnedEndWidth,
-          height: viewportRect.height,
+          width: bodyRect.width - pinnedStartWidth - pinnedEndWidth,
+          height: bodyRect.height,
         }
       : undefined;
-  }, [viewportRect, pinnedStartWidth, pinnedEndWidth]);
+  }, [bodyRect, pinnedStartWidth, pinnedEndWidth]);
 
   const updateVirtualSlice = React.useCallback(
     (scrollLeft: number, scrollTop: number) => {
@@ -641,7 +643,7 @@ export default function DataGrid({
         <div className={classes.pinnedStartHeader}>{pinnedStartHeaderElms}</div>
         <div
           className={classes.centerHeader}
-          style={{ width: viewportRect?.width }}
+          style={{ width: bodyRect?.width }}
         >
           <div
             ref={tableHeadRenderPaneRef}
