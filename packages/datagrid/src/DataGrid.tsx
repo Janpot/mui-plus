@@ -60,13 +60,6 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'auto',
     position: 'relative',
   },
-  tableBodyScrollPane: {},
-  tableBodyRenderViewport: {
-    position: 'sticky',
-    top: 0,
-    left: 0,
-    overflow: 'hidden',
-  },
   tableBodyRenderPane: {},
 
   tableColumns: {
