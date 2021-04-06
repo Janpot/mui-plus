@@ -11,11 +11,11 @@ import * as React from 'react';
 import { makeStyles, createSvgIcon } from '@material-ui/core';
 import useResizeObserver from './useResizeObserver';
 // import useEventListener from './useEventListener';
-import useCombinedRefs from './useCombinedRefs';
 import clsx from 'clsx';
 import { useControlled } from './useControlled';
 import { clamp } from './math';
 import { getTableVirtualSlice } from './virtualization';
+import Scroller from './Scroller';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     display: 'flex',
   },
-  tableBodyScrollViewport: {
+  tableBody: {
     flex: 1,
     overflow: 'auto',
     position: 'relative',
@@ -92,6 +92,10 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
   },
   tableBodyRenderPane: {},
+  centerColumnsViewport: {
+    width: '100%',
+    height: '100%',
+  },
 
   tableRow: {
     borderBottom: `1px solid ${theme.palette.divider}`,
@@ -395,7 +399,7 @@ export default function DataGrid({
     };
   }, [columns]);
 
-  const totalWidth = React.useMemo(() => {
+  const centerColumnsWidth = React.useMemo(() => {
     if (centerColumns.length <= 0) {
       return 0;
     }
@@ -407,11 +411,9 @@ export default function DataGrid({
   const totalHeight = rowHeight * data.length;
 
   const tableHeadRenderPaneRef = React.useRef<HTMLDivElement>(null);
-  const { ref: bodyResizeRef, rect: viewportRect } = useResizeObserver();
+  const { ref: centerColumnsRef, rect: viewportRect } = useResizeObserver();
 
   const rowCount = data.length;
-
-  const bodyRef = React.useRef<HTMLDivElement>(null);
 
   const updateVirtualSlice = React.useCallback(
     (scrollLeft: number, scrollTop: number) => {
@@ -446,12 +448,6 @@ export default function DataGrid({
     },
     [viewportRect, rowHeight, rowCount, centerColumns, columnDimensions]
   );
-
-  React.useEffect(() => {
-    if (!bodyRef.current) return;
-    const { scrollLeft, scrollTop } = bodyRef.current;
-    updateVirtualSlice(scrollLeft, scrollTop);
-  }, [updateVirtualSlice]);
 
   const getColumnElements = React.useCallback(
     (columnKey: string) => {
@@ -617,28 +613,46 @@ export default function DataGrid({
   const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
   const tableBodyPinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
 
-  const handleScroll = React.useCallback(
+  const scrollPosition = React.useRef({ top: 0, left: 0 });
+  const updateScroll = React.useCallback(() => {
+    const { left: scrollLeft, top: scrollTop } = scrollPosition.current;
+    updateVirtualSlice(scrollLeft, scrollTop);
+    if (tableBodyRenderPaneRef.current) {
+      tableBodyRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
+    }
+    if (tableBodyPinnedStartRenderPaneRef.current) {
+      tableBodyPinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
+    }
+    if (tableHeadRenderPaneRef.current) {
+      tableHeadRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, 0px)`;
+    }
+  }, [updateVirtualSlice]);
+
+  const handleVerticalScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
-      const { scrollLeft, scrollTop } = event.currentTarget;
-      updateVirtualSlice(scrollLeft, scrollTop);
-      if (tableBodyRenderPaneRef.current) {
-        tableBodyRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
-      }
-      if (tableBodyPinnedStartRenderPaneRef.current) {
-        tableBodyPinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
-      }
-      if (tableHeadRenderPaneRef.current) {
-        tableHeadRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, 0px)`;
-      }
+      const { scrollTop } = event.currentTarget;
+      scrollPosition.current.top = scrollTop;
+      updateScroll();
     },
-    [updateVirtualSlice]
+    [updateScroll]
   );
+
+  const handleHorizontalScroll = React.useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      const { scrollLeft } = event.currentTarget;
+      scrollPosition.current.left = scrollLeft;
+      updateScroll();
+    },
+    [updateScroll]
+  );
+
+  React.useEffect(() => {
+    updateScroll();
+  }, [updateScroll]);
 
   // useEventListener(bodyRef, 'wheel', handleWheel, {
   //   passive: false,
   // });
-
-  const tableBodyScrollViewportRef = useCombinedRefs(bodyResizeRef, bodyRef);
 
   return (
     <div
@@ -665,31 +679,26 @@ export default function DataGrid({
             {headerElms}
           </div>
         </div>
-        <div
-          ref={tableBodyScrollViewportRef}
-          className={classes.tableBodyScrollViewport}
-          onScroll={handleScroll}
-        >
-          <div
-            className={classes.tableBodyScrollPane}
-            style={{ width: totalWidth, height: totalHeight }}
-          >
-            <div
-              className={classes.tableBodyRenderViewport}
-              style={{
-                width: viewportRect?.width,
-                height: viewportRect?.height,
-              }}
+        <div className={classes.tableBody}>
+          <Scroller onScroll={handleVerticalScroll} scrollHeight={totalHeight}>
+            <Scroller
+              onScroll={handleHorizontalScroll}
+              scrollWidth={centerColumnsWidth}
             >
               <div
-                ref={tableBodyRenderPaneRef}
-                className={classes.tableBodyRenderPane}
-                style={{ width: totalWidth, height: totalHeight }}
+                ref={centerColumnsRef}
+                className={classes.centerColumnsViewport}
               >
-                {bodyElms}
+                <div
+                  ref={tableBodyRenderPaneRef}
+                  className={classes.tableBodyRenderPane}
+                  style={{ width: centerColumnsWidth, height: totalHeight }}
+                >
+                  {bodyElms}
+                </div>
               </div>
-            </div>
-          </div>
+            </Scroller>
+          </Scroller>
         </div>
       </div>
     </div>

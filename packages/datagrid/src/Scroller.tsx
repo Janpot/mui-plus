@@ -1,8 +1,9 @@
+import * as React from 'react';
 import { makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
 import useResizeObserver from './useResizeObserver';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   root: {
     position: 'relative',
     overflow: 'auto',
@@ -19,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     left: 0,
     overflow: 'hidden',
   },
-}));
+});
 
 interface ScrollerProps {
   className?: string;
