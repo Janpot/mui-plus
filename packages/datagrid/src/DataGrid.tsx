@@ -43,6 +43,11 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
+  pinnedEndHeader: {
+    height: 56,
+    display: 'flex',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  },
   tableHeadRenderPane: {
     fontWeight: theme.typography.fontWeightBold,
     position: 'relative',
@@ -71,6 +76,7 @@ const useStyles = makeStyles((theme) => ({
   pinnedStartColumns: {
     // boxShadow: theme.shadows[10]
   },
+  pinnedEndColumns: {},
   centerColumns: {
     flex: 1,
     overflow: 'hidden',
@@ -473,11 +479,15 @@ export default function DataGrid({
     bodyElms,
     pinnedStartHeaderElms,
     pinnedStartElms,
+    pinnedEndHeaderElms,
+    pinnedEndElms,
   }: {
     headerElms: JSX.Element;
     bodyElms: JSX.Element[];
     pinnedStartHeaderElms: JSX.Element;
     pinnedStartElms: JSX.Element[];
+    pinnedEndHeaderElms: JSX.Element;
+    pinnedEndElms: JSX.Element[];
   } = React.useMemo(() => {
     if (!virtualSlice) {
       return {
@@ -485,6 +495,8 @@ export default function DataGrid({
         bodyElms: [],
         pinnedStartHeaderElms: <React.Fragment></React.Fragment>,
         pinnedStartElms: [],
+        pinnedEndHeaderElms: <React.Fragment></React.Fragment>,
+        pinnedEndElms: [],
       };
     }
 
@@ -501,6 +513,27 @@ export default function DataGrid({
     const pinnedStartHeaderElms = (
       <React.Fragment>
         {pinnedStartColumns.map((column) => {
+          const headerContent = column?.header ?? column.key;
+          const { width } = getCellBoundingrect(0, column.key);
+          return (
+            <TableCell key={column.key} width={width} columnKey={column.key}>
+              <div className={classes.cellContent}>{headerContent}</div>
+              <div
+                className={classes.resizer}
+                onMouseDown={handleResizerMouseDown}
+                data-column={column.key}
+              >
+                <SeparatorIcon />
+              </div>
+            </TableCell>
+          );
+        })}
+      </React.Fragment>
+    );
+
+    const pinnedEndHeaderElms = (
+      <React.Fragment>
+        {pinnedEndColumns.map((column) => {
           const headerContent = column?.header ?? column.key;
           const { width } = getCellBoundingrect(0, column.key);
           return (
@@ -544,6 +577,7 @@ export default function DataGrid({
     const topMargin = virtualSlice.startRow * rowHeight;
 
     const pinnedStartElms = [<TableRow key={-1} height={topMargin} />];
+    const pinnedEndElms = [<TableRow key={-1} height={topMargin} />];
     const bodyElms = [<TableRow key={-1} height={topMargin} />];
     for (
       let rowIdx = virtualSlice.startRow;
@@ -553,6 +587,21 @@ export default function DataGrid({
       pinnedStartElms.push(
         <TableRow key={rowIdx} height={rowHeight}>
           {pinnedStartColumns.map((column) => {
+            const value = column.getValue
+              ? column.getValue(data[rowIdx])
+              : data[rowIdx][column.key];
+            const { width } = getCellBoundingrect(rowIdx, column.key);
+            return (
+              <TableCell key={column.key} width={width} columnKey={column.key}>
+                <div className={classes.cellContent}>{String(value)}</div>
+              </TableCell>
+            );
+          })}
+        </TableRow>
+      );
+      pinnedEndElms.push(
+        <TableRow key={rowIdx} height={rowHeight}>
+          {pinnedEndColumns.map((column) => {
             const value = column.getValue
               ? column.getValue(data[rowIdx])
               : data[rowIdx][column.key];
@@ -583,7 +632,14 @@ export default function DataGrid({
       );
     }
 
-    return { headerElms, bodyElms, pinnedStartHeaderElms, pinnedStartElms };
+    return {
+      headerElms,
+      bodyElms,
+      pinnedStartHeaderElms,
+      pinnedStartElms,
+      pinnedEndElms,
+      pinnedEndHeaderElms,
+    };
   }, [
     virtualSlice,
     getCellBoundingrect,
@@ -594,10 +650,12 @@ export default function DataGrid({
     rowHeight,
     classes.cellContent,
     classes.resizer,
+    pinnedEndColumns,
   ]);
 
   const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
   const pinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
+  const pinnedEndRenderPaneRef = React.useRef<HTMLDivElement>(null);
 
   const scrollPosition = React.useRef({ top: 0, left: 0 });
   const updateScroll = React.useCallback(() => {
@@ -608,6 +666,9 @@ export default function DataGrid({
     }
     if (pinnedStartRenderPaneRef.current) {
       pinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
+    }
+    if (pinnedEndRenderPaneRef.current) {
+      pinnedEndRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
     }
     if (tableHeadRenderPaneRef.current) {
       tableHeadRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, 0px)`;
@@ -652,6 +713,7 @@ export default function DataGrid({
             {headerElms}
           </div>
         </div>
+        <div className={classes.pinnedEndHeader}>{pinnedEndHeaderElms}</div>
       </div>
       <div ref={tableBodyRef} className={classes.tableBody}>
         <Scroller
@@ -671,6 +733,9 @@ export default function DataGrid({
               >
                 {bodyElms}
               </div>
+            </div>
+            <div className={classes.pinnedEndColumns}>
+              <div ref={pinnedEndRenderPaneRef}>{pinnedEndElms}</div>
             </div>
           </div>
         </Scroller>

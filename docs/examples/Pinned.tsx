@@ -39,7 +39,7 @@ const columns = [
   { key: 'birthDate', width: 200 },
   { key: 'email', width: 200 },
   { key: 'userName', width: 200 },
-  { key: 'phone' },
+  { key: 'phone', pin: 'end', width: 90 },
 ];
 
 export default function Pinned() {
