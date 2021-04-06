@@ -510,9 +510,9 @@ export default function DataGrid({
       centerColumns[virtualSlice.startColumn].key
     ).left;
 
-    const pinnedStartHeaderElms = (
+    const renderHeader = (columns: ColumnDefinitions) => (
       <React.Fragment>
-        {pinnedStartColumns.map((column) => {
+        {columns.map((column) => {
           const headerContent = column?.header ?? column.key;
           const { width } = getCellBoundingrect(0, column.key);
           return (
@@ -531,106 +531,53 @@ export default function DataGrid({
       </React.Fragment>
     );
 
-    const pinnedEndHeaderElms = (
-      <React.Fragment>
-        {pinnedEndColumns.map((column) => {
-          const headerContent = column?.header ?? column.key;
-          const { width } = getCellBoundingrect(0, column.key);
-          return (
-            <TableCell key={column.key} width={width} columnKey={column.key}>
-              <div className={classes.cellContent}>{headerContent}</div>
-              <div
-                className={classes.resizer}
-                onMouseDown={handleResizerMouseDown}
-                data-column={column.key}
-              >
-                <SeparatorIcon />
-              </div>
-            </TableCell>
-          );
-        })}
-      </React.Fragment>
-    );
+    const pinnedStartHeaderElms = renderHeader(pinnedStartColumns);
+
+    const pinnedEndHeaderElms = renderHeader(pinnedEndColumns);
 
     const headerElms = (
       <React.Fragment>
         <TableCell width={leftMargin} />
-        {columnsSlice.map((column) => {
-          const headerContent = column?.header ?? column.key;
-          const { width } = getCellBoundingrect(0, column.key);
-          return (
-            <TableCell key={column.key} width={width} columnKey={column.key}>
-              <div className={classes.cellContent}>{headerContent}</div>
-              <div
-                className={classes.resizer}
-                onMouseDown={handleResizerMouseDown}
-                data-column={column.key}
-              >
-                <SeparatorIcon />
-              </div>
-            </TableCell>
-          );
-        })}
+        {renderHeader(columnsSlice)}
       </React.Fragment>
     );
 
     const topMargin = virtualSlice.startRow * rowHeight;
 
-    const pinnedStartElms = [<TableRow key={-1} height={topMargin} />];
-    const pinnedEndElms = [<TableRow key={-1} height={topMargin} />];
-    const bodyElms = [<TableRow key={-1} height={topMargin} />];
-    for (
-      let rowIdx = virtualSlice.startRow;
-      rowIdx <= virtualSlice.endRow;
-      rowIdx += 1
-    ) {
-      pinnedStartElms.push(
-        <TableRow key={rowIdx} height={rowHeight}>
-          {pinnedStartColumns.map((column) => {
-            const value = column.getValue
-              ? column.getValue(data[rowIdx])
-              : data[rowIdx][column.key];
-            const { width } = getCellBoundingrect(rowIdx, column.key);
-            return (
-              <TableCell key={column.key} width={width} columnKey={column.key}>
-                <div className={classes.cellContent}>{String(value)}</div>
-              </TableCell>
-            );
-          })}
-        </TableRow>
-      );
-      pinnedEndElms.push(
-        <TableRow key={rowIdx} height={rowHeight}>
-          {pinnedEndColumns.map((column) => {
-            const value = column.getValue
-              ? column.getValue(data[rowIdx])
-              : data[rowIdx][column.key];
-            const { width } = getCellBoundingrect(rowIdx, column.key);
-            return (
-              <TableCell key={column.key} width={width} columnKey={column.key}>
-                <div className={classes.cellContent}>{String(value)}</div>
-              </TableCell>
-            );
-          })}
-        </TableRow>
-      );
-      bodyElms.push(
-        <TableRow key={rowIdx} height={rowHeight}>
-          <TableCell width={leftMargin} />
-          {columnsSlice.map((column) => {
-            const value = column.getValue
-              ? column.getValue(data[rowIdx])
-              : data[rowIdx][column.key];
-            const { width } = getCellBoundingrect(rowIdx, column.key);
-            return (
-              <TableCell key={column.key} width={width} columnKey={column.key}>
-                <div className={classes.cellContent}>{String(value)}</div>
-              </TableCell>
-            );
-          })}
-        </TableRow>
-      );
-    }
+    const renderBody = (columns: ColumnDefinitions, leftMargin = 0) => {
+      const elms = [<TableRow key={-1} height={topMargin} />];
+      for (
+        let rowIdx = virtualSlice.startRow;
+        rowIdx <= virtualSlice.endRow;
+        rowIdx += 1
+      ) {
+        elms.push(
+          <TableRow key={rowIdx} height={rowHeight}>
+            {leftMargin > 0 ? <TableCell width={leftMargin} /> : null}
+            {columns.map((column) => {
+              const value = column.getValue
+                ? column.getValue(data[rowIdx])
+                : data[rowIdx][column.key];
+              const { width } = getCellBoundingrect(rowIdx, column.key);
+              return (
+                <TableCell
+                  key={column.key}
+                  width={width}
+                  columnKey={column.key}
+                >
+                  <div className={classes.cellContent}>{String(value)}</div>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        );
+      }
+      return elms;
+    };
+
+    const pinnedStartElms = renderBody(pinnedStartColumns);
+    const pinnedEndElms = renderBody(pinnedEndColumns);
+    const bodyElms = renderBody(columnsSlice, leftMargin);
 
     return {
       headerElms,
