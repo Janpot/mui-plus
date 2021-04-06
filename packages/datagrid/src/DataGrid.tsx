@@ -20,7 +20,7 @@ import { getTableVirtualSlice } from './virtualization';
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     height: '100%',
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.divider}`,
@@ -30,7 +30,45 @@ const useStyles = makeStyles((theme) => ({
   },
   resizing: {},
 
+  pinnedStartColumns: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  pinnedStartHeader: {
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    display: 'flex',
+    height: 56,
+  },
+  pinnedStartBody: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+
+  pinnedEndColumns: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  pinnedEndHeader: {
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    display: 'flex',
+    height: 56,
+  },
+  pinnedEndBody: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+
+  centerColumns: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    overflow: 'hidden',
+  },
+
   tableHeadRenderViewport: {
+    display: 'flex',
     overflow: 'hidden',
     borderBottom: `1px solid ${theme.palette.divider}`,
     height: 56,
@@ -40,7 +78,6 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     height: '100%',
     display: 'flex',
-    overflow: 'hidden',
   },
   tableBodyScrollViewport: {
     flex: 1,
@@ -102,6 +139,7 @@ interface ResizingColumn {
 
 export interface ColumnDefinition {
   key: string;
+  pin?: 'start' | 'end';
   header?: string;
   visible?: boolean;
   getValue?: (row: any) => any;
@@ -313,40 +351,58 @@ export default function DataGrid({
   const [virtualSlice, setVirtualSlice] = React.useState<GridVirtualSlice>();
 
   const {
-    visibleColumns,
+    centerColumns,
+    pinnedStartColumns,
+    pinnedEndColumns,
     columnDimensions,
     columnByKey,
   } = React.useMemo(() => {
-    const visibleColumns: ColumnDefinitions = [];
-    const columnDimensions: {
-      [key: string]: { width: number; offset: number };
-    } = {};
-    const columnByKey: { [key: string]: ColumnDefinition } = {};
-    let offset = 0;
+    const pinnedStartColumns: ColumnDefinitions = [];
+    const pinnedEndColumns: ColumnDefinitions = [];
+    const centerColumns: ColumnDefinitions = [];
+    const columnDimensions: ColumnDimensionsMap = {};
+    const columnByKey: ColumnDefinitionMap = {};
+    let pinnedStartOffset = 0;
+    let pinnedEndOffset = 0;
+    let centerOffset = 0;
     for (const column of columns) {
       if (column.visible !== false) {
-        visibleColumns.push(column);
         const width = calculateColumnWidth(column);
+        let offset;
+        if (column.pin === 'start') {
+          pinnedStartColumns.push(column);
+          offset = pinnedStartOffset;
+          pinnedStartOffset += width;
+        } else if (column.pin === 'end') {
+          pinnedEndColumns.push(column);
+          offset = pinnedEndOffset;
+          pinnedEndOffset += width;
+        } else {
+          centerColumns.push(column);
+          offset = centerOffset;
+          centerOffset += width;
+        }
         columnDimensions[column.key] = { width, offset };
-        offset += width;
       }
       columnByKey[column.key] = column;
     }
     return {
-      visibleColumns,
+      centerColumns,
+      pinnedStartColumns,
+      pinnedEndColumns,
       columnByKey,
       columnDimensions,
     };
   }, [columns]);
 
   const totalWidth = React.useMemo(() => {
-    if (visibleColumns.length <= 0) {
+    if (centerColumns.length <= 0) {
       return 0;
     }
-    const lastColumnKey = visibleColumns[visibleColumns.length - 1].key;
+    const lastColumnKey = centerColumns[centerColumns.length - 1].key;
     const lastColumn = columnDimensions[lastColumnKey]!;
     return lastColumn.offset + lastColumn.width;
-  }, [visibleColumns, columnDimensions]);
+  }, [centerColumns, columnDimensions]);
 
   const totalHeight = rowHeight * data.length;
 
@@ -361,12 +417,12 @@ export default function DataGrid({
     (scrollLeft: number, scrollTop: number) => {
       if (!viewportRect) return;
       const getColumnStart = (columnIndex: number) =>
-        columnDimensions[visibleColumns[columnIndex].key].offset;
+        columnDimensions[centerColumns[columnIndex].key].offset;
       const { startRow, endRow, startColumn, endColumn } = getTableVirtualSlice(
         {
           rowCount,
           rowHeight,
-          columnCount: visibleColumns.length,
+          columnCount: centerColumns.length,
           getColumnStart,
           viewportWidth: viewportRect.width,
           viewportheight: viewportRect.height,
@@ -388,7 +444,7 @@ export default function DataGrid({
         }
       });
     },
-    [viewportRect, rowHeight, rowCount, visibleColumns, columnDimensions]
+    [viewportRect, rowHeight, rowCount, centerColumns, columnDimensions]
   );
 
   React.useEffect(() => {
@@ -433,26 +489,53 @@ export default function DataGrid({
   const {
     headerElms,
     bodyElms,
+    pinnedStartHeaderElms,
+    pinnedStartElms,
   }: {
     headerElms: JSX.Element;
     bodyElms: JSX.Element[];
+    pinnedStartHeaderElms: JSX.Element;
+    pinnedStartElms: JSX.Element[];
   } = React.useMemo(() => {
     if (!virtualSlice) {
       return {
         headerElms: <React.Fragment></React.Fragment>,
         bodyElms: [],
+        pinnedStartHeaderElms: <React.Fragment></React.Fragment>,
+        pinnedStartElms: [],
       };
     }
 
-    const columnsSlice = visibleColumns.slice(
+    const columnsSlice = centerColumns.slice(
       virtualSlice.startColumn,
       virtualSlice.endColumn + 1
     );
 
     const leftMargin = getCellBoundingrect(
       0,
-      visibleColumns[virtualSlice.startColumn].key
+      centerColumns[virtualSlice.startColumn].key
     ).left;
+
+    const pinnedStartHeaderElms = (
+      <React.Fragment>
+        {pinnedStartColumns.map((column) => {
+          const headerContent = column?.header ?? column.key;
+          const { width } = getCellBoundingrect(0, column.key);
+          return (
+            <TableCell key={column.key} width={width} columnKey={column.key}>
+              <div className={classes.cellContent}>{headerContent}</div>
+              <div
+                className={classes.resizer}
+                onMouseDown={handleResizerMouseDown}
+                data-column={column.key}
+              >
+                <SeparatorIcon />
+              </div>
+            </TableCell>
+          );
+        })}
+      </React.Fragment>
+    );
 
     const headerElms = (
       <React.Fragment>
@@ -476,14 +559,30 @@ export default function DataGrid({
       </React.Fragment>
     );
 
-    const bodyElms = [
-      <TableRow key={-1} height={virtualSlice.startRow * rowHeight} />,
-    ];
+    const topMargin = virtualSlice.startRow * rowHeight;
+
+    const pinnedStartElms = [<TableRow key={-1} height={topMargin} />];
+    const bodyElms = [<TableRow key={-1} height={topMargin} />];
     for (
       let rowIdx = virtualSlice.startRow;
       rowIdx <= virtualSlice.endRow;
       rowIdx += 1
     ) {
+      pinnedStartElms.push(
+        <TableRow key={rowIdx} height={rowHeight}>
+          {pinnedStartColumns.map((column) => {
+            const value = column.getValue
+              ? column.getValue(data[rowIdx])
+              : data[rowIdx][column.key];
+            const { width } = getCellBoundingrect(rowIdx, column.key);
+            return (
+              <TableCell key={column.key} width={width} columnKey={column.key}>
+                <div className={classes.cellContent}>{String(value)}</div>
+              </TableCell>
+            );
+          })}
+        </TableRow>
+      );
       bodyElms.push(
         <TableRow key={rowIdx} height={rowHeight}>
           <TableCell width={leftMargin} />
@@ -501,11 +600,13 @@ export default function DataGrid({
         </TableRow>
       );
     }
-    return { headerElms, bodyElms };
+
+    return { headerElms, bodyElms, pinnedStartHeaderElms, pinnedStartElms };
   }, [
     virtualSlice,
     getCellBoundingrect,
-    visibleColumns,
+    centerColumns,
+    pinnedStartColumns,
     data,
     handleResizerMouseDown,
     rowHeight,
@@ -514,6 +615,7 @@ export default function DataGrid({
   ]);
 
   const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
+  const tableBodyPinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
 
   const handleScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
@@ -521,6 +623,9 @@ export default function DataGrid({
       updateVirtualSlice(scrollLeft, scrollTop);
       if (tableBodyRenderPaneRef.current) {
         tableBodyRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
+      }
+      if (tableBodyPinnedStartRenderPaneRef.current) {
+        tableBodyPinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
       }
       if (tableHeadRenderPaneRef.current) {
         tableHeadRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, 0px)`;
@@ -542,34 +647,47 @@ export default function DataGrid({
         [classes.resizing]: isResizing,
       })}
     >
-      <div className={classes.tableHeadRenderViewport}>
-        <div
-          ref={tableHeadRenderPaneRef}
-          className={classes.tableHeadRenderPane}
-          style={{ width: totalWidth }}
-        >
-          {headerElms}
+      <div className={classes.pinnedStartColumns}>
+        <div className={classes.pinnedStartHeader}>{pinnedStartHeaderElms}</div>
+        <div className={classes.pinnedStartBody}>
+          <div ref={tableBodyPinnedStartRenderPaneRef}>{pinnedStartElms}</div>
         </div>
       </div>
-      <div
-        ref={tableBodyScrollViewportRef}
-        className={classes.tableBodyScrollViewport}
-        onScroll={handleScroll}
-      >
+      <div className={classes.centerColumns}>
         <div
-          className={classes.tableBodyScrollPane}
-          style={{ width: totalWidth, height: totalHeight }}
+          className={classes.tableHeadRenderViewport}
+          style={{ width: viewportRect?.width }}
         >
           <div
-            className={classes.tableBodyRenderViewport}
-            style={{ width: viewportRect?.width, height: viewportRect?.height }}
+            ref={tableHeadRenderPaneRef}
+            className={classes.tableHeadRenderPane}
+          >
+            {headerElms}
+          </div>
+        </div>
+        <div
+          ref={tableBodyScrollViewportRef}
+          className={classes.tableBodyScrollViewport}
+          onScroll={handleScroll}
+        >
+          <div
+            className={classes.tableBodyScrollPane}
+            style={{ width: totalWidth, height: totalHeight }}
           >
             <div
-              ref={tableBodyRenderPaneRef}
-              className={classes.tableBodyRenderPane}
-              style={{ width: totalWidth, height: totalHeight }}
+              className={classes.tableBodyRenderViewport}
+              style={{
+                width: viewportRect?.width,
+                height: viewportRect?.height,
+              }}
             >
-              {bodyElms}
+              <div
+                ref={tableBodyRenderPaneRef}
+                className={classes.tableBodyRenderPane}
+                style={{ width: totalWidth, height: totalHeight }}
+              >
+                {bodyElms}
+              </div>
             </div>
           </div>
         </div>
