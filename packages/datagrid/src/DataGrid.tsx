@@ -347,31 +347,34 @@ export default function DataGrid({
     pinnedEndColumns,
     columnDimensions,
     columnByKey,
+    pinnedStartWidth,
+    pinnedEndWidth,
+    centerWidth,
   } = React.useMemo(() => {
     const pinnedStartColumns: ColumnDefinitions = [];
     const pinnedEndColumns: ColumnDefinitions = [];
     const centerColumns: ColumnDefinitions = [];
     const columnDimensions: ColumnDimensionsMap = {};
     const columnByKey: ColumnDefinitionMap = {};
-    let pinnedStartOffset = 0;
-    let pinnedEndOffset = 0;
-    let centerOffset = 0;
+    let pinnedStartWidth = 0;
+    let pinnedEndWidth = 0;
+    let centerWidth = 0;
     for (const column of columns) {
       if (column.visible !== false) {
         const width = calculateColumnWidth(column);
         let offset;
         if (column.pin === 'start') {
           pinnedStartColumns.push(column);
-          offset = pinnedStartOffset;
-          pinnedStartOffset += width;
+          offset = pinnedStartWidth;
+          pinnedStartWidth += width;
         } else if (column.pin === 'end') {
           pinnedEndColumns.push(column);
-          offset = pinnedEndOffset;
-          pinnedEndOffset += width;
+          offset = pinnedEndWidth;
+          pinnedEndWidth += width;
         } else {
           centerColumns.push(column);
-          offset = centerOffset;
-          centerOffset += width;
+          offset = centerWidth;
+          centerWidth += width;
         }
         columnDimensions[column.key] = { width, offset };
       }
@@ -383,17 +386,11 @@ export default function DataGrid({
       pinnedEndColumns,
       columnByKey,
       columnDimensions,
+      pinnedStartWidth,
+      pinnedEndWidth,
+      centerWidth,
     };
   }, [columns]);
-
-  const centerColumnsWidth = React.useMemo(() => {
-    if (centerColumns.length <= 0) {
-      return 0;
-    }
-    const lastColumnKey = centerColumns[centerColumns.length - 1].key;
-    const lastColumn = columnDimensions[lastColumnKey]!;
-    return lastColumn.offset + lastColumn.width;
-  }, [centerColumns, columnDimensions]);
 
   const totalHeight = rowHeight * data.length;
 
@@ -671,7 +668,7 @@ export default function DataGrid({
             <Scroller
               className={classes.centerColumns}
               onScroll={handleHorizontalScroll}
-              scrollWidth={centerColumnsWidth}
+              scrollWidth={centerWidth}
             >
               <div
                 ref={centerColumnsRef}
@@ -680,7 +677,7 @@ export default function DataGrid({
                 <div
                   ref={tableBodyRenderPaneRef}
                   className={classes.tableBodyRenderPane}
-                  style={{ width: centerColumnsWidth, height: totalHeight }}
+                  style={{ width: centerWidth, height: totalHeight }}
                 >
                   {bodyElms}
                 </div>
