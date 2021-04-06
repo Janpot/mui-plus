@@ -20,7 +20,8 @@ import Scroller from './Scroller';
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column',
+    overflow: 'hidden',
     height: '100%',
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.divider}`,
@@ -30,54 +31,29 @@ const useStyles = makeStyles((theme) => ({
   },
   resizing: {},
 
-  pinnedStartColumns: {
+  centerHeader: {
+    flex: 1,
     display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
+    overflow: 'hidden',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    height: 56,
   },
   pinnedStartHeader: {
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    display: 'flex',
     height: 56,
-  },
-  pinnedStartBody: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-
-  pinnedEndColumns: {
     display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-  pinnedEndHeader: {
     borderBottom: `1px solid ${theme.palette.divider}`,
-    display: 'flex',
-    height: 56,
-  },
-  pinnedEndBody: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-
-  centerColumns: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflow: 'hidden',
-  },
-
-  tableHeadRenderViewport: {
-    display: 'flex',
-    overflow: 'hidden',
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    height: 56,
   },
   tableHeadRenderPane: {
     fontWeight: theme.typography.fontWeightBold,
     position: 'relative',
     height: '100%',
     display: 'flex',
+  },
+  tableHead: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    overflow: 'hidden',
   },
   tableBody: {
     flex: 1,
@@ -92,6 +68,17 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
   },
   tableBodyRenderPane: {},
+
+  tableColumns: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  pinnedStartColumns: {},
+  centerColumns: {
+    flex: 1,
+  },
   centerColumnsViewport: {
     width: '100%',
     height: '100%',
@@ -611,7 +598,7 @@ export default function DataGrid({
   ]);
 
   const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
-  const tableBodyPinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
+  const pinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
 
   const scrollPosition = React.useRef({ top: 0, left: 0 });
   const updateScroll = React.useCallback(() => {
@@ -620,8 +607,8 @@ export default function DataGrid({
     if (tableBodyRenderPaneRef.current) {
       tableBodyRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
     }
-    if (tableBodyPinnedStartRenderPaneRef.current) {
-      tableBodyPinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
+    if (pinnedStartRenderPaneRef.current) {
+      pinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
     }
     if (tableHeadRenderPaneRef.current) {
       tableHeadRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, 0px)`;
@@ -661,15 +648,10 @@ export default function DataGrid({
         [classes.resizing]: isResizing,
       })}
     >
-      <div className={classes.pinnedStartColumns}>
+      <div className={classes.tableHead}>
         <div className={classes.pinnedStartHeader}>{pinnedStartHeaderElms}</div>
-        <div className={classes.pinnedStartBody}>
-          <div ref={tableBodyPinnedStartRenderPaneRef}>{pinnedStartElms}</div>
-        </div>
-      </div>
-      <div className={classes.centerColumns}>
         <div
-          className={classes.tableHeadRenderViewport}
+          className={classes.centerHeader}
           style={{ width: viewportRect?.width }}
         >
           <div
@@ -679,9 +661,15 @@ export default function DataGrid({
             {headerElms}
           </div>
         </div>
-        <div className={classes.tableBody}>
-          <Scroller onScroll={handleVerticalScroll} scrollHeight={totalHeight}>
+      </div>
+      <div className={classes.tableBody}>
+        <Scroller onScroll={handleVerticalScroll} scrollHeight={totalHeight}>
+          <div className={classes.tableColumns}>
+            <div className={classes.pinnedStartColumns}>
+              <div ref={pinnedStartRenderPaneRef}>{pinnedStartElms}</div>
+            </div>
             <Scroller
+              className={classes.centerColumns}
               onScroll={handleHorizontalScroll}
               scrollWidth={centerColumnsWidth}
             >
@@ -698,8 +686,8 @@ export default function DataGrid({
                 </div>
               </div>
             </Scroller>
-          </Scroller>
-        </div>
+          </div>
+        </Scroller>
       </div>
     </div>
   );
