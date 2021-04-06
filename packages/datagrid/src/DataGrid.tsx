@@ -78,10 +78,7 @@ const useStyles = makeStyles((theme) => ({
   pinnedStartColumns: {},
   centerColumns: {
     flex: 1,
-  },
-  centerColumnsViewport: {
-    width: '100%',
-    height: '100%',
+    overflow: 'hidden',
   },
 
   tableRow: {
@@ -393,15 +390,25 @@ export default function DataGrid({
   }, [columns]);
 
   const totalHeight = rowHeight * data.length;
+  const totalWidth = pinnedStartWidth + centerWidth + pinnedEndWidth;
 
   const tableHeadRenderPaneRef = React.useRef<HTMLDivElement>(null);
-  const { ref: centerColumnsRef, rect: viewportRect } = useResizeObserver();
+  const { ref: tableBodyRef, rect: viewportRect } = useResizeObserver();
 
   const rowCount = data.length;
 
+  const centerViewport = React.useMemo(() => {
+    return viewportRect
+      ? {
+          width: viewportRect.width - pinnedStartWidth - pinnedEndWidth,
+          height: viewportRect.height,
+        }
+      : undefined;
+  }, [viewportRect, pinnedStartWidth, pinnedEndWidth]);
+
   const updateVirtualSlice = React.useCallback(
     (scrollLeft: number, scrollTop: number) => {
-      if (!viewportRect) return;
+      if (!centerViewport) return;
       const getColumnStart = (columnIndex: number) =>
         columnDimensions[centerColumns[columnIndex].key].offset;
       const { startRow, endRow, startColumn, endColumn } = getTableVirtualSlice(
@@ -410,8 +417,8 @@ export default function DataGrid({
           rowHeight,
           columnCount: centerColumns.length,
           getColumnStart,
-          viewportWidth: viewportRect.width,
-          viewportheight: viewportRect.height,
+          viewportWidth: centerViewport.width,
+          viewportheight: centerViewport.height,
           horizontalScroll: scrollLeft,
           verticalScroll: scrollTop,
           overscan: 3,
@@ -430,7 +437,7 @@ export default function DataGrid({
         }
       });
     },
-    [viewportRect, rowHeight, rowCount, centerColumns, columnDimensions]
+    [centerViewport, rowHeight, rowCount, centerColumns, columnDimensions]
   );
 
   const getColumnElements = React.useCallback(
@@ -614,16 +621,8 @@ export default function DataGrid({
 
   const handleVerticalScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
-      const { scrollTop } = event.currentTarget;
+      const { scrollTop, scrollLeft } = event.currentTarget;
       scrollPosition.current.top = scrollTop;
-      updateScroll();
-    },
-    [updateScroll]
-  );
-
-  const handleHorizontalScroll = React.useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
-      const { scrollLeft } = event.currentTarget;
       scrollPosition.current.left = scrollLeft;
       updateScroll();
     },
@@ -659,30 +658,25 @@ export default function DataGrid({
           </div>
         </div>
       </div>
-      <div className={classes.tableBody}>
-        <Scroller onScroll={handleVerticalScroll} scrollHeight={totalHeight}>
+      <div ref={tableBodyRef} className={classes.tableBody}>
+        <Scroller
+          onScroll={handleVerticalScroll}
+          scrollHeight={totalHeight}
+          scrollWidth={totalWidth}
+        >
           <div className={classes.tableColumns}>
             <div className={classes.pinnedStartColumns}>
               <div ref={pinnedStartRenderPaneRef}>{pinnedStartElms}</div>
             </div>
-            <Scroller
-              className={classes.centerColumns}
-              onScroll={handleHorizontalScroll}
-              scrollWidth={centerWidth}
-            >
+            <div className={classes.centerColumns}>
               <div
-                ref={centerColumnsRef}
-                className={classes.centerColumnsViewport}
+                ref={tableBodyRenderPaneRef}
+                className={classes.tableBodyRenderPane}
+                style={{ width: centerWidth, height: totalHeight }}
               >
-                <div
-                  ref={tableBodyRenderPaneRef}
-                  className={classes.tableBodyRenderPane}
-                  style={{ width: centerWidth, height: totalHeight }}
-                >
-                  {bodyElms}
-                </div>
+                {bodyElms}
               </div>
-            </Scroller>
+            </div>
           </div>
         </Scroller>
       </div>
