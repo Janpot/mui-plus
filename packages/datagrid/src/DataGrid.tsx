@@ -35,18 +35,12 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     display: 'flex',
     overflow: 'hidden',
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    height: 56,
   },
   pinnedStartHeader: {
-    height: 56,
     display: 'flex',
-    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   pinnedEndHeader: {
-    height: 56,
     display: 'flex',
-    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   tableHeadRenderPane: {
     fontWeight: theme.typography.fontWeightBold,
@@ -59,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     width: '100%',
     overflow: 'hidden',
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   tableBody: {
     flex: 1,
@@ -88,7 +83,11 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     display: 'flex',
     overflow: 'hidden',
+    '&$reverse': {
+      flexDirection: 'row-reverse',
+    },
   },
+  reverse: {},
   tableCell: {
     position: 'relative',
     display: 'flex',
@@ -117,11 +116,17 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       color: theme.palette.action.active,
     },
+    '$tableRow$reverse &': {
+      right: 'unset',
+      left: 0,
+      transform: 'translateX(-50%)',
+    },
   },
 }));
 
 interface ResizingColumn {
   key: string;
+  reverse: boolean;
   mouseOffset: number;
   offset: number;
 }
@@ -187,6 +192,7 @@ function useColumnResizing({
   const handleResizerMouseDown = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       const columnKey = event.currentTarget.dataset.column!;
+      const reverse = !!event.currentTarget.dataset.reverse;
       const dimensions = columnDimensions[columnKey];
       if (!dimensions) {
         return;
@@ -196,6 +202,7 @@ function useColumnResizing({
       setResingColumn({
         key: columnKey,
         mouseOffset: event.clientX - right,
+        reverse,
         offset,
       });
     },
@@ -278,16 +285,25 @@ interface GridVirtualSlice {
 
 interface TableRowProps {
   height: number;
+  reverse?: boolean;
   children?: React.ReactNode;
 }
 
-function TableRow({ height, children }: TableRowProps) {
+function TableRow({ height, children, reverse }: TableRowProps) {
   const classes = useStyles();
   return (
-    <div className={classes.tableRow} style={{ height }}>
+    <div
+      className={clsx(classes.tableRow, { [classes.reverse]: reverse })}
+      style={{ height }}
+    >
       {children}
     </div>
   );
+}
+
+interface RenderColumnsOptions {
+  reverse?: boolean;
+  leftMargin?: number;
 }
 
 interface TableCellProps {
@@ -475,24 +491,24 @@ export default function DataGrid({
   );
 
   const {
-    headerElms,
-    bodyElms,
+    centerHeaderElms,
+    centerElms,
     pinnedStartHeaderElms,
     pinnedStartElms,
     pinnedEndHeaderElms,
     pinnedEndElms,
   }: {
-    headerElms: JSX.Element;
-    bodyElms: JSX.Element[];
-    pinnedStartHeaderElms: JSX.Element;
-    pinnedStartElms: JSX.Element[];
-    pinnedEndHeaderElms: JSX.Element;
-    pinnedEndElms: JSX.Element[];
+    centerHeaderElms: React.ReactNode;
+    centerElms: React.ReactNode;
+    pinnedStartHeaderElms: React.ReactNode;
+    pinnedStartElms: React.ReactNode;
+    pinnedEndHeaderElms: React.ReactNode;
+    pinnedEndElms: React.ReactNode;
   } = React.useMemo(() => {
     if (!virtualSlice) {
       return {
-        headerElms: <React.Fragment></React.Fragment>,
-        bodyElms: [],
+        centerHeaderElms: <React.Fragment></React.Fragment>,
+        centerElms: [],
         pinnedStartHeaderElms: <React.Fragment></React.Fragment>,
         pinnedStartElms: [],
         pinnedEndHeaderElms: <React.Fragment></React.Fragment>,
@@ -510,8 +526,12 @@ export default function DataGrid({
       centerColumns[virtualSlice.startColumn].key
     ).left;
 
-    const renderHeader = (columns: ColumnDefinitions) => (
-      <React.Fragment>
+    const renderHeader = (
+      columns: ColumnDefinitions,
+      { leftMargin = 0, reverse = false }: RenderColumnsOptions = {}
+    ) => (
+      <TableRow height={56} reverse={reverse}>
+        {leftMargin > 0 ? <TableCell width={leftMargin} /> : null}
         {columns.map((column) => {
           const headerContent = column?.header ?? column.key;
           const { width } = getCellBoundingrect(0, column.key);
@@ -522,29 +542,28 @@ export default function DataGrid({
                 className={classes.resizer}
                 onMouseDown={handleResizerMouseDown}
                 data-column={column.key}
+                data-reverse={reverse ? true : undefined}
               >
                 <SeparatorIcon />
               </div>
             </TableCell>
           );
         })}
-      </React.Fragment>
+      </TableRow>
     );
 
     const pinnedStartHeaderElms = renderHeader(pinnedStartColumns);
-
-    const pinnedEndHeaderElms = renderHeader(pinnedEndColumns);
-
-    const headerElms = (
-      <React.Fragment>
-        <TableCell width={leftMargin} />
-        {renderHeader(columnsSlice)}
-      </React.Fragment>
-    );
+    const centerHeaderElms = renderHeader(columnsSlice, { leftMargin });
+    const pinnedEndHeaderElms = renderHeader(pinnedEndColumns, {
+      reverse: true,
+    });
 
     const topMargin = virtualSlice.startRow * rowHeight;
 
-    const renderBody = (columns: ColumnDefinitions, leftMargin = 0) => {
+    const renderBody = (
+      columns: ColumnDefinitions,
+      { leftMargin = 0, reverse = false }: RenderColumnsOptions = {}
+    ) => {
       const elms = [<TableRow key={-1} height={topMargin} />];
       for (
         let rowIdx = virtualSlice.startRow;
@@ -552,7 +571,7 @@ export default function DataGrid({
         rowIdx += 1
       ) {
         elms.push(
-          <TableRow key={rowIdx} height={rowHeight}>
+          <TableRow key={rowIdx} height={rowHeight} reverse={reverse}>
             {leftMargin > 0 ? <TableCell width={leftMargin} /> : null}
             {columns.map((column) => {
               const value = column.getValue
@@ -576,12 +595,12 @@ export default function DataGrid({
     };
 
     const pinnedStartElms = renderBody(pinnedStartColumns);
-    const pinnedEndElms = renderBody(pinnedEndColumns);
-    const bodyElms = renderBody(columnsSlice, leftMargin);
+    const centerElms = renderBody(columnsSlice, { leftMargin });
+    const pinnedEndElms = renderBody(pinnedEndColumns, { reverse: true });
 
     return {
-      headerElms,
-      bodyElms,
+      centerHeaderElms,
+      centerElms,
       pinnedStartHeaderElms,
       pinnedStartElms,
       pinnedEndElms,
@@ -657,7 +676,7 @@ export default function DataGrid({
             ref={tableHeadRenderPaneRef}
             className={classes.tableHeadRenderPane}
           >
-            {headerElms}
+            {centerHeaderElms}
           </div>
         </div>
         <div className={classes.pinnedEndHeader}>{pinnedEndHeaderElms}</div>
@@ -678,7 +697,7 @@ export default function DataGrid({
                 className={classes.tableBodyRenderPane}
                 style={{ width: centerWidth, height: totalHeight }}
               >
-                {bodyElms}
+                {centerElms}
               </div>
             </div>
             <div className={classes.pinnedEndColumns}>
