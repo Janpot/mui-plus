@@ -651,8 +651,6 @@ export default function DataGrid({
   //   passive: false,
   // });
 
-  console.log(centerViewport?.width);
-
   return (
     <div
       ref={rootRef}
