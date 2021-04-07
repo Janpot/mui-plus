@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     position: 'relative',
     display: 'flex',
-    overflow: 'hidden',
+    overflow: 'visible',
     '&$reverse': {
       flexDirection: 'row-reverse',
     },
@@ -126,9 +126,9 @@ const useStyles = makeStyles((theme) => ({
 
 interface ResizingColumn {
   key: string;
+  mouseStartX: number;
   reverse: boolean;
-  mouseOffset: number;
-  offset: number;
+  width: number;
 }
 
 export interface ColumnDefinition {
@@ -201,9 +201,9 @@ function useColumnResizing({
       const right = offset + width;
       setResingColumn({
         key: columnKey,
-        mouseOffset: event.clientX - right,
+        mouseStartX: event.clientX,
         reverse,
-        offset,
+        width,
       });
     },
     [columnDimensions]
@@ -215,8 +215,9 @@ function useColumnResizing({
     }
 
     const calculateResizedColumnWidth = (mouseX: number): number => {
-      const desiredPosition = mouseX - resizingColumn.mouseOffset;
-      const desiredWidth = desiredPosition - resizingColumn.offset;
+      const widthOffset = mouseX - resizingColumn.mouseStartX;
+      const desiredWidth =
+        resizingColumn.width + (resizingColumn.reverse ? -1 : 1) * widthOffset;
       return calculateColumnWidth(
         columnByKey[resizingColumn.key],
         desiredWidth
