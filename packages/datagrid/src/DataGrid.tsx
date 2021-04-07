@@ -197,13 +197,11 @@ function useColumnResizing({
       if (!dimensions) {
         return;
       }
-      const { offset, width } = dimensions;
-      const right = offset + width;
       setResingColumn({
         key: columnKey,
         mouseStartX: event.clientX,
         reverse,
-        width,
+        width: dimensions.width,
       });
     },
     [columnDimensions]
@@ -415,14 +413,7 @@ export default function DataGrid({
 
   const rowCount = data.length;
 
-  const centerViewport = React.useMemo(() => {
-    return bodyRect
-      ? {
-          width: bodyRect.width - pinnedStartWidth - pinnedEndWidth,
-          height: bodyRect.height,
-        }
-      : undefined;
-  }, [bodyRect, pinnedStartWidth, pinnedEndWidth]);
+  const { ref: centerColumnsRef, rect: centerViewport } = useResizeObserver();
 
   const updateVirtualSlice = React.useCallback(
     (scrollLeft: number, scrollTop: number) => {
@@ -660,6 +651,8 @@ export default function DataGrid({
   //   passive: false,
   // });
 
+  console.log(centerViewport?.width);
+
   return (
     <div
       ref={rootRef}
@@ -692,7 +685,7 @@ export default function DataGrid({
             <div className={classes.pinnedStartColumns}>
               <div ref={pinnedStartRenderPaneRef}>{pinnedStartElms}</div>
             </div>
-            <div className={classes.centerColumns}>
+            <div ref={centerColumnsRef} className={classes.centerColumns}>
               <div
                 ref={tableBodyRenderPaneRef}
                 className={classes.tableBodyRenderPane}
