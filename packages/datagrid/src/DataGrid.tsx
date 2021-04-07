@@ -513,10 +513,9 @@ export default function DataGrid({
       virtualSlice.endColumn + 1
     );
 
-    const leftMargin = getCellBoundingrect(
-      0,
-      centerColumns[virtualSlice.startColumn].key
-    ).left;
+    const leftMargin =
+      pinnedStartWidth +
+      getCellBoundingrect(0, centerColumns[virtualSlice.startColumn].key).left;
 
     const renderHeader = (
       columns: ColumnDefinitions,
@@ -603,6 +602,7 @@ export default function DataGrid({
     getCellBoundingrect,
     centerColumns,
     pinnedStartColumns,
+    pinnedStartWidth,
     data,
     handleResizerMouseDown,
     rowHeight,
@@ -620,7 +620,9 @@ export default function DataGrid({
     const { left: scrollLeft, top: scrollTop } = scrollPosition.current;
     updateVirtualSlice(scrollLeft, scrollTop);
     if (tableBodyRenderPaneRef.current) {
-      tableBodyRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
+      tableBodyRenderPaneRef.current.style.transform = `translate(${
+        -scrollLeft - pinnedStartWidth
+      }px, ${-scrollTop}px)`;
     }
     if (pinnedStartRenderPaneRef.current) {
       pinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
@@ -629,9 +631,11 @@ export default function DataGrid({
       pinnedEndRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
     }
     if (tableHeadRenderPaneRef.current) {
-      tableHeadRenderPaneRef.current.style.transform = `translate(${-scrollLeft}px, 0px)`;
+      tableHeadRenderPaneRef.current.style.transform = `translate(${
+        -scrollLeft - pinnedStartWidth
+      }px, 0px)`;
     }
-  }, [updateVirtualSlice]);
+  }, [updateVirtualSlice, pinnedStartWidth]);
 
   const handleVerticalScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
@@ -687,7 +691,7 @@ export default function DataGrid({
               <div
                 ref={tableBodyRenderPaneRef}
                 className={classes.tableBodyRenderPane}
-                style={{ width: centerWidth, height: totalHeight }}
+                style={{ width: totalWidth, height: totalHeight }}
               >
                 {centerElms}
               </div>
