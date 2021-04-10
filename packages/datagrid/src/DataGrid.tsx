@@ -672,6 +672,9 @@ export default function DataGrid({
   //   passive: false,
   // });
 
+  const hasPinnedStart = pinnedStartColumns.length > 0;
+  const hasPinnedEnd = pinnedEndColumns.length > 0;
+
   return (
     <div
       ref={rootRef}
@@ -680,7 +683,11 @@ export default function DataGrid({
       })}
     >
       <div className={classes.tableHead}>
-        <div className={classes.pinnedStartHeader}>{pinnedStartHeaderElms}</div>
+        {hasPinnedStart && (
+          <div className={classes.pinnedStartHeader}>
+            {pinnedStartHeaderElms}
+          </div>
+        )}
         <div
           className={classes.centerHeader}
           style={{ width: bodyRect?.width }}
@@ -693,7 +700,9 @@ export default function DataGrid({
             {centerHeaderElms}
           </div>
         </div>
-        <div className={classes.pinnedEndHeader}>{pinnedEndHeaderElms}</div>
+        {hasPinnedEnd && (
+          <div className={classes.pinnedEndHeader}>{pinnedEndHeaderElms}</div>
+        )}
       </div>
       <div ref={tableBodyRef} className={classes.tableBody}>
         <Scroller
@@ -702,9 +711,11 @@ export default function DataGrid({
           scrollWidth={totalWidth}
         >
           <div className={classes.tableColumns}>
-            <div className={classes.pinnedStartColumns}>
-              <div ref={pinnedStartRenderPaneRef}>{pinnedStartElms}</div>
-            </div>
+            {hasPinnedStart && (
+              <div className={classes.pinnedStartColumns}>
+                <div ref={pinnedStartRenderPaneRef}>{pinnedStartElms}</div>
+              </div>
+            )}
             <div ref={centerColumnsRef} className={classes.centerColumns}>
               <div
                 ref={tableBodyRenderPaneRef}
@@ -714,9 +725,11 @@ export default function DataGrid({
                 {centerElms}
               </div>
             </div>
-            <div className={classes.pinnedEndColumns}>
-              <div ref={pinnedEndRenderPaneRef}>{pinnedEndElms}</div>
-            </div>
+            {hasPinnedEnd && (
+              <div className={classes.pinnedEndColumns}>
+                <div ref={pinnedEndRenderPaneRef}>{pinnedEndElms}</div>
+              </div>
+            )}
           </div>
         </Scroller>
       </div>
