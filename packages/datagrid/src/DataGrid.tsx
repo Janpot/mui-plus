@@ -33,7 +33,6 @@ const useStyles = makeStyles((theme) => ({
 
   centerHeader: {
     flex: 1,
-    display: 'flex',
     overflow: 'hidden',
   },
   pinnedStartHeader: {
@@ -53,7 +52,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     width: '100%',
     overflow: 'hidden',
-    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   tableBody: {
     flex: 1,
@@ -69,9 +67,11 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
   },
   pinnedStartColumns: {
-    // boxShadow: theme.shadows[10]
+    borderRight: `1px solid ${theme.palette.divider}`,
   },
-  pinnedEndColumns: {},
+  pinnedEndColumns: {
+    borderLeft: `1px solid ${theme.palette.divider}`,
+  },
   centerColumns: {
     flex: 1,
     overflow: 'hidden',
@@ -86,6 +86,9 @@ const useStyles = makeStyles((theme) => ({
     '&$reverse': {
       flexDirection: 'row-reverse',
     },
+  },
+  verticalFill: {
+    width: '100%',
   },
   reverse: {},
   tableCell: {
@@ -295,6 +298,20 @@ function TableRow({ height, children, reverse }: TableRowProps) {
       className={clsx(classes.tableRow, { [classes.reverse]: reverse })}
       style={{ height }}
     >
+      {children}
+    </div>
+  );
+}
+
+interface VerticalFillProps {
+  height: number;
+  children?: React.ReactNode;
+}
+
+function VerticalFill({ height, children }: VerticalFillProps) {
+  const classes = useStyles();
+  return (
+    <div className={classes.verticalFill} style={{ height }}>
       {children}
     </div>
   );
@@ -555,7 +572,7 @@ export default function DataGrid({
       columns: ColumnDefinitions,
       { leftMargin = 0, reverse = false }: RenderColumnsOptions = {}
     ) => {
-      const elms = [<TableRow key={-1} height={topMargin} />];
+      const elms = [<VerticalFill key={-1} height={topMargin} />];
       for (
         let rowIdx = virtualSlice.startRow;
         rowIdx <= virtualSlice.endRow;
@@ -671,6 +688,7 @@ export default function DataGrid({
           <div
             ref={tableHeadRenderPaneRef}
             className={classes.tableHeadRenderPane}
+            style={{ width: totalWidth }}
           >
             {centerHeaderElms}
           </div>
