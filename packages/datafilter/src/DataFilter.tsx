@@ -61,9 +61,9 @@ interface Operator {
   value: OperatorPrimitive | OperatorPrimitive[];
 }
 
-type FilterPrimitive = string | number | boolean | Operator;
+export type FilterPrimitive = string | number | boolean | Operator;
 
-interface KeyFilter {
+export interface KeyFilter {
   property: string;
   condition: FilterPrimitive | FilterPrimitive[];
 }
@@ -96,7 +96,7 @@ function useKeyGenerator() {
   };
 }
 
-interface FilterItemProps extends Omit<MenuItemProps, 'value'> {
+export interface FilterItemProps extends Omit<MenuItemProps, 'value'> {
   property: string;
   label?: string;
   condition?: FilterPrimitive | React.ElementType;
