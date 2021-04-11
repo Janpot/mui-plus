@@ -1,5 +1,5 @@
 import * as React from 'react';
-import DataGrid, { ColumnDefinitons } from '@mui-plus/datagrid';
+import { DataGrid, ColumnDefinitons } from 'mui-plus';
 import { Paper } from '@material-ui/core';
 
 function useData() {

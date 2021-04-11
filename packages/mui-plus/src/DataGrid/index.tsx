@@ -352,7 +352,7 @@ function calculateColumnWidth(
   );
 }
 
-export default function DataGrid({
+export function DataGrid({
   data,
   columns: columnsProp,
   onColumnsChange: onColumnsChangeProp,

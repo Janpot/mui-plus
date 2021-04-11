@@ -4,15 +4,17 @@ description: Lorem ipsum dolor sit amet.
 ---
 
 import ExampleHost from '../components/ExampleHost';
-import Basic from '../examples/Basic';
-import srcBasic from '../examples/Basic?raw';
-import Controlled from '../examples/Controlled';
-import srcControlled from '../examples/Controlled?raw';
 
 ## Basic
+
+import Basic from '../examples/DataGrid/Basic';
+import srcBasic from '../examples/DataGrid/Basic?raw';
 
 <ExampleHost code={srcBasic} renderExample={() => <Basic />} />
 
 ## Controlled
+
+import Controlled from '../examples/DataGrid/Controlled';
+import srcControlled from '../examples/DataGrid/Controlled?raw';
 
 <ExampleHost code={srcControlled} renderExample={() => <Controlled />} />

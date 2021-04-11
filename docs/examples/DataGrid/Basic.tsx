@@ -1,5 +1,5 @@
 import * as React from 'react';
-import DataGrid from '@mui-plus/datagrid';
+import { DataGrid } from 'mui-plus';
 import { Paper } from '@material-ui/core';
 
 function useData() {

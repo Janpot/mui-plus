@@ -1,12 +1,13 @@
 {
-  "name": "@mui-plus/datafilter",
+  "name": "mui-plus",
   "version": "1.0.0",
   "devDependencies": {
+    "@types/resize-observer-browser": "^0.1.5",
     "microbundle": "^0.13.0",
     "react": "^17.0.1",
     "typescript": "^4.1.5"
   },
-  "source": "./src/index.tsx",
+  "source": "./src/index.ts",
   "main": "./dist/index.js",
   "module": "./dist/index.module.js",
   "exports": "./dist/index.modern.js",
@@ -16,12 +17,13 @@
     "dev": "microbundle watch --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern"
   },
   "peerDependencies": {
-    "react": "*",
+    "react": "^17.0.1",
     "react-dom": "*"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
+    "clsx": "^1.1.1",
     "react-transition-group": "^4.4.1"
   }
 }

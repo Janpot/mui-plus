@@ -1,7 +1,7 @@
 import * as React from 'react';
-import DataFilter, { Filter, FilterItem } from '@mui-plus/datafilter';
+import { DataFilter, Filter, FilterItem } from 'mui-plus';
 
-export default function Basic () {
+export default function Basic() {
   const [value, setValue] = React.useState<Filter>([]);
   return (
     <>
