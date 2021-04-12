@@ -6,8 +6,8 @@ export default function Basic() {
   return (
     <>
       <DataFilter value={value} onChange={setValue}>
-        <FilterItem property="hello" label="Hello" condition={1}>
-          hello
+        <FilterItem property="hello" condition={1}>
+          Hello
         </FilterItem>
       </DataFilter>
       <pre>{JSON.stringify(value, null, 2)}</pre>

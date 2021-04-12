@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ExampleHost from './components/ExampleHost';
 import NextraTheme, {
   NextraOptions,
   MuiNextraThemeConfig,
@@ -13,3 +14,5 @@ export default function createTheme(
     return <NextraTheme props={props} opts={opts} config={config || {}} />;
   };
 }
+
+export { ExampleHost };

@@ -2,7 +2,7 @@ import * as React from 'react';
 import Highlight, { defaultProps, Language } from 'prism-react-renderer';
 import { makeStyles, useTheme } from '@material-ui/core';
 import clsx from 'clsx';
-import useIsMounted from '../src/useIsMounted';
+import useIsMounted from '../useIsMounted';
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -9,6 +9,16 @@ import * as React from 'react';
 import Code from './Code';
 import CodeIcon from '@material-ui/icons/Code';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { PrismTheme } from 'prism-react-renderer';
+
+declare module '@material-ui/core' {
+  interface ThemeOptions {
+    prism?: PrismTheme;
+  }
+  interface Theme {
+    prism?: PrismTheme;
+  }
+}
 
 const useStyles = makeStyles((theme) => ({
   root: {},

@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { DataGrid, ColumnDefinitons } from 'mui-plus';
+import { DataGrid, ColumnDefinitions } from 'mui-plus';
 import { Paper } from '@material-ui/core';
 
 const ROWS = 100000;
 const COLUMNS = 100000;
 
-const columns: ColumnDefinitons = [];
+const columns: ColumnDefinitions = [];
 const rows: { idx: number }[] = [];
 
 for (let columnIdx = 0; columnIdx <= COLUMNS; columnIdx++) {

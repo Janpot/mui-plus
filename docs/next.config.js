@@ -1,5 +1,5 @@
 const withNextra = require('nextra')(
-  './src/createNextraTheme',
+  'nextra-theme-mui-docs',
   './theme.config.js'
 );
 module.exports = withNextra({

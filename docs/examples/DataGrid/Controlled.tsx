@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DataGrid, ColumnDefinitons } from 'mui-plus';
+import { DataGrid, ColumnDefinitions } from 'mui-plus';
 import { Paper } from '@material-ui/core';
 
 function useData() {
@@ -23,7 +23,7 @@ function useData() {
 export default function Basic() {
   const rows = useData();
 
-  const [columns, setColumns] = React.useState<ColumnDefinitons>([
+  const [columns, setColumns] = React.useState<ColumnDefinitions>([
     {
       key: 'firstName',
       header: 'First Name',

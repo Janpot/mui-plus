@@ -4,7 +4,7 @@ import Link from './Link';
 import * as React from 'react';
 import { styled, Typography, TypographyProps } from '@material-ui/core';
 import innerText from 'react-innertext';
-import Code from '../components/Code';
+import Code from './components/Code';
 import { useSection } from './useScrollSpy';
 import LinkIcon from '@material-ui/icons/Link';
 

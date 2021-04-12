@@ -1,0 +1,36 @@
+{
+  "name": "nextra-theme-mui-docs",
+  "version": "1.0.0",
+  "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.57",
+    "@mdx-js/react": "^1.6.22",
+    "clsx": "^1.1.1",
+    "github-slugger": "^1.3.0",
+    "next-themes": "^0.0.14",
+    "prism-react-renderer": "^1.2.0",
+    "react-innertext": "^1.1.5"
+  },
+  "devDependencies": {
+    "microbundle": "^0.13.0"
+  },
+  "source": "./src/index.tsx",
+  "main": "./dist/index.js",
+  "module": "./dist/index.module.js",
+  "exports": {
+    ".": "./dist/index.modern.js",
+    "./ExampleHost": "./dist/ExampleHost.modern.js",
+    "./Code": "./dist/Code.modern.js"
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "microbundle --jsxFragment React.Fragment --jsx 'React.createElement' --format es,cjs,modern ./*.ts",
+    "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern ./*.ts"
+  },
+  "peerDependencies": {
+    "next": "^10.1.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  }
+}

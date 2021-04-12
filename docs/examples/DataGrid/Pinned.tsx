@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DataGrid } from 'mui-plus';
+import { DataGrid, ColumnDefinitions } from 'mui-plus';
 import { Paper } from '@material-ui/core';
 
 function useData() {
@@ -20,7 +20,7 @@ function useData() {
   }, []);
 }
 
-const columns = [
+const columns: ColumnDefinitions = [
   {
     key: 'firstName',
     header: 'First Name',
