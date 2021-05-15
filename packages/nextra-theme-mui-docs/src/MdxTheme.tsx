@@ -38,6 +38,9 @@ const Article = styled('article')(({ theme }) => ({
     ...theme.typography.subtitle2,
     margin: '32px 0 16px',
   },
+  '& p': {
+    ...theme.typography.body1,
+  },
 }));
 
 const Anchor = styled('span')({

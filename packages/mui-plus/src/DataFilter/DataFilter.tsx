@@ -117,11 +117,12 @@ export function DataFilter({
   const classes = useStyles();
   const popperRef = React.useRef<PopoverActions>(null);
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
-  const [editedOption, setEditedOption] = React.useState<{
-    property: string;
-    label: string;
-    renderEditor: React.ElementType;
-  } | null>(null);
+  const [editedOption, setEditedOption] =
+    React.useState<{
+      property: string;
+      label: string;
+      renderEditor: React.ElementType;
+    } | null>(null);
   const [editedIndex, setEditedIndex] = React.useState<number | null>(null);
   const menuOpen = Boolean(anchorEl);
 

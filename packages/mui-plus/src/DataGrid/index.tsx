@@ -187,10 +187,8 @@ function useColumnResizing({
   onColumnsChange,
   getColumnElements,
 }: UseColumnResizingParams) {
-  const [
-    resizingColumn,
-    setResingColumn,
-  ] = React.useState<ResizingColumn | null>(null);
+  const [resizingColumn, setResingColumn] =
+    React.useState<ResizingColumn | null>(null);
 
   const handleResizerMouseDown = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

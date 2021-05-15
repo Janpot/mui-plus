@@ -12,16 +12,8 @@ type NextComposedProps = Omit<
 
 const NextComposed = React.forwardRef<HTMLAnchorElement, NextComposedProps>(
   (props, ref) => {
-    const {
-      as,
-      href,
-      replace,
-      scroll,
-      passHref,
-      shallow,
-      prefetch,
-      ...other
-    } = props;
+    const { as, href, replace, scroll, passHref, shallow, prefetch, ...other } =
+      props;
 
     return (
       <NextLink

@@ -1,9 +1,30 @@
 ---
-title: DataGrid
+title: Basic Usage
+description: Lorem ipsum dolor sit amet.
+order:
+  - index
 ---
 
-## installation
+import ExampleHost from 'nextra-theme-mui-docs/ExampleHost';
 
-```
-yarn add mui-plus
-```
+# DataGrid
+
+The philosophy behind the `mui-plus` datagrid is to have component that is only concerned with the layout part of the grid. Pagination, filtering, sorting, etc... is best left to the application as it is often highly dependent on the use case. This library focuses on providing a grid component that is focused on layout, column sizing, virtualization, etc...
+
+## Uncontrolled
+
+The Grid component works both in uncontrolled mode and controlled mode. To use it in uncontrolled mode, pass column definitions to the `defaultColumns` prop.
+
+import Basic from '../../examples/DataGrid/Basic';
+import srcBasic from '../../examples/DataGrid/Basic?raw';
+
+<ExampleHost code={srcBasic} renderExample={() => <Basic />} />
+
+## Controlled
+
+If you want to manipulate the grid component from the outside, You can use the `columns` and `onColumnsChange` props to switch the column definition in controlled mode.
+
+import Controlled from '../../examples/DataGrid/Controlled';
+import srcControlled from '../../examples/DataGrid/Controlled?raw';
+
+<ExampleHost code={srcControlled} renderExample={() => <Controlled />} />

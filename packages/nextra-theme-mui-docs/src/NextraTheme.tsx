@@ -253,6 +253,7 @@ function Layout({ children, opts, config }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const slugger = new Slugger();
+  const minLevel = 1;
   const docOutline = React.Children.toArray(children).flatMap((child) => {
     if (!React.isValidElement(child)) {
       return [];
@@ -262,6 +263,9 @@ function Layout({ children, opts, config }: LayoutProps) {
       return [];
     }
     const level = Number(match[1]) - 1;
+    if (level < minLevel) {
+      return [];
+    }
     const text = innerText(child) || '';
     const slug = slugger.slug(text);
     return [{ level, text, slug }];
@@ -273,6 +277,11 @@ function Layout({ children, opts, config }: LayoutProps) {
 
   const activeSection = useActiveSection();
 
+  const pageMap = React.useMemo(
+    () => sortPageMap(opts.pageMap),
+    [opts.pageMap]
+  );
+
   const drawer = (
     <div>
       <Toolbar>
@@ -281,7 +290,7 @@ function Layout({ children, opts, config }: LayoutProps) {
         </Typography>
       </Toolbar>
       <Divider />
-      <SideBarItemList entries={opts.pageMap} />
+      <SideBarItemList entries={pageMap} />
     </div>
   );
 
@@ -332,31 +341,31 @@ function Layout({ children, opts, config }: LayoutProps) {
         </Container>
       </DocsMain>
       <DocsOutline>
-        <Toolbar />
-        <Box padding={2}>
-          <Typography variant="subtitle1">Content:</Typography>
-          {docOutline.map(({ level, slug, text }) => {
-            const minLevel = 1;
-            if (level < minLevel) {
-              return null;
-            }
-            const isACtive = slug === activeSection;
-            return (
-              <DocsOutlineSection
-                className={clsx({ [CLASS_ACTIVE]: isACtive })}
-                key={slug}
-                style={{ paddingLeft: 8 + (level - minLevel) * 8 }}
-              >
-                <Link
-                  href={`#${slug}`}
-                  color={isACtive ? 'primary' : 'inherit'}
-                >
-                  {text}
-                </Link>
-              </DocsOutlineSection>
-            );
-          })}
-        </Box>
+        {docOutline.length > 0 ? (
+          <>
+            <Toolbar />
+            <Box padding={2}>
+              <Typography variant="subtitle1">Content:</Typography>
+              {docOutline.map(({ level, slug, text }) => {
+                const isACtive = slug === activeSection;
+                return (
+                  <DocsOutlineSection
+                    className={clsx({ [CLASS_ACTIVE]: isACtive })}
+                    key={slug}
+                    style={{ paddingLeft: 8 + (level - minLevel) * 8 }}
+                  >
+                    <Link
+                      href={`#${slug}`}
+                      color={isACtive ? 'primary' : 'inherit'}
+                    >
+                      {text}
+                    </Link>
+                  </DocsOutlineSection>
+                );
+              })}
+            </Box>
+          </>
+        ) : null}
       </DocsOutline>
     </LayoutRoot>
   );
@@ -412,6 +421,28 @@ interface NextraThemeProps {
   props: NextraRootProps;
   opts: NextraOptions;
   config: MuiNextraThemeConfig;
+}
+
+function sortPageMap(pageMap: PageMap): PageMap {
+  const entryMap = new Map(pageMap.map((entry) => [entry.name, entry]));
+  const indexEntry = entryMap.get('index');
+  const order: string[] = indexEntry?.frontMatter?.order ?? [];
+  const orderedEntryNames = new Set(order);
+  const orderedEntries = order.map((entryName) => entryMap.get(entryName));
+  const unorderedEntries = pageMap.filter(
+    (entry) => !orderedEntryNames.has(entry.name)
+  );
+  const allEntries = [...orderedEntries, ...unorderedEntries].filter(
+    Boolean
+  ) as NextraPageMapEntry[];
+  return allEntries.map((entry) =>
+    entry.children
+      ? {
+          ...entry,
+          children: sortPageMap(entry.children),
+        }
+      : entry
+  );
 }
 
 export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
