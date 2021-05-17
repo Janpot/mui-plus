@@ -11,6 +11,8 @@ import CodeIcon from '@material-ui/icons/Code';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { PrismTheme } from 'prism-react-renderer';
 
+const SKIPPED_PREVIEW_LINES = '// ...';
+
 declare module '@material-ui/core' {
   interface ThemeOptions {
     prism?: PrismTheme;
@@ -33,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'flex-end',
     flexDirection: theme.direction === 'rtl' ? 'row-reverse' : 'row',
   },
+  code: {
+    maxHeight: 'min(50vh, 1000px)',
+  },
 }));
 
 interface ExampleHostProps {
@@ -40,10 +45,53 @@ interface ExampleHostProps {
   code: string;
 }
 
+function isMarker(line: string, marker: string): boolean {
+  const trimmed = line.trimLeft();
+  return (
+    trimmed.startsWith(`/// ${marker}`) ||
+    trimmed.startsWith(`{/** ${marker} */}`)
+  );
+}
+
 export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+
+  let previewIndentation = Infinity;
+  const [fullSource, previewSource] = React.useMemo(() => {
+    const lines = code.split('\n');
+    const fullSourcelines: string[] = [];
+    const previewSourcelines: string[] = [];
+    let inPreview = false;
+    for (const line of lines) {
+      if (isMarker(line, 'preview-start')) {
+        inPreview = true;
+      } else if (isMarker(line, 'preview-end')) {
+        inPreview = false;
+      } else {
+        fullSourcelines.push(line);
+        if (inPreview) {
+          if (previewSourcelines.length > 0) {
+            previewSourcelines.push(SKIPPED_PREVIEW_LINES);
+          }
+          const indentation = line.length - line.trimLeft().length;
+          if (indentation < previewIndentation) {
+            previewIndentation = indentation;
+          }
+          previewSourcelines.push(line);
+        }
+      }
+    }
+    return [
+      fullSourcelines.join('\n'),
+      previewSourcelines
+        .map((line) =>
+          line === SKIPPED_PREVIEW_LINES ? line : line.slice(previewIndentation)
+        )
+        .join('\n'),
+    ];
+  }, [code]);
 
   const handleCopy = React.useCallback(() => {
     navigator.clipboard.writeText(code).then(
@@ -65,9 +113,9 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
           <FileCopyIcon />
         </IconButton>
       </Toolbar>
-      <Collapse in={expanded}>
-        <Code language="ts" lineNumbers>
-          {code}
+      <Collapse in={!!previewSource || expanded}>
+        <Code language="ts" lineNumbers className={classes.code}>
+          {expanded ? fullSource : previewSource}
         </Code>
       </Collapse>
       <Snackbar

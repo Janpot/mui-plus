@@ -44,7 +44,9 @@ export default function Basic() {
 
   return (
     <Paper style={{ height: 300 }}>
+      {/** preview-start */}
       <DataGrid data={rows} columns={columns} onColumnsChange={setColumns} />
+      {/** preview-end */}
     </Paper>
   );
 }

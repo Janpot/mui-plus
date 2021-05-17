@@ -35,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
 
 export interface CodeProps {
   children: string;
+  className?: string;
   language?: string;
   highlight?: number[];
   lineNumbers?: boolean;
@@ -43,6 +44,7 @@ export interface CodeProps {
 export default function Code({
   children,
   language,
+  className: classNameProp,
   highlight = [],
   lineNumbers,
 }: CodeProps) {
@@ -61,7 +63,10 @@ export default function Code({
       theme={theme.prism}
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
-        <code className={clsx(className, classes.root)} style={style}>
+        <code
+          className={clsx(classNameProp, className, classes.root)}
+          style={style}
+        >
           {tokens.map((line, i) => {
             const { className, ...props } = getLineProps({ line, key: i });
             return (
