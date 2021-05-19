@@ -10,6 +10,7 @@ import Code from './Code';
 import CodeIcon from '@material-ui/icons/Code';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { PrismTheme } from 'prism-react-renderer';
+import app from 'next/app';
 
 const SKIPPED_PREVIEW_LINES = '// ...';
 
@@ -114,7 +115,7 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
         </IconButton>
       </Toolbar>
       <Collapse in={!!previewSource || expanded}>
-        <Code language="ts" lineNumbers className={classes.code}>
+        <Code language="tsx" lineNumbers className={classes.code}>
           {expanded ? fullSource : previewSource}
         </Code>
       </Collapse>
