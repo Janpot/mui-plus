@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "lib": ["ES2020"]
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "tags": {},
+  "description": "mui-plus DataGrid Component",
+  "displayName": "DataGrid",
+  "methods": [],
+  "props": {
+    "columns": {
+      "defaultValue": null,
+      "description": "Column definitions for the grid.",
+      "name": "columns",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "name": "DataGridProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "name": "DataGridProps"
+        }
+      ],
+      "required": false,
+      "type": {
+        "name": "ColumnDefinitions"
+      }
+    },
+    "onColumnsChange": {
+      "defaultValue": null,
+      "description": "",
+      "name": "onColumnsChange",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "name": "DataGridProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "name": "DataGridProps"
+        }
+      ],
+      "required": false,
+      "type": {
+        "name": "(newValue: ColumnDefinitions) => void"
+      }
+    },
+    "defaultColumns": {
+      "defaultValue": {
+        "value": "[]"
+      },
+      "description": "",
+      "name": "defaultColumns",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "name": "DataGridProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "name": "DataGridProps"
+        }
+      ],
+      "required": false,
+      "type": {
+        "name": "ColumnDefinitions"
+      }
+    },
+    "data": {
+      "defaultValue": null,
+      "description": "",
+      "name": "data",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "name": "DataGridProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "name": "DataGridProps"
+        }
+      ],
+      "required": true,
+      "type": {
+        "name": "any[]"
+      }
+    },
+    "rowHeight": {
+      "defaultValue": {
+        "value": 52
+      },
+      "description": "",
+      "name": "rowHeight",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "name": "DataGridProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "name": "DataGridProps"
+        }
+      ],
+      "required": false,
+      "type": {
+        "name": "number"
+      }
+    }
+  }
+}

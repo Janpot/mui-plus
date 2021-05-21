@@ -8,7 +8,8 @@
     "dev:docs": "next dev ./docs",
     "fix": "yarn prettier --write .",
     "eslint": "eslint .",
-    "lint": "yarn prettier --write ."
+    "lint": "yarn prettier --write .",
+    "docgen": "./scripts/api-docgen.ts"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.23.0",
@@ -16,6 +17,9 @@
     "eslint": "^7.26.0",
     "eslint-plugin-react": "^7.23.2",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "prettier": "^2.3.0"
-  }
+    "prettier": "^2.3.0",
+    "react-docgen-typescript": "^1.22.0",
+    "ts-node": "^9.1.1"
+  },
+  "dependencies": {}
 }

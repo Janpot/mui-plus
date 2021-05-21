@@ -1,8 +1,6 @@
 /*
 TODO
-- resizing min/max width
 - ltr
-- pinned columns
 - row hover
 - flex
 */
@@ -148,6 +146,9 @@ export interface ColumnDefinition {
 export type ColumnDefinitions = ColumnDefinition[];
 
 export interface DataGridProps<RowType = any> {
+  /**
+   * Column definitions for the grid.
+   */
   columns?: ColumnDefinitions;
   onColumnsChange?: (newValue: ColumnDefinitions) => void;
   defaultColumns?: ColumnDefinitions;
@@ -350,6 +351,9 @@ function calculateColumnWidth(
   );
 }
 
+/**
+ * mui-plus DataGrid Component
+ */
 export function DataGrid({
   data,
   columns: columnsProp,

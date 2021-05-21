@@ -1,0 +1,155 @@
+{
+  "./packages/mui-plus/src/DataGrid/Scroller.tsx": {
+    "description": "",
+    "displayName": "Scroller",
+    "methods": [],
+    "props": {
+      "className": {
+        "required": false,
+        "tsType": {
+          "name": "string"
+        },
+        "description": ""
+      },
+      "scrollWidth": {
+        "required": false,
+        "tsType": {
+          "name": "number"
+        },
+        "description": ""
+      },
+      "scrollHeight": {
+        "required": false,
+        "tsType": {
+          "name": "number"
+        },
+        "description": ""
+      },
+      "children": {
+        "required": false,
+        "tsType": {
+          "name": "ReactReactNode",
+          "raw": "React.ReactNode"
+        },
+        "description": ""
+      },
+      "onScroll": {
+        "required": false,
+        "tsType": {
+          "name": "signature",
+          "type": "function",
+          "raw": "(event: React.UIEvent<HTMLDivElement>) => void",
+          "signature": {
+            "arguments": [
+              {
+                "name": "event",
+                "type": {
+                  "name": "ReactUIEvent",
+                  "raw": "React.UIEvent<HTMLDivElement>",
+                  "elements": [
+                    {
+                      "name": "HTMLDivElement"
+                    }
+                  ]
+                }
+              }
+            ],
+            "return": {
+              "name": "void"
+            }
+          }
+        },
+        "description": ""
+      }
+    }
+  },
+  "./packages/mui-plus/src/DataGrid/index.tsx": {
+    "description": "mui-plus DataGrid Component",
+    "displayName": "DataGrid",
+    "methods": [],
+    "props": {
+      "columns": {
+        "required": false,
+        "tsType": {
+          "name": "Array",
+          "elements": [
+            {
+              "name": "ColumnDefinition"
+            }
+          ],
+          "raw": "ColumnDefinition[]"
+        },
+        "description": "Column definitions for the grid."
+      },
+      "onColumnsChange": {
+        "required": false,
+        "tsType": {
+          "name": "signature",
+          "type": "function",
+          "raw": "(newValue: ColumnDefinitions) => void",
+          "signature": {
+            "arguments": [
+              {
+                "name": "newValue",
+                "type": {
+                  "name": "Array",
+                  "elements": [
+                    {
+                      "name": "ColumnDefinition"
+                    }
+                  ],
+                  "raw": "ColumnDefinition[]"
+                }
+              }
+            ],
+            "return": {
+              "name": "void"
+            }
+          }
+        },
+        "description": ""
+      },
+      "defaultColumns": {
+        "required": false,
+        "tsType": {
+          "name": "Array",
+          "elements": [
+            {
+              "name": "ColumnDefinition"
+            }
+          ],
+          "raw": "ColumnDefinition[]"
+        },
+        "description": "",
+        "defaultValue": {
+          "value": "[]",
+          "computed": false
+        }
+      },
+      "data": {
+        "required": true,
+        "tsType": {
+          "name": "Array",
+          "elements": [
+            {
+              "name": "RowType"
+            }
+          ],
+          "raw": "RowType[]"
+        },
+        "description": ""
+      },
+      "rowHeight": {
+        "required": false,
+        "tsType": {
+          "name": "number"
+        },
+        "description": "",
+        "defaultValue": {
+          "value": "52",
+          "computed": false
+        }
+      }
+    }
+  }
+}
