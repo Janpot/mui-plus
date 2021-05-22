@@ -11,9 +11,25 @@ const INPUT_FILES = [
   // './packages/mui-plus/src/DataFilter/DataFilter.tsx'
 ].map((relative) => resolve(ROOT, relative));
 
-const API_DOC_COMPONENT = resolve(ROOT, './docs/components/ApiDoc');
+const PROPERTIES_TABLE_COMPONENT = resolve(
+  ROOT,
+  './docs/components/PropertiesTable'
+);
 
 const OUTPUT_FOLDER = resolve(ROOT, './docs/pages/component-api/');
+
+function dedent(str: string): string {
+  let lines = str.split('\n');
+  if (lines[0].length <= 0) {
+    lines = lines.slice(1);
+  }
+  const minIndent = Math.min(
+    ...lines.map((line) =>
+      line.trim().length <= 0 ? Infinity : line.length - line.trimLeft().length
+    )
+  );
+  return lines.map((line) => line.slice(minIndent)).join('\n');
+}
 
 async function main() {
   const docgenResults = await Promise.all(
@@ -32,14 +48,31 @@ async function main() {
         OUTPUT_FOLDER,
         `${componentInfo.displayName}-componentInfo.json`
       );
-      const apiDocImportPath = relative(OUTPUT_FOLDER, API_DOC_COMPONENT);
+      const propertiesTableImportPath = relative(
+        OUTPUT_FOLDER,
+        PROPERTIES_TABLE_COMPONENT
+      );
       const json = JSON.stringify(componentInfo, null, 2);
-      const mdx = [
-        `import ApiDoc from '${apiDocImportPath}'`,
-        `import componentInfo from './${componentInfo.displayName}-componentInfo.json'`,
-        '',
-        `<ApiDoc componentInfo={componentInfo} />`,
-      ].join('\n');
+      const mdx = dedent(`
+        # ${componentInfo.displayName}
+  
+        ${componentInfo.description}
+  
+        ## import
+  
+        \`\`\`tsx
+        import ${componentInfo.displayName} from mui-plus/${componentInfo.displayName}
+        // or
+        import { ${componentInfo.displayName} } from mui-plus
+        \`\`\`
+  
+        ## Properties
+  
+        import PropertiesTable from '${propertiesTableImportPath}'
+        import componentInfo from './${componentInfo.displayName}-componentInfo.json'
+  
+        <PropertiesTable props={componentInfo.props} />
+      `);
       await Promise.all([
         writeFile(jsonfile, json, { encoding: 'utf-8' }),
         writeFile(mdxfile, mdx, { encoding: 'utf-8' }),
