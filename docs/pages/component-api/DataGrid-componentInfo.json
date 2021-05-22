@@ -19,9 +19,7 @@
         }
       ],
       "required": false,
-      "type": {
-        "name": "ColumnDefinitions"
-      }
+      "type": { "name": "ColumnDefinitions" }
     },
     "onColumnsChange": {
       "defaultValue": null,
@@ -38,14 +36,10 @@
         }
       ],
       "required": false,
-      "type": {
-        "name": "(newValue: ColumnDefinitions) => void"
-      }
+      "type": { "name": "(newValue: ColumnDefinitions) => void" }
     },
     "defaultColumns": {
-      "defaultValue": {
-        "value": "[]"
-      },
+      "defaultValue": { "value": "[]" },
       "description": "",
       "name": "defaultColumns",
       "parent": {
@@ -59,9 +53,7 @@
         }
       ],
       "required": false,
-      "type": {
-        "name": "ColumnDefinitions"
-      }
+      "type": { "name": "ColumnDefinitions" }
     },
     "data": {
       "defaultValue": null,
@@ -78,14 +70,10 @@
         }
       ],
       "required": true,
-      "type": {
-        "name": "any[]"
-      }
+      "type": { "name": "any[]" }
     },
     "rowHeight": {
-      "defaultValue": {
-        "value": 52
-      },
+      "defaultValue": { "value": 52 },
       "description": "",
       "name": "rowHeight",
       "parent": {
@@ -99,9 +87,7 @@
         }
       ],
       "required": false,
-      "type": {
-        "name": "number"
-      }
+      "type": { "name": "number" }
     }
   }
 }

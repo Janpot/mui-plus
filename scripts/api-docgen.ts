@@ -2,7 +2,8 @@
 
 import * as reactDocgen from 'react-docgen-typescript';
 import { resolve, relative } from 'path';
-import { readFile, writeFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
+import { format } from 'prettier';
 
 const ROOT = resolve(__dirname, '..');
 
@@ -40,11 +41,11 @@ async function main() {
 
   await Promise.all(
     docgenResults.flat().map(async (componentInfo) => {
-      const mdxfile = resolve(
+      const mdxFilepath = resolve(
         OUTPUT_FOLDER,
         `${componentInfo.displayName}.mdx`
       );
-      const jsonfile = resolve(
+      const jsonFilepath = resolve(
         OUTPUT_FOLDER,
         `${componentInfo.displayName}-componentInfo.json`
       );
@@ -52,7 +53,9 @@ async function main() {
         OUTPUT_FOLDER,
         PROPERTIES_TABLE_COMPONENT
       );
-      const json = JSON.stringify(componentInfo, null, 2);
+      const json = format(JSON.stringify(componentInfo), {
+        filepath: jsonFilepath,
+      });
       const mdx = dedent(`
         # ${componentInfo.displayName}
   
@@ -61,21 +64,21 @@ async function main() {
         ## import
   
         \`\`\`tsx
-        import ${componentInfo.displayName} from mui-plus/${componentInfo.displayName}
+        import ${componentInfo.displayName} from 'mui-plus/${componentInfo.displayName}';
         // or
-        import { ${componentInfo.displayName} } from mui-plus
+        import { ${componentInfo.displayName} } from 'mui-plus';
         \`\`\`
   
         ## Properties
   
-        import PropertiesTable from '${propertiesTableImportPath}'
-        import componentInfo from './${componentInfo.displayName}-componentInfo.json'
+        import PropertiesTable from '${propertiesTableImportPath}';
+        import componentInfo from './${componentInfo.displayName}-componentInfo.json';
   
         <PropertiesTable props={componentInfo.props} />
       `);
       await Promise.all([
-        writeFile(jsonfile, json, { encoding: 'utf-8' }),
-        writeFile(mdxfile, mdx, { encoding: 'utf-8' }),
+        writeFile(jsonFilepath, json, { encoding: 'utf-8' }),
+        writeFile(mdxFilepath, mdx, { encoding: 'utf-8' }),
       ]);
     })
   );
