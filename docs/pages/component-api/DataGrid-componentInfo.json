@@ -9,12 +9,12 @@
       "description": "Column definitions for the grid.",
       "name": "columns",
       "parent": {
-        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
         "name": "DataGridProps"
       },
       "declarations": [
         {
-          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
           "name": "DataGridProps"
         }
       ],
@@ -26,12 +26,12 @@
       "description": "",
       "name": "onColumnsChange",
       "parent": {
-        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
         "name": "DataGridProps"
       },
       "declarations": [
         {
-          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
           "name": "DataGridProps"
         }
       ],
@@ -43,12 +43,12 @@
       "description": "",
       "name": "defaultColumns",
       "parent": {
-        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
         "name": "DataGridProps"
       },
       "declarations": [
         {
-          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
           "name": "DataGridProps"
         }
       ],
@@ -60,12 +60,12 @@
       "description": "",
       "name": "data",
       "parent": {
-        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
         "name": "DataGridProps"
       },
       "declarations": [
         {
-          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
           "name": "DataGridProps"
         }
       ],
@@ -77,12 +77,12 @@
       "description": "",
       "name": "rowHeight",
       "parent": {
-        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+        "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
         "name": "DataGridProps"
       },
       "declarations": [
         {
-          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/index.tsx",
+          "fileName": "mui-plus/packages/mui-plus/src/DataGrid/DataGrid.tsx",
           "name": "DataGridProps"
         }
       ],

@@ -31,7 +31,9 @@ export default function ApiDoc({ props }: ApiDocProps) {
           {properties.map(([propName, def]) => (
             <TableRow key={propName}>
               <TableCell>{propName}</TableCell>
-              <TableCell>{def.type.name}</TableCell>
+              <TableCell>
+                <code>{def.type.name}</code>
+              </TableCell>
               <TableCell>
                 {def.defaultValue ? (
                   <code>{def.defaultValue.value}</code>

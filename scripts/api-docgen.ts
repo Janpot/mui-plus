@@ -2,14 +2,14 @@
 
 import * as reactDocgen from 'react-docgen-typescript';
 import { resolve, relative } from 'path';
-import { writeFile } from 'fs/promises';
+import { writeFile, rm, mkdir } from 'fs/promises';
 import { format } from 'prettier';
 
 const ROOT = resolve(__dirname, '..');
 
 const INPUT_FILES = [
-  './packages/mui-plus/src/DataGrid/index.tsx',
-  // './packages/mui-plus/src/DataFilter/DataFilter.tsx'
+  './packages/mui-plus/src/DataGrid/DataGrid.tsx',
+  './packages/mui-plus/src/DataFilter/DataFilter.tsx',
 ].map((relative) => resolve(ROOT, relative));
 
 const PROPERTIES_TABLE_COMPONENT = resolve(
@@ -35,9 +35,16 @@ function dedent(str: string): string {
 async function main() {
   const docgenResults = await Promise.all(
     INPUT_FILES.map(async (filename) => {
-      return reactDocgen.parse(filename, {});
+      const componentInfo = reactDocgen.parse(filename, {});
+      if (componentInfo.length <= 0) {
+        throw new Error(`No component found in ${filename}`);
+      }
+      return componentInfo;
     })
   );
+
+  await rm(OUTPUT_FOLDER, { recursive: true, force: true });
+  await mkdir(OUTPUT_FOLDER);
 
   await Promise.all(
     docgenResults.flat().map(async (componentInfo) => {

@@ -108,7 +108,7 @@ export function FilterItem(props: FilterItemProps) {
   return <MenuItem {...menuProps} button />;
 }
 
-export function DataFilter({
+export default function DataFilter({
   children,
   value,
   onChange,

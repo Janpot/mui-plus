@@ -1,0 +1,59 @@
+{
+  "tags": {},
+  "description": "",
+  "displayName": "DataFilter",
+  "methods": [],
+  "props": {
+    "value": {
+      "defaultValue": null,
+      "description": "",
+      "name": "value",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+        "name": "DataFilterProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+          "name": "DataFilterProps"
+        }
+      ],
+      "required": true,
+      "type": { "name": "Filter" }
+    },
+    "onChange": {
+      "defaultValue": null,
+      "description": "",
+      "name": "onChange",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+        "name": "DataFilterProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+          "name": "DataFilterProps"
+        }
+      ],
+      "required": true,
+      "type": { "name": "(newFilter: Filter) => void" }
+    },
+    "fixed": {
+      "defaultValue": { "value": 0 },
+      "description": "",
+      "name": "fixed",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+        "name": "DataFilterProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+          "name": "DataFilterProps"
+        }
+      ],
+      "required": false,
+      "type": { "name": "number" }
+    }
+  }
+}
