@@ -68,14 +68,14 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
     for (const line of lines) {
       if (isMarker(line, 'preview-start')) {
         inPreview = true;
+        if (previewSourcelines.length > 0) {
+          previewSourcelines.push(SKIPPED_PREVIEW_LINES);
+        }
       } else if (isMarker(line, 'preview-end')) {
         inPreview = false;
       } else {
         fullSourcelines.push(line);
         if (inPreview) {
-          if (previewSourcelines.length > 0) {
-            previewSourcelines.push(SKIPPED_PREVIEW_LINES);
-          }
           const indentation = line.length - line.trimLeft().length;
           if (indentation < previewIndentation) {
             previewIndentation = indentation;

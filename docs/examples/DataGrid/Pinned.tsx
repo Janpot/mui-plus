@@ -21,11 +21,13 @@ function useData() {
 }
 
 const columns: ColumnDefinitions = [
+  /// preview-start
   {
     key: 'firstName',
     header: 'First Name',
     pin: 'start',
   },
+  /// preview-end
   {
     key: 'lastName',
     header: 'Last Name',

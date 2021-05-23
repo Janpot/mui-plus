@@ -2,8 +2,10 @@ import * as React from 'react';
 import { DataGrid, ColumnDefinitions } from 'mui-plus';
 import { Paper } from '@material-ui/core';
 
+/// preview-start
 const ROWS = 100000;
 const COLUMNS = 100000;
+/// preview-end
 
 const columns: ColumnDefinitions = [];
 const rows: { idx: number }[] = [];

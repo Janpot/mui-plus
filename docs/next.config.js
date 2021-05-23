@@ -4,9 +4,7 @@ const withNextra = require('nextra')(
 );
 module.exports = withNextra({
   future: { webpack5: true },
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Note: we provide webpack above so you should not `require` it
-    // Perform customizations to webpack config
+  webpack: (config) => {
     config.module.rules = [
       {
         resourceQuery: /raw/,
@@ -18,7 +16,6 @@ module.exports = withNextra({
       },
     ];
 
-    // Important: return the modified config
     return config;
   },
 });

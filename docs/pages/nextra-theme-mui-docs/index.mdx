@@ -1,0 +1,96 @@
+# nextra-theme-mui-docs
+
+A custom [`nextra`](https://nextra.vercel.app/) theme built on top of [`@material-ui`](https://material-ui.com/).
+
+## Installation
+
+1. Install `yarn add next react react-dom nextra`.
+2. install the theme `yarn add nextra-theme-mui-docs`.
+3. Create configuration
+
+```tsx
+// next.config.js
+const withNextra = require('nextra')(
+  'nextra-theme-mui-docs',
+  './theme.config.js'
+);
+module.exports = withNextra({});
+```
+
+```tsx
+import * as React from 'react';
+
+export default {
+  logo: (
+    <>
+      <span>Mui+</span>
+    </>
+  ),
+  head: (
+    <>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="description" content="Mui+: extensions for Material UI" />
+      <meta name="og:title" content="Mui+: extensions for Material UI" />
+    </>
+  ),
+};
+```
+
+## Built-in components
+
+### `ExampleHost`
+
+Add Example code blocks with the `ExampleHost` component.
+
+You'll need to add webpack configuration to `next.config.js`.
+
+```tsx
+module.exports = withNextra({
+  webpack: (config) => {
+    config.module.rules = [
+      {
+        resourceQuery: /raw/,
+        type: 'asset/source',
+      },
+      {
+        resourceQuery: /^(?!\?raw$).*/,
+        rules: config.module.rules,
+      },
+    ];
+
+    return config;
+  },
+});
+```
+
+Create some example code
+
+```tsx
+// ./Example.tsx
+import * as React from 'react';
+export default function MyComponent() {
+  /// preview-start
+  return <div>Hello World</div>;
+  /// preview-end
+}
+```
+
+```tsx
+import ExampleHost from 'nextra-theme-mui-docs/ExampleHost';
+
+import Example from './Example';
+import srcExample from './Example?raw';
+
+<ExampleHost code={srcExample} renderExample={() => <Example />} />;
+```
+
+Will render
+
+import ExampleHost from 'nextra-theme-mui-docs/ExampleHost';
+
+import Example from './Example';
+import srcExample from './Example?raw';
+
+<ExampleHost code={srcExample} renderExample={() => <Example />} />
+
+You can use `/// preview-start`, `/// preview-end` to create a preview block. Inside jsx `{/** preview-start */}` and `{/** preview-end */}` will also work.
