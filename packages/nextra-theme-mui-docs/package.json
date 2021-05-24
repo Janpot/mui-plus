@@ -22,7 +22,7 @@
   "module": "./dist/index.module.js",
   "exports": {
     ".": "./dist/index.modern.js",
-    "./ExampleHost": "./dist/ExampleHost.modern.js",
+    "./CodeExample": "./dist/CodeExample.modern.js",
     "./Code": "./dist/Code.modern.js"
   },
   "types": "./dist/index.d.ts",

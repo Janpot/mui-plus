@@ -41,9 +41,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface ExampleHostProps {
-  renderExample: () => React.ReactNode;
-  code: string;
+interface CodeExampleProps {
+  src?: string;
+  children?: React.ReactNode;
 }
 
 function isMarker(line: string, marker: string): boolean {
@@ -54,14 +54,14 @@ function isMarker(line: string, marker: string): boolean {
   );
 }
 
-export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
+export default function CodeExample({ children, src = '' }: CodeExampleProps) {
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
   let previewIndentation = Infinity;
   const [fullSource, previewSource] = React.useMemo(() => {
-    const lines = code.split('\n');
+    const lines = src.split('\n');
     const fullSourcelines: string[] = [];
     const previewSourcelines: string[] = [];
     let inPreview = false;
@@ -92,20 +92,20 @@ export default function ExampleHost({ renderExample, code }: ExampleHostProps) {
         )
         .join('\n'),
     ];
-  }, [code]);
+  }, [src]);
 
   const handleCopy = React.useCallback(() => {
-    navigator.clipboard.writeText(code).then(
+    navigator.clipboard.writeText(fullSource).then(
       () => {
         setSnackbarOpen(true);
       },
       () => undefined
     );
-  }, [code]);
+  }, [fullSource]);
 
   return (
     <div className={classes.root}>
-      <div className={classes.container}>{renderExample()}</div>
+      <div className={classes.container}>{children}</div>
       <Toolbar className={classes.tools} disableGutters>
         <IconButton onClick={() => setExpanded((expanded) => !expanded)}>
           <CodeIcon />

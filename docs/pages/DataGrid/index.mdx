@@ -5,7 +5,7 @@ order:
   - index
 ---
 
-import ExampleHost from 'nextra-theme-mui-docs/ExampleHost';
+import CodeExample from 'nextra-theme-mui-docs/CodeExample';
 
 # DataGrid
 
@@ -18,7 +18,9 @@ The Grid component works both in uncontrolled mode and controlled mode. To use i
 import Basic from '../../examples/DataGrid/Basic';
 import srcBasic from '../../examples/DataGrid/Basic?raw';
 
-<ExampleHost code={srcBasic} renderExample={() => <Basic />} />
+<CodeExample src={srcBasic}>
+  <Basic />
+</CodeExample>
 
 ## Controlled
 
@@ -27,4 +29,6 @@ If you want to manipulate the grid component from the outside, You can use the `
 import Controlled from '../../examples/DataGrid/Controlled';
 import srcControlled from '../../examples/DataGrid/Controlled?raw';
 
-<ExampleHost code={srcControlled} renderExample={() => <Controlled />} />
+<CodeExample src={srcControlled}>
+  <Controlled />
+</CodeExample>
