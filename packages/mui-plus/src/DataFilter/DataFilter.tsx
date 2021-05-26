@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {
-  makeStyles,
+  experimentalStyled as styled,
   Box,
   Chip,
   Popover,
@@ -13,14 +13,13 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import { TransitionGroup } from 'react-transition-group';
 
-const useStyles = makeStyles((theme) => ({
-  chip: {
-    margin: theme.spacing(0.5),
-  },
-  new: {
-    borderStyle: 'dashed',
-  },
+const DataFilterChip = styled(Chip)(({ theme }) => ({
+  margin: theme.spacing(0.5),
 }));
+
+const NewDataFilterChip = styled(DataFilterChip)({
+  borderStyle: 'dashed',
+});
 
 function isAvailable(
   option: { property: string; allowMultiple?: boolean },
@@ -114,7 +113,6 @@ export default function DataFilter({
   onChange,
   fixed = 0,
 }: DataFilterProps) {
-  const classes = useStyles();
   const popperRef = React.useRef<PopoverActions>(null);
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
   const [editedOption, setEditedOption] =
@@ -221,8 +219,7 @@ export default function DataFilter({
                 )}`;
           return (
             <Zoom key={reactKey} in mountOnEnter unmountOnExit>
-              <Chip
-                className={classes.chip}
+              <DataFilterChip
                 key={index}
                 label={label}
                 onDelete={isFixed ? undefined : () => handleDelete(index)}
@@ -232,8 +229,7 @@ export default function DataFilter({
         })}
         {hasAvailableOptions ? (
           <Zoom in mountOnEnter unmountOnExit>
-            <Chip
-              className={`${classes.chip} ${classes.new}`}
+            <NewDataFilterChip
               icon={<AddIcon />}
               label="Add a filter"
               variant="outlined"
