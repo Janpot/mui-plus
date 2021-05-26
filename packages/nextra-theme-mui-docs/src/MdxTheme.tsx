@@ -2,7 +2,11 @@ import { MDXProvider, MDXProviderComponents } from '@mdx-js/react';
 import Slugger from 'github-slugger';
 import Link from './Link';
 import * as React from 'react';
-import { styled, Typography, TypographyProps } from '@material-ui/core';
+import {
+  experimentalStyled as styled,
+  Typography,
+  TypographyProps,
+} from '@material-ui/core';
 import innerText from 'react-innertext';
 import Code from './components/Code';
 import { useSection } from './useScrollSpy';

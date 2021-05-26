@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   root: {},
   container: {
     background:
-      theme.palette.type === 'dark' ? '#333' : theme.palette.grey[100],
+      theme.palette.mode === 'dark' ? '#333' : theme.palette.grey[100],
     borderRadius: theme.shape.borderRadius,
     padding: theme.spacing(6),
   },

@@ -10,16 +10,16 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MdxTheme from './MdxTheme';
 import Link from './Link';
 import {
-  createMuiTheme,
-  styled,
+  createTheme,
+  experimentalStyled as styled,
   ThemeProvider as MuiThemeProvider,
   Collapse,
   Container,
   CssBaseline,
   IconButton,
   useTheme as useMuiTheme,
-  Hidden,
   Box,
+  Skeleton,
 } from '@material-ui/core';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
@@ -35,9 +35,8 @@ import prismLight from 'prism-react-renderer/themes/vsLight';
 import prismDark from 'prism-react-renderer/themes/vsDark';
 import { PrismTheme } from 'prism-react-renderer';
 import GitHubIcon from '@material-ui/icons/GitHub';
-import { ThemeProvider, useTheme } from 'next-themes';
+import { ThemeProvider, useTheme as useNextTheme } from 'next-themes';
 import useIsMounted from './useIsMounted';
-import { Skeleton } from '@material-ui/lab';
 
 declare module '@material-ui/core' {
   interface ThemeOptions {
@@ -48,9 +47,9 @@ declare module '@material-ui/core' {
   }
 }
 
-const LIGHT = createMuiTheme({
+const LIGHT = createTheme({
   palette: {
-    type: 'light',
+    mode: 'light',
     primary: {
       main: '#556cd6',
     },
@@ -61,9 +60,9 @@ const LIGHT = createMuiTheme({
   prism: prismLight,
 });
 
-const DARK = createMuiTheme({
+const DARK = createTheme({
   palette: {
-    type: 'dark',
+    mode: 'dark',
     primary: {
       main: '#0097a7',
     },
@@ -165,7 +164,7 @@ function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
       selected={isActive}
       button
       component={Link}
-      naked
+      noLinkStyle
       href={entry.route}
       style={{ paddingLeft: 8 + level * 16 + 24 }}
     >
@@ -219,25 +218,25 @@ function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
   );
 }
 
+function useTheme() {
+  const { theme, setTheme } = useNextTheme();
+  const mounted = useIsMounted();
+  return {
+    theme: mounted ? theme : undefined,
+    setTheme,
+  };
+}
+
 function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
-  const mounted = useIsMounted();
 
   const toggleTheme = React.useCallback(() => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
 
   return (
-    <IconButton disabled={!mounted} onClick={toggleTheme}>
-      {mounted ? (
-        theme === 'dark' ? (
-          <LightIcon />
-        ) : (
-          <DarkIcon />
-        )
-      ) : (
-        <Skeleton variant="circle" height={24} width={24} />
-      )}
+    <IconButton disabled={theme === undefined} onClick={toggleTheme}>
+      {theme === 'dark' ? <LightIcon /> : <DarkIcon />}
     </IconButton>
   );
 }
@@ -308,14 +307,18 @@ function Layout({ children, opts, config }: LayoutProps) {
             <MenuIcon />
           </DocsMenuButton>
           <FlexFill />
-          <IconButton component={Link} naked href="https://github.com/...">
+          <IconButton
+            component={Link}
+            noLinkStyle
+            href="https://github.com/..."
+          >
             <GitHubIcon />
           </IconButton>
           <ThemeSwitcher />
         </Toolbar>
       </DocsHeader>
       <DocsNavigation>
-        <Hidden lgUp implementation="css">
+        <Box sx={{ display: { xs: 'block', lg: 'none' } }}>
           <DocsDrawer
             variant="temporary"
             anchor={muiTheme.direction === 'rtl' ? 'right' : 'left'}
@@ -327,12 +330,12 @@ function Layout({ children, opts, config }: LayoutProps) {
           >
             {drawer}
           </DocsDrawer>
-        </Hidden>
-        <Hidden mdDown implementation="css">
+        </Box>
+        <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
           <DocsDrawer variant="permanent" open>
             {drawer}
           </DocsDrawer>
-        </Hidden>
+        </Box>
       </DocsNavigation>
       <DocsMain>
         <Toolbar />

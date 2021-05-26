@@ -1,56 +1,72 @@
+/* eslint-disable jsx-a11y/anchor-has-content */
 import * as React from 'react';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import NextLink, { LinkProps as NextLinkProps } from 'next/link';
 import MuiLink, { LinkProps as MuiLinkProps } from '@material-ui/core/Link';
 
-type NextComposedProps = Omit<
-  React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  'href'
-> &
-  NextLinkProps;
-
-const NextComposed = React.forwardRef<HTMLAnchorElement, NextComposedProps>(
-  (props, ref) => {
-    const { as, href, replace, scroll, passHref, shallow, prefetch, ...other } =
-      props;
-
-    return (
-      <NextLink
-        href={href}
-        prefetch={prefetch}
-        as={as}
-        replace={replace}
-        scroll={scroll}
-        shallow={shallow}
-        passHref={passHref}
-      >
-        <a ref={ref} {...other} />
-      </NextLink>
-    );
-  }
-);
-NextComposed.displayName = 'NextComposed';
-
-interface LinkPropsBase {
-  activeClassName?: string;
-  innerRef?: React.Ref<HTMLAnchorElement>;
-  naked?: boolean;
+interface NextLinkComposedProps
+  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
+    Omit<NextLinkProps, 'href' | 'as'> {
+  to: NextLinkProps['href'];
+  linkAs?: NextLinkProps['as'];
+  href?: NextLinkProps['href'];
 }
 
-export type LinkProps = LinkPropsBase &
-  NextComposedProps &
+export const NextLinkComposed = React.forwardRef<
+  HTMLAnchorElement,
+  NextLinkComposedProps
+>(function NextLinkComposed(props, ref) {
+  const {
+    to,
+    linkAs,
+    href,
+    replace,
+    scroll,
+    passHref,
+    shallow,
+    prefetch,
+    locale,
+    ...other
+  } = props;
+
+  return (
+    <NextLink
+      href={to}
+      prefetch={prefetch}
+      as={linkAs}
+      replace={replace}
+      scroll={scroll}
+      shallow={shallow}
+      passHref={passHref}
+      locale={locale}
+    >
+      <a ref={ref} {...other} />
+    </NextLink>
+  );
+});
+
+export type LinkProps = {
+  activeClassName?: string;
+  as?: NextLinkProps['as'];
+  href: NextLinkProps['href'];
+  noLinkStyle?: boolean;
+} & Omit<NextLinkComposedProps, 'to' | 'linkAs' | 'href'> &
   Omit<MuiLinkProps, 'href'>;
 
 // A styled version of the Next.js Link component:
 // https://nextjs.org/docs/#with-link
-function LinkBase(props: LinkProps) {
+const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(
+  props,
+  ref
+) {
   const {
-    href,
     activeClassName = 'active',
+    as: linkAs,
     className: classNameProps,
-    innerRef,
-    naked,
+    href,
+    noLinkStyle,
+    role, // Link don't have roles.
     ...other
   } = props;
 
@@ -60,12 +76,38 @@ function LinkBase(props: LinkProps) {
     [activeClassName]: router.pathname === pathname && activeClassName,
   });
 
-  if (naked) {
+  const isExternal =
+    typeof href === 'string' &&
+    (href.startsWith('http') || href.startsWith('mailto:'));
+
+  if (isExternal) {
+    if (noLinkStyle) {
+      return (
+        <a
+          className={className}
+          href={href as string}
+          ref={ref as any}
+          {...other}
+        />
+      );
+    }
+
     return (
-      <NextComposed
+      <MuiLink
         className={className}
-        ref={innerRef}
-        href={href}
+        href={href as string}
+        ref={ref}
+        {...other}
+      />
+    );
+  }
+
+  if (noLinkStyle) {
+    return (
+      <NextLinkComposed
+        className={className}
+        ref={ref as any}
+        to={href}
         {...other}
       />
     );
@@ -73,18 +115,14 @@ function LinkBase(props: LinkProps) {
 
   return (
     <MuiLink
-      component={NextComposed}
+      component={NextLinkComposed}
+      linkAs={linkAs}
       className={className}
-      ref={innerRef}
-      href={href as string}
+      ref={ref}
+      to={href}
       {...other}
     />
   );
-}
-
-const Link = React.forwardRef<HTMLAnchorElement, LinkProps>((props, ref) => (
-  <LinkBase {...props} innerRef={ref} />
-));
-Link.displayName = 'Link';
+});
 
 export default Link;
