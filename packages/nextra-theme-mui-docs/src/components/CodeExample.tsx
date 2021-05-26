@@ -1,16 +1,15 @@
 import {
   Collapse,
   IconButton,
-  makeStyles,
   Snackbar,
   Toolbar,
+  experimentalStyled as styled,
 } from '@material-ui/core';
 import * as React from 'react';
 import Code from './Code';
 import CodeIcon from '@material-ui/icons/Code';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { PrismTheme } from 'prism-react-renderer';
-import app from 'next/app';
 
 const SKIPPED_PREVIEW_LINES = '// ...';
 
@@ -23,23 +22,21 @@ declare module '@material-ui/core' {
   }
 }
 
-const useStyles = makeStyles((theme) => ({
-  root: {},
-  container: {
-    background:
-      theme.palette.mode === 'dark' ? '#333' : theme.palette.grey[100],
-    borderRadius: theme.shape.borderRadius,
-    padding: theme.spacing(6),
-  },
-  tools: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    flexDirection: theme.direction === 'rtl' ? 'row-reverse' : 'row',
-  },
-  code: {
-    maxHeight: 'min(50vh, 1000px)',
-  },
+const Container = styled('div')(({ theme }) => ({
+  background: theme.palette.mode === 'dark' ? '#333' : theme.palette.grey[100],
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(6),
 }));
+
+const SrcToolbar = styled(Toolbar)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  flexDirection: theme.direction === 'rtl' ? 'row-reverse' : 'row',
+}));
+
+const SrcCode = styled(Code)({
+  maxHeight: 'min(50vh, 1000px)',
+});
 
 interface CodeExampleProps {
   src?: string;
@@ -55,7 +52,6 @@ function isMarker(line: string, marker: string): boolean {
 }
 
 export default function CodeExample({ children, src = '' }: CodeExampleProps) {
-  const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
@@ -104,20 +100,20 @@ export default function CodeExample({ children, src = '' }: CodeExampleProps) {
   }, [fullSource]);
 
   return (
-    <div className={classes.root}>
-      <div className={classes.container}>{children}</div>
-      <Toolbar className={classes.tools} disableGutters>
+    <div>
+      <Container>{children}</Container>
+      <SrcToolbar disableGutters>
         <IconButton onClick={() => setExpanded((expanded) => !expanded)}>
           <CodeIcon />
         </IconButton>
         <IconButton onClick={handleCopy}>
           <FileCopyIcon />
         </IconButton>
-      </Toolbar>
+      </SrcToolbar>
       <Collapse in={!!previewSource || expanded}>
-        <Code language="tsx" lineNumbers className={classes.code}>
+        <SrcCode language="tsx" lineNumbers>
           {expanded ? fullSource : previewSource}
-        </Code>
+        </SrcCode>
       </Collapse>
       <Snackbar
         anchorOrigin={{
