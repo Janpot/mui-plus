@@ -19,7 +19,6 @@ import {
   IconButton,
   useTheme as useMuiTheme,
   Box,
-  Skeleton,
 } from '@material-ui/core';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';

@@ -1,27 +1,26 @@
 import * as React from 'react';
-import { makeStyles } from '@material-ui/core';
-import clsx from 'clsx';
+import { experimentalStyled as styled } from '@material-ui/core';
 import useResizeObserver from './useResizeObserver';
 
-const useStyles = makeStyles({
-  root: {
-    position: 'relative',
-    overflow: 'auto',
-    width: '100%',
-    height: '100%',
-  },
-  scrollPane: {
-    width: '100%',
-    height: '100%',
-  },
-  viewport: {
-    position: 'sticky',
-    top: 0,
-    left: 0,
-    width: 0,
-    height: 0,
-    overflow: 'hidden',
-  },
+const Root = styled('div')({
+  position: 'relative',
+  overflow: 'auto',
+  width: '100%',
+  height: '100%',
+});
+
+const ScrollPane = styled('div')({
+  width: '100%',
+  height: '100%',
+});
+
+const Viewport = styled('div')({
+  position: 'sticky',
+  top: 0,
+  left: 0,
+  width: 0,
+  height: 0,
+  overflow: 'hidden',
 });
 
 interface ScrollerProps {
@@ -39,25 +38,14 @@ export default function Scroller({
   children,
   onScroll,
 }: ScrollerProps) {
-  const classes = useStyles();
   const { ref: rootRef, rect } = useResizeObserver();
   return (
-    <div
-      ref={rootRef}
-      className={clsx(classes.root, className)}
-      onScroll={onScroll}
-    >
-      <div
-        className={classes.scrollPane}
-        style={{ width: scrollWidth, height: scrollHeight }}
-      >
-        <div
-          className={classes.viewport}
-          style={{ width: rect?.width, height: rect?.height }}
-        >
+    <Root ref={rootRef} className={className} onScroll={onScroll}>
+      <ScrollPane style={{ width: scrollWidth, height: scrollHeight }}>
+        <Viewport style={{ width: rect?.width, height: rect?.height }}>
           {children}
-        </div>
-      </div>
-    </div>
+        </Viewport>
+      </ScrollPane>
+    </Root>
   );
 }
