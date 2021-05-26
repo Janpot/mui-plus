@@ -6,7 +6,7 @@ TODO
 */
 
 import * as React from 'react';
-import { makeStyles, createSvgIcon } from '@material-ui/core';
+import { createSvgIcon, experimentalStyled as styled } from '@material-ui/core';
 import useResizeObserver from './useResizeObserver';
 // import useEventListener from './useEventListener';
 import clsx from 'clsx';
@@ -15,113 +15,124 @@ import { clamp } from './math';
 import { getTableVirtualSlice } from './virtualization';
 import Scroller from './Scroller';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    height: '100%',
-    borderRadius: theme.shape.borderRadius,
-    border: `1px solid ${theme.palette.divider}`,
-    '&.resizing': {
-      userSelect: 'none',
-    },
-  },
-  resizing: {},
+const CLASS_RESIZING = 'NextraMuiThemeResizing';
+const CLASS_REVERSE = 'NextraMuiThemeReverse';
+const CLASS_TABLE_CELL = 'NextraMuiThemeTableCell';
 
-  centerHeader: {
-    flex: 1,
-    overflow: 'hidden',
+const Root = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  height: '100%',
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.divider}`,
+  [`&.${CLASS_RESIZING}`]: {
+    userSelect: 'none',
   },
-  pinnedStartHeader: {
-    display: 'flex',
-  },
-  pinnedEndHeader: {
-    display: 'flex',
-  },
-  tableHeadRenderPane: {
-    fontWeight: theme.typography.fontWeightBold,
-    position: 'relative',
-    height: '100%',
-    display: 'flex',
-  },
-  tableHead: {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '100%',
-    overflow: 'hidden',
-  },
-  tableBody: {
-    flex: 1,
-    overflow: 'auto',
-    position: 'relative',
-  },
-  tableBodyRenderPane: {},
+}));
 
-  tableColumns: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-  },
-  pinnedStartColumns: {
-    borderRight: `1px solid ${theme.palette.divider}`,
-  },
-  pinnedEndColumns: {
-    borderLeft: `1px solid ${theme.palette.divider}`,
-  },
-  centerColumns: {
-    flex: 1,
-    overflow: 'hidden',
-  },
+const CenterHeader = styled('div')({
+  flex: 1,
+  overflow: 'hidden',
+});
 
-  tableRow: {
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    width: '100%',
-    position: 'relative',
-    display: 'flex',
-    overflow: 'visible',
-    '&$reverse': {
-      flexDirection: 'row-reverse',
-    },
+const PinnedStartHeader = styled('div')({
+  display: 'flex',
+});
+
+const PinnedEndHeader = styled('div')({
+  display: 'flex',
+});
+
+const TableHeadRenderPane = styled('div')(({ theme }) => ({
+  fontWeight: theme.typography.fontWeightBold,
+  position: 'relative',
+  height: '100%',
+  display: 'flex',
+}));
+
+const TableHead = styled('div')({
+  display: 'flex',
+  flexDirection: 'row',
+  width: '100%',
+  overflow: 'hidden',
+});
+
+const TableBody = styled('div')({
+  flex: 1,
+  overflow: 'auto',
+  position: 'relative',
+});
+
+const TableColumns = styled('div')({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+});
+
+const PinnedStartColumns = styled('div')(({ theme }) => ({
+  borderRight: `1px solid ${theme.palette.divider}`,
+}));
+
+const PinnedEndColumns = styled('div')(({ theme }) => ({
+  borderLeft: `1px solid ${theme.palette.divider}`,
+}));
+
+const CenterColumns = styled('div')({
+  flex: 1,
+  overflow: 'hidden',
+});
+
+const TableRowRoot = styled('div')(({ theme }) => ({
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  width: '100%',
+  position: 'relative',
+  display: 'flex',
+  overflow: 'visible',
+  [`&.${CLASS_REVERSE}`]: {
+    flexDirection: 'row-reverse',
   },
-  verticalFill: {
-    width: '100%',
+}));
+
+const VerticalFillRoot = styled('div')(({ theme }) => ({
+  width: '100%',
+}));
+
+const TableCellRoot = styled('div')({
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  height: '100%',
+  flexShrink: 0,
+  flexgrow: 0,
+});
+
+const CellContent = styled('div')({
+  padding: '0 16px',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
+});
+
+const Resizer = styled('div')(({ theme }) => ({
+  color: theme.palette.divider,
+  display: 'inline-flex',
+  alignItems: 'center',
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  right: 0,
+  cursor: 'col-resize',
+  zIndex: 1,
+  transform: 'translateX(50%)',
+  '&:hover': {
+    color: theme.palette.action.active,
   },
-  reverse: {},
-  tableCell: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
-    flexShrink: 0,
-    flexgrow: 0,
-  },
-  cellContent: {
-    padding: '0 16px',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-  },
-  resizer: {
-    color: theme.palette.divider,
-    display: 'inline-flex',
-    alignItems: 'center',
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    cursor: 'col-resize',
-    zIndex: 1,
-    transform: 'translateX(50%)',
-    '&:hover': {
-      color: theme.palette.action.active,
-    },
-    '$tableRow$reverse &': {
-      right: 'unset',
-      left: 0,
-      transform: 'translateX(-50%)',
-    },
+  [`.${CLASS_REVERSE} &`]: {
+    right: 'unset',
+    left: 0,
+    transform: 'translateX(-50%)',
   },
 }));
 
@@ -291,14 +302,13 @@ interface TableRowProps {
 }
 
 function TableRow({ height, children, reverse }: TableRowProps) {
-  const classes = useStyles();
   return (
-    <div
-      className={clsx(classes.tableRow, { [classes.reverse]: reverse })}
+    <TableRowRoot
+      className={clsx({ [CLASS_REVERSE]: reverse })}
       style={{ height }}
     >
       {children}
-    </div>
+    </TableRowRoot>
   );
 }
 
@@ -308,12 +318,7 @@ interface VerticalFillProps {
 }
 
 function VerticalFill({ height, children }: VerticalFillProps) {
-  const classes = useStyles();
-  return (
-    <div className={classes.verticalFill} style={{ height }}>
-      {children}
-    </div>
-  );
+  return <VerticalFillRoot style={{ height }}>{children}</VerticalFillRoot>;
 }
 
 interface RenderColumnsOptions {
@@ -328,15 +333,14 @@ interface TableCellProps {
 }
 
 function TableCell({ width, columnKey, children }: TableCellProps) {
-  const classes = useStyles();
   return (
-    <div
-      className={classes.tableCell}
+    <TableCellRoot
       style={{ width }}
+      className={CLASS_TABLE_CELL}
       data-column={columnKey}
     >
       {children}
-    </div>
+    </TableCellRoot>
   );
 }
 
@@ -361,7 +365,6 @@ export default function DataGrid({
   defaultColumns = [],
   rowHeight = 52,
 }: DataGridProps) {
-  const classes = useStyles();
   const rootRef = React.useRef<HTMLDivElement>(null);
 
   const [columns, setColumns] = useControlled(
@@ -468,16 +471,13 @@ export default function DataGrid({
     [centerViewport, rowHeight, rowCount, centerColumns, columnDimensions]
   );
 
-  const getColumnElements = React.useCallback(
-    (columnKey: string) => {
-      return (
-        rootRef.current?.querySelectorAll<HTMLDivElement>(
-          `.${classes.tableCell}[data-column=${columnKey}]`
-        ) || []
-      );
-    },
-    [classes.tableCell]
-  );
+  const getColumnElements = React.useCallback((columnKey: string) => {
+    return (
+      rootRef.current?.querySelectorAll<HTMLDivElement>(
+        `.${CLASS_TABLE_CELL}[data-column=${columnKey}]`
+      ) || []
+    );
+  }, []);
 
   const { handleResizerMouseDown, isResizing } = useColumnResizing({
     columns,
@@ -547,15 +547,14 @@ export default function DataGrid({
           const { width } = getCellBoundingrect(0, column.key);
           return (
             <TableCell key={column.key} width={width} columnKey={column.key}>
-              <div className={classes.cellContent}>{headerContent}</div>
-              <div
-                className={classes.resizer}
+              <CellContent>{headerContent}</CellContent>
+              <Resizer
                 onMouseDown={handleResizerMouseDown}
                 data-column={column.key}
                 data-reverse={reverse ? true : undefined}
               >
                 <SeparatorIcon />
-              </div>
+              </Resizer>
             </TableCell>
           );
         })}
@@ -594,7 +593,7 @@ export default function DataGrid({
                   width={width}
                   columnKey={column.key}
                 >
-                  <div className={classes.cellContent}>{String(value)}</div>
+                  <CellContent>{String(value)}</CellContent>
                 </TableCell>
               );
             })}
@@ -625,8 +624,6 @@ export default function DataGrid({
     data,
     handleResizerMouseDown,
     rowHeight,
-    classes.cellContent,
-    classes.resizer,
     pinnedEndColumns,
   ]);
 
@@ -678,63 +675,51 @@ export default function DataGrid({
   const hasPinnedEnd = pinnedEndColumns.length > 0;
 
   return (
-    <div
-      ref={rootRef}
-      className={clsx(classes.root, {
-        [classes.resizing]: isResizing,
-      })}
-    >
-      <div className={classes.tableHead}>
+    <Root ref={rootRef} className={clsx({ [CLASS_RESIZING]: isResizing })}>
+      <TableHead>
         {hasPinnedStart && (
-          <div className={classes.pinnedStartHeader}>
-            {pinnedStartHeaderElms}
-          </div>
+          <PinnedStartHeader>{pinnedStartHeaderElms}</PinnedStartHeader>
         )}
-        <div
-          className={classes.centerHeader}
-          style={{ width: bodyRect?.width }}
-        >
-          <div
+        <CenterHeader style={{ width: bodyRect?.width }}>
+          <TableHeadRenderPane
             ref={tableHeadRenderPaneRef}
-            className={classes.tableHeadRenderPane}
             style={{ width: totalWidth }}
           >
             {centerHeaderElms}
-          </div>
-        </div>
+          </TableHeadRenderPane>
+        </CenterHeader>
         {hasPinnedEnd && (
-          <div className={classes.pinnedEndHeader}>{pinnedEndHeaderElms}</div>
+          <PinnedEndHeader>{pinnedEndHeaderElms}</PinnedEndHeader>
         )}
-      </div>
-      <div ref={tableBodyRef} className={classes.tableBody}>
+      </TableHead>
+      <TableBody ref={tableBodyRef}>
         <Scroller
           onScroll={handleVerticalScroll}
           scrollHeight={totalHeight}
           scrollWidth={totalWidth}
         >
-          <div className={classes.tableColumns}>
+          <TableColumns>
             {hasPinnedStart && (
-              <div className={classes.pinnedStartColumns}>
+              <PinnedStartColumns>
                 <div ref={pinnedStartRenderPaneRef}>{pinnedStartElms}</div>
-              </div>
+              </PinnedStartColumns>
             )}
-            <div ref={centerColumnsRef} className={classes.centerColumns}>
+            <CenterColumns ref={centerColumnsRef}>
               <div
                 ref={tableBodyRenderPaneRef}
-                className={classes.tableBodyRenderPane}
                 style={{ width: totalWidth, height: totalHeight }}
               >
                 {centerElms}
               </div>
-            </div>
+            </CenterColumns>
             {hasPinnedEnd && (
-              <div className={classes.pinnedEndColumns}>
+              <PinnedEndColumns>
                 <div ref={pinnedEndRenderPaneRef}>{pinnedEndElms}</div>
-              </div>
+              </PinnedEndColumns>
             )}
-          </div>
+          </TableColumns>
         </Scroller>
-      </div>
-    </div>
+      </TableBody>
+    </Root>
   );
 }
