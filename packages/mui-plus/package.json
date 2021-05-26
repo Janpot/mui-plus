@@ -17,12 +17,12 @@
     "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern"
   },
   "peerDependencies": {
+    "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^4.11.2",
     "react": "^17.0.1",
     "react-dom": "*"
   },
   "dependencies": {
-    "@material-ui/core": "^4.11.3",
-    "@material-ui/icons": "^4.11.2",
     "clsx": "^1.1.1",
     "react-transition-group": "^4.4.1"
   }
