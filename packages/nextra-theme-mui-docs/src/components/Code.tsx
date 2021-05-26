@@ -1,37 +1,39 @@
 import * as React from 'react';
 import Highlight, { defaultProps, Language } from 'prism-react-renderer';
-import { makeStyles, useTheme } from '@material-ui/core';
+import { useTheme, experimentalStyled as styled } from '@material-ui/core';
 import clsx from 'clsx';
 import useIsMounted from '../useIsMounted';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    whiteSpace: 'pre',
-    display: 'block',
-    borderRadius: theme.shape.borderRadius,
-    overflow: 'scroll',
-    padding: theme.spacing(2),
-  },
-  line: {
-    display: 'table-row',
-    '&$highlight': {
-      background: 'var(--c-highlight)',
-      margin: '0 -1rem',
-      padding: '0 1rem',
-    },
-  },
-  highlight: {},
-  lineNumber: {
-    display: 'table-cell',
-    textAlign: 'right',
-    paddingRight: '1em',
-    userSelect: 'none',
-    opacity: 0.5,
-  },
-  lineContent: {
-    display: 'table-cell',
-  },
+const CLASS_HIGHLIGHT = 'NextraMuiThemeHighlight';
+
+const Root = styled('code')(({ theme }) => ({
+  whiteSpace: 'pre',
+  display: 'block',
+  borderRadius: theme.shape.borderRadius,
+  overflow: 'scroll',
+  padding: theme.spacing(2),
 }));
+
+const CodeLine = styled('div')({
+  display: 'table-row',
+  [`&.${CLASS_HIGHLIGHT}`]: {
+    background: 'var(--c-highlight)',
+    margin: '0 -1rem',
+    padding: '0 1rem',
+  },
+});
+
+const LineNumber = styled('span')({
+  display: 'table-cell',
+  textAlign: 'right',
+  paddingRight: '1em',
+  userSelect: 'none',
+  opacity: 0.5,
+});
+
+const LineContent = styled('span')({
+  display: 'table-cell',
+});
 
 export interface CodeProps {
   children: string;
@@ -49,10 +51,9 @@ export default function Code({
   lineNumbers,
 }: CodeProps) {
   const mounted = useIsMounted();
-  const classes = useStyles();
   const theme = useTheme();
 
-  if (!mounted) return <code className={classes.root}>{children}</code>;
+  if (!mounted) return <Root>{children}</Root>;
 
   // https://mdxjs.com/guides/syntax-highlighting#all-together
   return (
@@ -63,32 +64,27 @@ export default function Code({
       theme={theme.prism}
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
-        <code
-          className={clsx(classNameProp, className, classes.root)}
-          style={style}
-        >
+        <Root className={clsx(classNameProp, className)} style={style}>
           {tokens.map((line, i) => {
             const { className, ...props } = getLineProps({ line, key: i });
             return (
-              <div
+              <CodeLine
                 key={i}
-                className={clsx(className, classes.line, {
-                  [classes.highlight]: highlight.includes(i + 1),
+                className={clsx(className, {
+                  [CLASS_HIGHLIGHT]: highlight.includes(i + 1),
                 })}
                 {...props}
               >
-                {lineNumbers ? (
-                  <span className={classes.lineNumber}>{i + 1}</span>
-                ) : null}
-                <span className={classes.lineContent}>
+                {lineNumbers ? <LineNumber>{i + 1}</LineNumber> : null}
+                <LineContent>
                   {line.map((token, key) => (
                     <span key={key} {...getTokenProps({ token, key })} />
                   ))}
-                </span>
-              </div>
+                </LineContent>
+              </CodeLine>
             );
           })}
-        </code>
+        </Root>
       )}
     </Highlight>
   );
