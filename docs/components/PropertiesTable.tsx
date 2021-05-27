@@ -1,5 +1,4 @@
 import {
-  Paper,
   TableContainer,
   Table,
   TableHead,
@@ -17,7 +16,7 @@ interface ApiDocProps {
 export default function ApiDoc({ props }: ApiDocProps) {
   const properties = React.useMemo(() => Object.entries(props), [props]);
   return (
-    <TableContainer component={Paper}>
+    <TableContainer>
       <Table aria-label="properties table">
         <TableHead>
           <TableRow>

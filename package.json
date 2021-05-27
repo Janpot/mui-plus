@@ -12,6 +12,7 @@
     "docgen": "./scripts/api-docgen.ts"
   },
   "devDependencies": {
+    "@types/node": "^15.6.1",
     "@types/prettier": "^2.2.3",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
@@ -20,7 +21,8 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "prettier": "^2.3.0",
     "react-docgen-typescript": "^1.22.0",
-    "ts-node": "^10.0.0"
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2"
   },
   "dependencies": {}
 }
