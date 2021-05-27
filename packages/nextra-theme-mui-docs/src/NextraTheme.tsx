@@ -36,6 +36,7 @@ import { PrismTheme } from 'prism-react-renderer';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { ThemeProvider, useTheme as useNextTheme } from 'next-themes';
 import useIsMounted from './useIsMounted';
+import Head from 'next/head';
 
 declare module '@material-ui/core' {
   interface ThemeOptions {
@@ -137,6 +138,12 @@ const DocsDrawer = styled(Drawer)({
   },
 });
 
+const DrawerListItemText = styled(ListItemText)(({ styleProps }) => ({
+  '& .MuiListItemText-primary':
+    // @ts-expect-error
+    styleProps?.level <= 0 ? { fontWeight: 'bold' } : {},
+}));
+
 interface SideBarItemProps {
   level?: number;
   entry: NextraPageMapEntry;
@@ -167,7 +174,10 @@ function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
       href={entry.route}
       style={{ paddingLeft: 8 + level * 16 + 24 }}
     >
-      <ListItemText primary={entry.frontMatter?.title ?? entry.name} />
+      <DrawerListItemText
+        styleProps={{ level }}
+        primary={entry.frontMatter?.title ?? entry.name}
+      />
     </ListItem>
   );
 }
@@ -208,7 +218,10 @@ function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
         style={{ paddingLeft: 8 + level * 16 }}
       >
         {open ? <ArrowDropDown /> : <ArrowRight />}
-        <ListItemText primary={entry.frontMatter?.title ?? entry.name} />
+        <DrawerListItemText
+          styleProps={{ level }}
+          primary={entry.frontMatter?.title ?? entry.name}
+        />
       </ListItem>
       <Collapse in={open}>
         <SideBarItemList entries={entry.children} level={level + 1} />
@@ -306,13 +319,11 @@ function Layout({ children, opts, config }: LayoutProps) {
             <MenuIcon />
           </DocsMenuButton>
           <FlexFill />
-          <IconButton
-            component={Link}
-            noLinkStyle
-            href="https://github.com/..."
-          >
-            <GitHubIcon />
-          </IconButton>
+          {config.repository && (
+            <IconButton component={Link} noLinkStyle href={config.repository}>
+              <GitHubIcon />
+            </IconButton>
+          )}
           <ThemeSwitcher />
         </Toolbar>
       </DocsHeader>
@@ -404,6 +415,8 @@ export interface NextraRootProps {
 
 export interface MuiNextraThemeConfig {
   logo?: React.ReactNode;
+  title?: string;
+  repository?: string;
 }
 
 interface MuiThemedContentProps {
@@ -449,13 +462,26 @@ function sortPageMap(pageMap: PageMap): PageMap {
 
 export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
   return (
-    <ThemeProvider>
-      <MuiThemedContent>
-        <CssBaseline />
-        <ScrollSpyProvider>
-          <Layout {...props} opts={opts} config={config || {}} />
-        </ScrollSpyProvider>
-      </MuiThemedContent>
-    </ThemeProvider>
+    <>
+      <CssBaseline />
+      <ThemeProvider>
+        <MuiThemedContent>
+          <Head>
+            <title>{config.title}</title>
+            <meta
+              name="viewport"
+              content="minimum-scale=1, initial-scale=1, width=device-width"
+            />
+            <link
+              rel="stylesheet"
+              href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+            />
+          </Head>
+          <ScrollSpyProvider>
+            <Layout {...props} opts={opts} config={config || {}} />
+          </ScrollSpyProvider>
+        </MuiThemedContent>
+      </ThemeProvider>
+    </>
   );
 }

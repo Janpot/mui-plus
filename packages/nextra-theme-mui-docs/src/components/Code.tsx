@@ -55,7 +55,6 @@ export default function Code({
 
   if (!mounted) return <Root>{children}</Root>;
 
-  // https://mdxjs.com/guides/syntax-highlighting#all-together
   return (
     <Highlight
       {...defaultProps}

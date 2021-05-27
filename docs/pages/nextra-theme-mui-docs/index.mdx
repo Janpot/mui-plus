@@ -21,18 +21,8 @@ module.exports = withNextra({});
 import * as React from 'react';
 
 export default {
-  logo: (
-    <>
-      <span>Mui+</span>
-    </>
-  ),
-  head: (
-    <>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="description" content="Mui+: extensions for Material UI" />
-      <meta name="og:title" content="Mui+: extensions for Material UI" />
-    </>
-  ),
+  logo: <span>Mui+</span>,
+  title: 'Mui+: extensions for Material UI',
 };
 ```
 
@@ -63,19 +53,22 @@ module.exports = withNextra({
 });
 ```
 
-Create some example code
+Create some example code:
 
 ```tsx
 // ./Example.tsx
 import * as React from 'react';
 export default function MyComponent() {
   /// preview-start
-  return <div>Hello World</div>;
+  return <div>Hello World!</div>;
   /// preview-end
 }
 ```
 
+Then you can import it in your mdx files:
+
 ```tsx
+// ./pages/myExamplePage.ndx
 import CodeExample from 'nextra-theme-mui-docs/CodeExample';
 
 import Example from './Example';
@@ -86,12 +79,12 @@ import srcExample from './Example?raw';
 </CodeExample>;
 ```
 
-Will render
+That will render:
 
 import CodeExample from 'nextra-theme-mui-docs/CodeExample';
 
-import Example from './Example';
-import srcExample from './Example?raw';
+import Example from '../../examples/nextra-theme-mui-docs/Example';
+import srcExample from '../../examples/nextra-theme-mui-docs/Example?raw';
 
 <CodeExample src={srcExample}>
   <Example />

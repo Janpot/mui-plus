@@ -1,11 +1,9 @@
 import * as React from 'react';
 
 export default {
-  logo: (
-    <>
-      <span>Mui+</span>
-    </>
-  ),
+  logo: <span>Mui+</span>,
+  title: 'Mui+: extensions for Material UI',
+  repository: 'https://github.com/Janpot/mui-plus',
   head: (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />

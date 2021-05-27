@@ -3,7 +3,9 @@ import {
   IconButton,
   Snackbar,
   Toolbar,
+  Paper,
   experimentalStyled as styled,
+  PaperProps,
 } from '@material-ui/core';
 import * as React from 'react';
 import Code from './Code';
@@ -22,10 +24,10 @@ declare module '@material-ui/core' {
   }
 }
 
-const Container = styled('div')(({ theme }) => ({
-  background: theme.palette.mode === 'dark' ? '#333' : theme.palette.grey[100],
-  borderRadius: theme.shape.borderRadius,
-  padding: theme.spacing(6),
+const Container = styled((props: PaperProps) => (
+  <Paper variant="outlined" {...props} />
+))(({ theme }) => ({
+  padding: theme.spacing(3),
 }));
 
 const SrcToolbar = styled(Toolbar)(({ theme }) => ({
