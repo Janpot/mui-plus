@@ -146,11 +146,11 @@ const DrawerListItemText = styled(ListItemText)(({ styleProps }) => ({
 
 interface SideBarItemProps {
   level?: number;
-  entry: NextraPageMapEntry;
+  entry: SiteStructureEntry;
 }
 
 function SideBarItem({ entry, ...props }: SideBarItemProps) {
-  if (entry.children) {
+  if (entry.children.length > 0) {
     return <SideBarFolderItem entry={entry} {...props} />;
   } else {
     return <SideBarFileItem entry={entry} {...props} />;
@@ -159,7 +159,7 @@ function SideBarItem({ entry, ...props }: SideBarItemProps) {
 
 interface SideBarFileItemProps {
   level?: number;
-  entry: NextraPageMapFileEntry;
+  entry: SiteStructureEntry;
 }
 
 function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
@@ -174,17 +174,14 @@ function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
       href={entry.route}
       style={{ paddingLeft: 8 + level * 16 + 24 }}
     >
-      <DrawerListItemText
-        styleProps={{ level }}
-        primary={entry.frontMatter?.title ?? entry.name}
-      />
+      <DrawerListItemText styleProps={{ level }} primary={entry.title} />
     </ListItem>
   );
 }
 
 interface SideBarItemListProps {
   level?: number;
-  entries: PageMap;
+  entries: SiteStructureEntry[];
 }
 
 function SideBarItemList({ entries, level = 0 }: SideBarItemListProps) {
@@ -202,7 +199,7 @@ function SideBarItemList({ entries, level = 0 }: SideBarItemListProps) {
 
 interface SideBarFolderItemProps {
   level?: number;
-  entry: NextraPageMapFolderEntry;
+  entry: SiteStructureEntry;
 }
 
 function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
@@ -218,10 +215,7 @@ function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
         style={{ paddingLeft: 8 + level * 16 }}
       >
         {open ? <ArrowDropDown /> : <ArrowRight />}
-        <DrawerListItemText
-          styleProps={{ level }}
-          primary={entry.frontMatter?.title ?? entry.name}
-        />
+        <DrawerListItemText styleProps={{ level }} primary={entry.title} />
       </ListItem>
       <Collapse in={open}>
         <SideBarItemList entries={entry.children} level={level + 1} />
@@ -289,7 +283,7 @@ function Layout({ children, opts, config }: LayoutProps) {
   const activeSection = useActiveSection();
 
   const pageMap = React.useMemo(
-    () => sortPageMap(opts.pageMap),
+    () => parsePageMap(opts.pageMap),
     [opts.pageMap]
   );
 
@@ -438,12 +432,45 @@ interface NextraThemeProps {
   config: MuiNextraThemeConfig;
 }
 
-function sortPageMap(pageMap: PageMap): PageMap {
+function parseOrder(input: unknown): { name: string; title?: string }[] {
+  const result = [];
+  if (Array.isArray(input)) {
+    for (const item of input) {
+      if (typeof item === 'string') {
+        result.push({ name: item });
+      } else if (
+        item &&
+        typeof item === 'object' &&
+        typeof item.name === 'string'
+      ) {
+        result.push({
+          name: item.name as string,
+          frontMatter: {
+            title: typeof item.title === 'string' ? item.title : undefined,
+          },
+        });
+      }
+    }
+  }
+  return result;
+}
+
+interface SiteStructureEntry {
+  name: string;
+  title: string;
+  route: string;
+  children: SiteStructureEntry[];
+}
+
+function parsePageMap(pageMap: PageMap): SiteStructureEntry[] {
   const entryMap = new Map(pageMap.map((entry) => [entry.name, entry]));
   const indexEntry = entryMap.get('index');
-  const order: string[] = indexEntry?.frontMatter?.order ?? [];
-  const orderedEntryNames = new Set(order);
-  const orderedEntries = order.map((entryName) => entryMap.get(entryName));
+  const order = parseOrder(indexEntry?.frontMatter?.order);
+  const orderedEntryNames = new Set(order.map((entry) => entry.name));
+  const orderedEntries = order.map((orderEntry) => ({
+    ...orderEntry,
+    ...entryMap.get(orderEntry.name),
+  }));
   const unorderedEntries = pageMap.filter(
     (entry) => !orderedEntryNames.has(entry.name)
   );
@@ -453,10 +480,17 @@ function sortPageMap(pageMap: PageMap): PageMap {
   return allEntries.map((entry) =>
     entry.children
       ? {
-          ...entry,
-          children: sortPageMap(entry.children),
+          name: entry.name,
+          title: entry.frontMatter?.title ?? entry.name,
+          route: entry.route,
+          children: parsePageMap(entry.children),
         }
-      : entry
+      : {
+          name: entry.name,
+          title: entry.frontMatter?.title ?? entry.name,
+          route: entry.route,
+          children: [],
+        }
   );
 }
 
