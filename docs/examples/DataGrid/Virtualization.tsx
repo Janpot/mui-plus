@@ -10,14 +10,14 @@ const COLUMNS = 100000;
 const columns: ColumnDefinitions = [];
 const rows: { idx: number }[] = [];
 
-for (let columnIdx = 0; columnIdx <= COLUMNS; columnIdx++) {
+for (let columnIdx = 0; columnIdx < COLUMNS; columnIdx++) {
   columns.push({
     key: `col-${columnIdx}`,
     getValue: (row: any) => `value ${row.idx} ${columnIdx}`,
   });
 }
 
-for (let rowIdx = 0; rowIdx <= ROWS; rowIdx++) {
+for (let rowIdx = 0; rowIdx < ROWS; rowIdx++) {
   rows.push({ idx: rowIdx });
 }
 

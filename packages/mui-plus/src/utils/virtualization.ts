@@ -12,21 +12,21 @@ function _getInterSectingIndexVariable(
   itemCount: number,
   getItemOffset: (index: number) => number,
   offset: number,
-  first = 0,
-  last = itemCount - 1
+  sliceStart = 0,
+  sliceEnd = itemCount
 ): number {
-  if (first >= last) {
-    return first - 1;
+  if (sliceStart >= sliceEnd) {
+    return sliceStart;
   }
 
-  const pivot = first + Math.floor((last - first) / 2);
+  const pivot = sliceStart + Math.floor((sliceEnd - sliceStart) / 2);
   const itemOffset = getItemOffset(pivot);
-  if (offset < itemOffset) {
+  if (offset <= itemOffset) {
     return _getInterSectingIndexVariable(
       itemCount,
       getItemOffset,
       offset,
-      first,
+      sliceStart,
       pivot
     );
   } else {
@@ -35,7 +35,7 @@ function _getInterSectingIndexVariable(
       getItemOffset,
       offset,
       pivot + 1,
-      last
+      sliceEnd
     );
   }
 }

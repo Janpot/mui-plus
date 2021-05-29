@@ -11,8 +11,8 @@ import useResizeObserver from './useResizeObserver';
 // import useEventListener from './useEventListener';
 import clsx from 'clsx';
 import { useControlled } from './useControlled';
-import { clamp } from './math';
-import { getTableVirtualSlice } from './virtualization';
+import { clamp } from '../utils/math';
+import { getTableVirtualSlice } from '../utils/virtualization';
 import Scroller from './Scroller';
 
 const CLASS_RESIZING = 'NextraMuiThemeResizing';
