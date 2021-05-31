@@ -1,0 +1,36 @@
+{
+  "name": "site-search",
+  "version": "1.0.0",
+  "dependencies": {
+    "ajv": "7",
+    "execa": "^5.0.1",
+    "jsdom": "^16.6.0",
+    "node-fetch": "^2.6.1",
+    "sqlite": "^4.0.23",
+    "sqlite3": "^5.0.2",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^16.2.10",
+    "@types/node": "^15.6.1",
+    "@types/node-fetch": "^2.5.10",
+    "@types/sqlite3": "^3.1.7",
+    "microbundle": "^0.13.0"
+  },
+  "source": "./src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.module.js",
+  "exports": {
+    ".": "./dist/index.modern.js"
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "microbundle --jsxFragment React.Fragment --jsx 'React.createElement' --format es,cjs,modern ./*.ts",
+    "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern ./*.ts"
+  },
+  "bin": {
+    "site-search": "./bin/cli.ts"
+  },
+  "peerDependencies": {}
+}
