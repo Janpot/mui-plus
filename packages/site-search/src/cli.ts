@@ -120,48 +120,50 @@ async function main() {
       if (seen.has(url)) {
         return;
       }
+
       seen.add(url);
-      await queue.add(async () => {
-        const { pathname } = new URL(url);
+      const { pathname } = new URL(url);
+
+      const { window } = await queue.add(async () => {
         console.log(`Fetching ${url}`);
         const res = await fetch(url);
         const pageSrc = await res.text();
-        const { window } = new JSDOM(pageSrc, {
+        return new JSDOM(pageSrc, {
           url,
           contentType: res.headers.get('content-type') || 'text/html',
         });
-
-        const records = extractRecords(window.document.body, config.selectors);
-
-        await Promise.all(
-          records.map(async (record) => {
-            await db.run(
-              `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              record.lvl0,
-              record.lvl1,
-              record.lvl2,
-              record.lvl3,
-              record.lvl4,
-              record.lvl5,
-              record.text,
-              pathname,
-              record.anchor
-            );
-          })
-        );
-
-        await Promise.all(
-          Array.from(window.document.querySelectorAll('a'), async (anchor) => {
-            const url = new URL(anchor.href);
-            url.search = '';
-            url.hash = '';
-            if (url.origin === config.siteOrigin) {
-              const urlStr = url.toString();
-              await crawl(url.toString());
-            }
-          })
-        );
       });
+
+      const records = extractRecords(window.document.body, config.selectors);
+
+      await Promise.all(
+        records.map(async (record) => {
+          await db.run(
+            `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            record.lvl0,
+            record.lvl1,
+            record.lvl2,
+            record.lvl3,
+            record.lvl4,
+            record.lvl5,
+            record.text,
+            pathname,
+            record.anchor
+          );
+        })
+      );
+
+      await Promise.all(
+        Array.from(window.document.querySelectorAll('a'), async (anchor) => {
+          const url = new URL(anchor.href);
+          url.search = '';
+          url.hash = '';
+          if (url.origin === config.siteOrigin) {
+            const urlStr = url.toString();
+            await crawl(url.toString());
+          }
+        })
+      );
     };
 
     await crawl(siteReadyProbeUrl.toString());
