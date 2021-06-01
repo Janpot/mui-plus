@@ -187,12 +187,9 @@ interface SideBarItemListProps {
 function SideBarItemList({ entries, level = 0 }: SideBarItemListProps) {
   return (
     <List dense>
-      {entries.map((entry) => {
-        if (entry.name.startsWith('_')) {
-          return null;
-        }
-        return <SideBarItem key={entry.name} entry={entry} level={level} />;
-      })}
+      {entries.map((entry) => (
+        <SideBarItem key={entry.name} entry={entry} level={level} />
+      ))}
     </List>
   );
 }
@@ -477,21 +474,28 @@ function parsePageMap(pageMap: PageMap): SiteStructureEntry[] {
   const allEntries = [...orderedEntries, ...unorderedEntries].filter(
     Boolean
   ) as NextraPageMapEntry[];
-  return allEntries.map((entry) =>
-    entry.children
-      ? {
-          name: entry.name,
-          title: entry.frontMatter?.title ?? entry.name,
-          route: entry.route,
-          children: parsePageMap(entry.children),
-        }
-      : {
-          name: entry.name,
-          title: entry.frontMatter?.title ?? entry.name,
-          route: entry.route,
-          children: [],
-        }
-  );
+  return allEntries
+    .map((entry) =>
+      entry.children
+        ? {
+            name: entry.name,
+            title: entry.frontMatter?.title ?? entry.name,
+            route: entry.route,
+            children: parsePageMap(entry.children),
+          }
+        : {
+            name: entry.name,
+            title: entry.frontMatter?.title ?? entry.name,
+            route: entry.route,
+            children: [],
+          }
+    )
+    .filter(
+      (entry) =>
+        !entry.name.startsWith('_') &&
+        entry.route !== '/api' &&
+        !entry.route.startsWith('/api/')
+    );
 }
 
 export default function NextraTheme({ props, opts, config }: NextraThemeProps) {

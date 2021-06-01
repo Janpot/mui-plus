@@ -102,7 +102,7 @@ export default async function run() {
     }
 
     console.log(`Creating index at "${indexPath}"`);
-    await db.exec(`DROP TABLE IF EXISTS site_search_index`);
+    await db.exec(`DROP TABLE IF EXISTS site_search_index;`);
     await db.exec(
       `CREATE VIRTUAL TABLE site_search_index USING fts5(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path UNINDEXED, anchor UNINDEXED)`
     );
@@ -142,7 +142,7 @@ export default async function run() {
         await Promise.all(
           records.map(async (record) => {
             await db.run(
-              `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               record.lvl0,
               record.lvl1,
               record.lvl2,
