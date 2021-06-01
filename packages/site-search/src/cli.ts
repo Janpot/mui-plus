@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import * as sqlite3 from 'sqlite3';
-import { Database, open } from 'sqlite';
+import { open } from 'sqlite';
 import execa from 'execa';
 import fetch from 'node-fetch';
 import Ajv, { JSONSchemaType } from 'ajv';
