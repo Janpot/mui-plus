@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import * as sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import { Database, open } from 'sqlite';
 import execa from 'execa';
 import fetch from 'node-fetch';
 import Ajv, { JSONSchemaType } from 'ajv';
@@ -73,14 +73,13 @@ async function waitUntilSiteReady(url: URL): Promise<void> {
 }
 
 async function main() {
-  let db;
+  let db = await open({
+    filename: indexPath,
+    driver: sqlite3.Database,
+  });
+
   let siteProcess;
   try {
-    db = await open({
-      filename: indexPath,
-      driver: sqlite3.Database,
-    });
-
     console.log(`Reading configuration at "${configPath}"`);
     const config = require(configPath);
 
@@ -98,9 +97,9 @@ async function main() {
         lvl3,
         lvl4,
         lvl5,
-        lvl6,
         text,
-        url UNINDEXED
+        path UNINDEXED,
+        anchor UNINDEXED
       )`
     );
 
@@ -123,6 +122,7 @@ async function main() {
       }
       seen.add(url);
       await queue.add(async () => {
+        const { pathname } = new URL(url);
         console.log(`Fetching ${url}`);
         const res = await fetch(url);
         const pageSrc = await res.text();
@@ -130,10 +130,25 @@ async function main() {
           url,
           contentType: res.headers.get('content-type') || 'text/html',
         });
-        const title = window.document.querySelector('title')?.textContent;
 
-        console.log(extractRecords(window.document.body, config.selectors));
-        console.log(`Page title "${title}"`);
+        const records = extractRecords(window.document.body, config.selectors);
+
+        await Promise.all(
+          records.map(async (record) => {
+            await db.run(
+              `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              record.lvl0,
+              record.lvl1,
+              record.lvl2,
+              record.lvl3,
+              record.lvl4,
+              record.lvl5,
+              record.text,
+              pathname,
+              record.anchor
+            );
+          })
+        );
 
         await Promise.all(
           Array.from(window.document.querySelectorAll('a'), async (anchor) => {
@@ -152,7 +167,7 @@ async function main() {
     await crawl(siteReadyProbeUrl.toString());
   } finally {
     console.log('Cleaning up');
-    await Promise.all([db?.close(), siteProcess?.cancel()]);
+    await Promise.all([db.close(), siteProcess?.cancel()]);
   }
 }
 
