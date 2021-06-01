@@ -72,6 +72,19 @@ async function waitUntilSiteReady(url: URL): Promise<void> {
   }
 }
 
+function extractLinks(doc: Document, config: SiteSearchConfig): string[] {
+  const result: string[] = [];
+  for (const anchor of doc.querySelectorAll('a')) {
+    const url = new URL(anchor.href);
+    url.search = '';
+    url.hash = '';
+    if (url.origin === config.siteOrigin) {
+      result.push(url.toString());
+    }
+  }
+  return result;
+}
+
 async function main() {
   let db = await open({
     filename: indexPath,
@@ -89,18 +102,9 @@ async function main() {
     }
 
     console.log(`Creating index at "${indexPath}"`);
+    await db.exec(`DROP TABLE IF EXISTS site_search_index`);
     await db.exec(
-      `CREATE VIRTUAL TABLE IF NOT EXISTS site_search_index USING fts5(
-        lvl0,
-        lvl1,
-        lvl2,
-        lvl3,
-        lvl4,
-        lvl5,
-        text,
-        path UNINDEXED,
-        anchor UNINDEXED
-      )`
+      `CREATE VIRTUAL TABLE site_search_index USING fts5(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path UNINDEXED, anchor UNINDEXED)`
     );
 
     console.log(`Starting site with "${config.siteStartCmd}"`);
@@ -124,46 +128,40 @@ async function main() {
       seen.add(url);
       const { pathname } = new URL(url);
 
-      const { window } = await queue.add(async () => {
+      const links = await queue.add(async () => {
         console.log(`Fetching ${url}`);
         const res = await fetch(url);
         const pageSrc = await res.text();
-        return new JSDOM(pageSrc, {
+        const { window } = new JSDOM(pageSrc, {
           url,
           contentType: res.headers.get('content-type') || 'text/html',
         });
+
+        const records = extractRecords(window.document.body, config.selectors);
+
+        await Promise.all(
+          records.map(async (record) => {
+            await db.run(
+              `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              record.lvl0,
+              record.lvl1,
+              record.lvl2,
+              record.lvl3,
+              record.lvl4,
+              record.lvl5,
+              record.text,
+              pathname,
+              record.anchor
+            );
+          })
+        );
+
+        const links = extractLinks(window.document, config);
+
+        return links;
       });
 
-      const records = extractRecords(window.document.body, config.selectors);
-
-      await Promise.all(
-        records.map(async (record) => {
-          await db.run(
-            `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor)VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            record.lvl0,
-            record.lvl1,
-            record.lvl2,
-            record.lvl3,
-            record.lvl4,
-            record.lvl5,
-            record.text,
-            pathname,
-            record.anchor
-          );
-        })
-      );
-
-      await Promise.all(
-        Array.from(window.document.querySelectorAll('a'), async (anchor) => {
-          const url = new URL(anchor.href);
-          url.search = '';
-          url.hash = '';
-          if (url.origin === config.siteOrigin) {
-            const urlStr = url.toString();
-            await crawl(url.toString());
-          }
-        })
-      );
+      await Promise.all(links.map((link) => crawl(link)));
     };
 
     await crawl(siteReadyProbeUrl.toString());
