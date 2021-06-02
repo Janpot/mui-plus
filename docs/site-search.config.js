@@ -2,6 +2,7 @@ module.exports = {
   siteStartCmd: 'npm start',
   siteOrigin: 'http://localhost:3000',
   siteReadyProbe: '/',
+  outputPath: './site-search.json',
   selectors: {
     lvl0: 'title',
     lvl1: 'article h1',

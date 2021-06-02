@@ -1,21 +1,20 @@
-import { resolve } from 'path';
-import * as sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import { resolve, dirname } from 'path';
 import execa from 'execa';
 import fetch from 'node-fetch';
 import Ajv, { JSONSchemaType } from 'ajv';
 import { URL } from 'url';
 import { JSDOM } from 'jsdom';
 import extractRecords from './extractRecords';
-import { SiteSearchConfig } from './types';
+import { SiteSearchConfig, IndexedDocument } from './types';
 import PromiseQueue from './PromiseQueue';
+import lunr from 'lunr';
+import { writeFile } from 'fs/promises';
 
 const ajv = new Ajv();
 
 const projectRoot = process.cwd();
 
 const configPath = resolve(projectRoot, 'site-search.config');
-const indexPath = resolve(projectRoot, 'site-search.db');
 
 const configSchema: JSONSchemaType<SiteSearchConfig> = {
   type: 'object',
@@ -23,6 +22,7 @@ const configSchema: JSONSchemaType<SiteSearchConfig> = {
     siteStartCmd: { type: 'string' },
     siteOrigin: { type: 'string' },
     siteReadyProbe: { type: 'string' },
+    outputPath: { type: 'string' },
     selectors: {
       type: 'object',
       properties: {
@@ -86,26 +86,17 @@ function extractLinks(doc: Document, config: SiteSearchConfig): string[] {
 }
 
 export default async function run() {
-  const db = await open({
-    filename: indexPath,
-    driver: sqlite3.Database,
-  });
-
   let siteProcess;
   try {
     console.log(`Reading configuration at "${configPath}"`);
-    const config = require(configPath);
+    const { default: config } = await import(configPath);
 
     if (!validateConfig(config)) {
       console.log(validateConfig.errors);
       return;
     }
 
-    console.log(`Creating index at "${indexPath}"`);
-    await db.exec(`DROP TABLE IF EXISTS site_search_index;`);
-    await db.exec(
-      `CREATE VIRTUAL TABLE site_search_index USING fts5(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path UNINDEXED, anchor UNINDEXED)`
-    );
+    const resolvedOutputPath = resolve(dirname(configPath), config.outputPath);
 
     console.log(`Starting site with "${config.siteStartCmd}"`);
     siteProcess = execa.command(config.siteStartCmd, {
@@ -119,6 +110,8 @@ export default async function run() {
 
     const queue = new PromiseQueue({ concurrency: 5 });
     const seen: Set<string> = new Set();
+
+    const corpus: IndexedDocument[] = [];
 
     const crawl = async (url: string) => {
       if (seen.has(url)) {
@@ -139,21 +132,8 @@ export default async function run() {
 
         const records = extractRecords(window.document.body, config.selectors);
 
-        await Promise.all(
-          records.map(async (record) => {
-            await db.run(
-              `INSERT INTO site_search_index(lvl0, lvl1, lvl2, lvl3, lvl4, lvl5, text, path, anchor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              record.lvl0,
-              record.lvl1,
-              record.lvl2,
-              record.lvl3,
-              record.lvl4,
-              record.lvl5,
-              record.text,
-              pathname,
-              record.anchor
-            );
-          })
+        corpus.push(
+          ...records.map((record) => ({ path: pathname, ...record }))
         );
 
         const links = extractLinks(window.document, config);
@@ -165,8 +145,33 @@ export default async function run() {
     };
 
     await crawl(siteReadyProbeUrl.toString());
+
+    const index = lunr(function () {
+      this.ref('id');
+      this.field('lvl0');
+      this.field('lvl1');
+      this.field('lvl2');
+      this.field('lvl3');
+      this.field('lvl4');
+      this.field('lvl5');
+      this.field('text');
+      this.metadataWhitelist = ['position'];
+
+      corpus.forEach((record, id) => {
+        this.add({ id, ...record });
+      });
+    });
+
+    console.log(`Writing output at "${resolvedOutputPath}"`);
+    await writeFile(
+      resolvedOutputPath,
+      JSON.stringify({
+        corpus,
+        index: index.toJSON(),
+      })
+    );
   } finally {
     console.log('Cleaning up');
-    await Promise.all([db.close(), siteProcess?.cancel()]);
+    await siteProcess?.cancel();
   }
 }

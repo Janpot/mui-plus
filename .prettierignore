@@ -2,3 +2,5 @@ dist
 .next
 __fixtures__
 public
+
+docs/site-search.json

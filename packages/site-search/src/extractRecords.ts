@@ -1,12 +1,4 @@
-import { ContentSelectors } from './types';
-
-type Level = keyof ContentSelectors;
-
-type IndexedRecord = Partial<
-  Record<Level, string> & {
-    anchor: string;
-  }
->;
+import { ContentSelectors, IndexedRecord, Level } from './types';
 
 const levels: Level[] = [
   'lvl0',

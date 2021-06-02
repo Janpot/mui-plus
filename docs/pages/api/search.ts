@@ -1,2 +1,3 @@
 import handler from 'site-search/handler';
-export default handler();
+import index from '../../site-search.json';
+export default handler(index);
