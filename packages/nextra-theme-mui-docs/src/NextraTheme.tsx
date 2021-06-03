@@ -310,6 +310,7 @@ function Layout({ children, opts, config }: LayoutProps) {
             <MenuIcon />
           </DocsMenuButton>
           <FlexFill />
+          {config.search}
           {config.repository && (
             <IconButton component={Link} noLinkStyle href={config.repository}>
               <GitHubIcon />
@@ -406,6 +407,7 @@ export interface NextraRootProps {
 
 export interface MuiNextraThemeConfig {
   logo?: React.ReactNode;
+  search?: React.ReactNode;
   title?: string;
   repository?: string;
 }

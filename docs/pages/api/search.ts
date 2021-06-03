@@ -1,3 +1,3 @@
 import handler from 'site-search/handler';
-import index from '../../site-search.json';
-export default handler(index);
+import siteSearchData from '../../site-search.json';
+export default handler({ data: siteSearchData });

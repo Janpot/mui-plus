@@ -16,7 +16,8 @@
     "nextra-theme-mui-docs": "1.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "site-search": "1.0.0"
+    "site-search": "1.0.0",
+    "swr": "^0.5.6"
   },
   "scripts": {
     "dev": "next",

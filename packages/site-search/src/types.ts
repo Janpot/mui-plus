@@ -1,12 +1,18 @@
-export interface ContentSelectors {
-  lvl0: string;
-  lvl1: string;
-  lvl2: string;
-  lvl3: string;
-  lvl4: string;
-  lvl5: string;
-  text: string;
-}
+export const LEVELS = [
+  'lvl0',
+  'lvl1',
+  'lvl2',
+  'lvl3',
+  'lvl4',
+  'lvl5',
+  'text',
+] as const;
+
+export type Level = typeof LEVELS[number];
+
+export type ContentSelectors = {
+  [key in Level]: string;
+};
 
 export interface SiteSearchConfig {
   siteStartCmd: string;
@@ -15,8 +21,6 @@ export interface SiteSearchConfig {
   outputPath: string;
   selectors: ContentSelectors;
 }
-
-export type Level = keyof ContentSelectors;
 
 export type IndexedRecord = Partial<
   Record<Level, string> & {
