@@ -1,6 +1,6 @@
 import { MDXProvider, MDXProviderComponents } from '@mdx-js/react';
 import Slugger from 'github-slugger';
-import Link from './Link';
+import Link from './components/Link';
 import * as React from 'react';
 import {
   experimentalStyled as styled,

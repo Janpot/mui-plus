@@ -20,7 +20,8 @@
   "exports": {
     ".": "./dist/index.modern.js",
     "./CodeExample": "./dist/CodeExample.modern.js",
-    "./Code": "./dist/Code.modern.js"
+    "./Code": "./dist/Code.modern.js",
+    "./Link": "./dist/Link.modern.js"
   },
   "types": "./dist/index.d.ts",
   "scripts": {

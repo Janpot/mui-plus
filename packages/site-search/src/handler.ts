@@ -124,20 +124,12 @@ function buildSnippet(
   parts.push(text.slice(i, Math.min(sliceEnd, text.length)));
 
   if (isTruncatedStart) {
-    parts[0] = '...' + parts[0];
+    parts[0] = '…' + parts[0];
   }
 
   if (isTruncatedEnd) {
-    parts[parts.length - 1] = parts[parts.length - 1] + '...';
+    parts[parts.length - 1] = parts[parts.length - 1] + '…';
   }
-
-  /* 
-  const truncated = [
-    isTruncatedStart ? '...' : '',
-    text.slice(Math.max(0, sliceStart), Math.min(sliceEnd, text.length)),
-    isTruncatedEnd ? '...' : '',
-  ].join(''); 
-*/
 
   return { parts };
 }
@@ -203,7 +195,7 @@ export default function (options: Options) {
   return async (req: IncomingMessage, res: ServerResponse) => {
     const { searchParams } = new URL(req.url!, 'http://x');
     const query = searchParams.get('q');
-    const results = query ? await search(options.data, query) : [];
+    const results = query ? await search(options.data, query + '*') : [];
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ results }));
   };
