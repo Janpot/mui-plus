@@ -28,6 +28,12 @@ const Search = styled('div')(({ theme }) => ({
     marginLeft: theme.spacing(1),
     width: 'auto',
   },
+  [`& .${autocompleteClasses.clearIndicator}`]: {
+    color: 'inherit',
+  },
+  [`& .${autocompleteClasses.endAdornment}`]: {
+    right: theme.spacing(1),
+  },
 }));
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
@@ -57,7 +63,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchResult = styled('li')({
+const SearchResult = styled('div')({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'flex-start',
@@ -103,7 +109,7 @@ function CustomPopper(props: PopperProps) {
 }
 
 const AppBarSearchInput = React.forwardRef<HTMLDivElement, InputBaseProps>(
-  (props, ref) => {
+  ({ className, ...props }, ref) => {
     return (
       <Search ref={ref}>
         <SearchIconWrapper>
@@ -148,7 +154,7 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
       }}
       renderInput={(params) => (
         <AppBarSearchInput
-          ref={params.InputProps.ref}
+          {...params.InputProps}
           inputProps={params.inputProps}
         />
       )}
