@@ -30,7 +30,7 @@ import Slugger from 'github-slugger';
 import innerText from 'react-innertext';
 import { ScrollSpyProvider, useActiveSection } from './useScrollSpy';
 import clsx from 'clsx';
-import prismLight from 'prism-react-renderer/themes/vsLight';
+import prismLight from 'prism-react-renderer/themes/duotoneLight';
 import prismDark from 'prism-react-renderer/themes/vsDark';
 import { PrismTheme } from 'prism-react-renderer';
 import GitHubIcon from '@material-ui/icons/GitHub';
@@ -51,7 +51,7 @@ const LIGHT = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#556cd6',
+      main: '#0097a7',
     },
     secondary: {
       main: '#19857b',
@@ -238,7 +238,11 @@ function ThemeSwitcher() {
   }, [theme, setTheme]);
 
   return (
-    <IconButton disabled={theme === undefined} onClick={toggleTheme}>
+    <IconButton
+      disabled={theme === undefined}
+      onClick={toggleTheme}
+      color="inherit"
+    >
       {theme === 'dark' ? <LightIcon /> : <DarkIcon />}
     </IconButton>
   );
@@ -299,7 +303,11 @@ function Layout({ children, opts, config }: LayoutProps) {
   return (
     <LayoutRoot>
       <CssBaseline />
-      <DocsHeader position="fixed" color="default">
+      {/* TODO: color behavior will be default in future version */}
+      <DocsHeader
+        position="fixed"
+        color={muiTheme.palette.mode === 'light' ? 'primary' : 'default'}
+      >
         <Toolbar>
           <DocsMenuButton
             color="inherit"
@@ -310,9 +318,14 @@ function Layout({ children, opts, config }: LayoutProps) {
             <MenuIcon />
           </DocsMenuButton>
           <FlexFill />
-          {config.search}
+          <Box mr={2}>{config.search}</Box>
           {config.repository && (
-            <IconButton component={Link} noLinkStyle href={config.repository}>
+            <IconButton
+              component={Link}
+              noLinkStyle
+              href={config.repository}
+              color="inherit"
+            >
               <GitHubIcon />
             </IconButton>
           )}

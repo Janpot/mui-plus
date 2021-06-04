@@ -1,6 +1,8 @@
 import { TextField } from '@material-ui/core';
 import * as React from 'react';
-import SearchBox from './components/SearchBox';
+import dynamic from 'next/dynamic';
+
+const SearchBox = dynamic(() => import('./components/SearchBox'));
 
 export default {
   logo: <span>Mui+</span>,

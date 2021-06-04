@@ -162,7 +162,6 @@ async function search(
       result.matchData.metadata as DocMatchesPositions
     );
     const snippets = buildSnippets(doc, positions);
-    console.log(JSON.stringify(snippets, null, 2));
 
     return {
       doc,
