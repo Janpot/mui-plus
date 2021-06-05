@@ -8,7 +8,6 @@ import {
   autocompleteClasses,
   InputBaseProps,
   Divider,
-  TextField,
 } from '@material-ui/core';
 import * as React from 'react';
 import { SearchApiResponse } from 'site-search/handler';
@@ -66,14 +65,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const SearchResult = styled('div')({
   display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-});
-const SearchResultSection = styled('div')({});
-const SearchResultContent = styled('div')({
-  display: 'flex',
   flexDirection: 'row',
   alignItems: 'flex-start',
+  flex: 1,
 });
 const SearchResultTitle = styled('div')(({ theme }) => ({
   ...theme.typography.body2,
@@ -124,7 +118,6 @@ const AppBarSearchField = React.forwardRef<HTMLDivElement, InputBaseProps>(
         </SearchIconWrapper>
         <StyledInputBase
           placeholder="Search…"
-          className={className}
           {...props}
           inputProps={{ 'aria-label': 'search', ...props.inputProps }}
         />
@@ -132,6 +125,14 @@ const AppBarSearchField = React.forwardRef<HTMLDivElement, InputBaseProps>(
     );
   }
 );
+
+function useLatest<S>(value: S | undefined): S | undefined {
+  const latest = React.useRef(value);
+  if (value !== undefined) {
+    latest.current = value;
+  }
+  return latest.current;
+}
 
 function identity<T>(x: T): T {
   return x;
@@ -146,17 +147,38 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
   const { data } = useSWR<SearchApiResponse>(
     input ? `${endpoint}?q=${input}` : null
   );
+
+  const latestResults = useLatest(input ? data?.results : []);
+
   const router = useRouter();
+
+  const sortedOptions = React.useMemo(() => {
+    if (!latestResults) {
+      return [];
+    } else {
+      const lvl0Values = [
+        ...new Set(latestResults.map((result) => result.doc.lvl0)),
+      ];
+      return lvl0Values.flatMap((lvl0) =>
+        latestResults.filter((result) => result.doc.lvl0 === lvl0)
+      );
+    }
+  }, [latestResults]);
+
   return (
     <Autocomplete
       onInputChange={(_event, newValue) => setInput(newValue)}
-      options={data?.results || []}
+      options={sortedOptions}
       filterOptions={identity}
       onChange={(_event, option) => {
-        setInput('');
         if (option && typeof option !== 'string') {
           router.push(
-            option.doc.path + (option.doc.anchor ? `#${option.doc.anchor}` : '')
+            option.doc.path +
+              (option.doc.anchor ? `#${option.doc.anchor}` : ''),
+            undefined,
+            {
+              scroll: true,
+            }
           );
         }
       }}
@@ -166,6 +188,7 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
           inputProps={params.inputProps}
         />
       )}
+      groupBy={(option) => option.doc.lvl0 || ''}
       PopperComponent={CustomPopper}
       freeSolo
       disableListWrap
@@ -186,26 +209,22 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
         return (
           <li {...props}>
             <SearchResult>
-              <SearchResultSection>{section}</SearchResultSection>
-              <Divider flexItem />
-              <SearchResultContent>
-                <SearchResultTitle>{title}</SearchResultTitle>
-                <Divider orientation="vertical" flexItem />
-                <SearchResultBody>
-                  <SearchResultSubtitle>{subtitle}</SearchResultSubtitle>
-                  <SearchResultText>
-                    {option.snippets.text
-                      ? option.snippets.text.parts.map((part, i) =>
-                          i % 2 === 1 ? (
-                            <Highlight key={i}>{part}</Highlight>
-                          ) : (
-                            part
-                          )
+              <SearchResultTitle>{title}</SearchResultTitle>
+              <Divider orientation="vertical" flexItem />
+              <SearchResultBody>
+                <SearchResultSubtitle>{subtitle}</SearchResultSubtitle>
+                <SearchResultText>
+                  {option.snippets.text
+                    ? option.snippets.text.parts.map((part, i) =>
+                        i % 2 === 1 ? (
+                          <Highlight key={i}>{part}</Highlight>
+                        ) : (
+                          part
                         )
-                      : null}
-                  </SearchResultText>
-                </SearchResultBody>
-              </SearchResultContent>
+                      )
+                    : null}
+                </SearchResultText>
+              </SearchResultBody>
             </SearchResult>
           </li>
         );

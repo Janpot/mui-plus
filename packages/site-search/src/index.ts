@@ -155,7 +155,9 @@ export default async function run() {
       this.field('lvl4');
       this.field('lvl5');
       this.field('text');
+
       this.metadataWhitelist = ['position'];
+      this.pipeline.remove(lunr.stemmer);
 
       corpus.forEach((record, id) => {
         this.add({ id, ...record });

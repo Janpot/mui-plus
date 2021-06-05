@@ -7,12 +7,15 @@ module.exports = withNextra({
   webpack: (config) => {
     config.module.rules = [
       {
-        resourceQuery: /raw/,
-        type: 'asset/source',
-      },
-      {
-        resourceQuery: /^(?!\?raw$).*/,
-        rules: config.module.rules,
+        oneOf: [
+          {
+            resourceQuery: /raw/,
+            type: 'asset/source',
+          },
+          {
+            rules: config.module.rules,
+          },
+        ],
       },
     ];
 
