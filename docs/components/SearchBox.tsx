@@ -8,6 +8,7 @@ import {
   autocompleteClasses,
   InputBaseProps,
   Divider,
+  TextField,
 } from '@material-ui/core';
 import * as React from 'react';
 import { SearchApiResponse } from 'site-search/handler';
@@ -65,6 +66,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const SearchResult = styled('div')({
   display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+});
+const SearchResultSection = styled('div')({});
+const SearchResultContent = styled('div')({
+  display: 'flex',
   flexDirection: 'row',
   alignItems: 'flex-start',
 });
@@ -73,7 +80,7 @@ const SearchResultTitle = styled('div')(({ theme }) => ({
   color: theme.palette.text.secondary,
   width: 100,
   textAlign: 'right',
-  margin: theme.spacing(2),
+  margin: theme.spacing(1),
 }));
 const SearchResultBody = styled('div')(({ theme }) => ({
   flex: 1,
@@ -108,7 +115,7 @@ function CustomPopper(props: PopperProps) {
   );
 }
 
-const AppBarSearchInput = React.forwardRef<HTMLDivElement, InputBaseProps>(
+const AppBarSearchField = React.forwardRef<HTMLDivElement, InputBaseProps>(
   ({ className, ...props }, ref) => {
     return (
       <Search ref={ref}>
@@ -117,6 +124,7 @@ const AppBarSearchInput = React.forwardRef<HTMLDivElement, InputBaseProps>(
         </SearchIconWrapper>
         <StyledInputBase
           placeholder="Search…"
+          className={className}
           {...props}
           inputProps={{ 'aria-label': 'search', ...props.inputProps }}
         />
@@ -153,7 +161,7 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
         }
       }}
       renderInput={(params) => (
-        <AppBarSearchInput
+        <AppBarSearchField
           {...params.InputProps}
           inputProps={params.inputProps}
         />
@@ -163,31 +171,41 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
       disableListWrap
       renderOption={(props, option) => {
         const levels = [
-          option.doc.lvl5,
-          option.doc.lvl4,
-          option.doc.lvl3,
-          option.doc.lvl2,
+          option.doc.lvl0,
           option.doc.lvl1,
-        ].filter(Boolean);
+          option.doc.lvl2,
+          option.doc.lvl3,
+          option.doc.lvl4,
+          option.doc.lvl5,
+        ].filter(Boolean) as string[];
+
+        const section = levels.shift();
+        const title = levels.shift() || section;
+        const subtitle = levels.join(' › ') || title;
+
         return (
           <li {...props}>
             <SearchResult>
-              <SearchResultTitle>{levels[1]}</SearchResultTitle>
-              <Divider orientation="vertical" flexItem />
-              <SearchResultBody>
-                <SearchResultSubtitle>{levels[0]}</SearchResultSubtitle>
-                <SearchResultText>
-                  {option.snippets.text
-                    ? option.snippets.text.parts.map((part, i) =>
-                        i % 2 === 1 ? (
-                          <Highlight key={i}>{part}</Highlight>
-                        ) : (
-                          part
+              <SearchResultSection>{section}</SearchResultSection>
+              <Divider flexItem />
+              <SearchResultContent>
+                <SearchResultTitle>{title}</SearchResultTitle>
+                <Divider orientation="vertical" flexItem />
+                <SearchResultBody>
+                  <SearchResultSubtitle>{subtitle}</SearchResultSubtitle>
+                  <SearchResultText>
+                    {option.snippets.text
+                      ? option.snippets.text.parts.map((part, i) =>
+                          i % 2 === 1 ? (
+                            <Highlight key={i}>{part}</Highlight>
+                          ) : (
+                            part
+                          )
                         )
-                      )
-                    : null}
-                </SearchResultText>
-              </SearchResultBody>
+                      : null}
+                  </SearchResultText>
+                </SearchResultBody>
+              </SearchResultContent>
             </SearchResult>
           </li>
         );

@@ -4,7 +4,7 @@ module.exports = {
   siteReadyProbe: '/',
   outputPath: './site-search.json',
   selectors: {
-    lvl0: 'title',
+    lvl0: '.outline-lvl0-active',
     lvl1: 'article h1',
     lvl2: 'article h2',
     lvl3: 'article h3',

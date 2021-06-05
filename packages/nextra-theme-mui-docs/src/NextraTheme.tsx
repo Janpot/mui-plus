@@ -164,9 +164,12 @@ interface SideBarFileItemProps {
 
 function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
   const { route } = useRouter();
+  const isInActiveRoute =
+    route === entry.route || route.startsWith(entry.route + '/');
   const isActive = route === entry.route;
   return (
     <ListItem
+      className={isInActiveRoute ? `outline-lvl${level}-active` : undefined}
       selected={isActive}
       button
       component={Link}
@@ -203,10 +206,13 @@ function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
   const { route } = useRouter();
   const isOpen = route === entry.route || route.startsWith(entry.route + '/');
   const [open, setOpen] = React.useState(isOpen);
+  const isInActiveRoute =
+    route === entry.route || route.startsWith(entry.route + '/');
 
   return (
     <>
       <ListItem
+        className={isInActiveRoute ? `outline-lvl${level}-active` : undefined}
         button
         onClick={() => setOpen((open) => !open)}
         style={{ paddingLeft: 8 + level * 16 }}
