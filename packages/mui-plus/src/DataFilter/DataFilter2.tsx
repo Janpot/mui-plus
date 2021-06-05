@@ -15,29 +15,22 @@ import {
 import * as React from 'react';
 import AddIcon from '@material-ui/icons/Add';
 
-type TYPES_MAP = {
-  string: string;
-  number: number;
-  boolean: boolean;
-};
-
-type ValueTypeKey = keyof TYPES_MAP;
-
-interface RenderValueEditorParams<ValueType> {
-  value: ValueType;
-  onChange: (newValue: ValueType) => void;
+interface InputComponentProps<ValueType> {
+  value?: ValueType;
+  onChange?: (newValue: ValueType) => void;
 }
-type RenderValueEditor<ValueType> = (
-  params: RenderValueEditorParams<ValueType>
-) => React.ReactNode;
+type InputComponent<ValueType> = React.JSXElementConstructor<
+  InputComponentProps<ValueType>
+>;
 
-export interface Option<Field, Value> {
-  field: Field;
-  operators?: string[];
+interface OptionParams<ValueType> {
+  operators: string[];
   label?: string;
-  renderValueEditor:
-    | RenderValueEditor<Value>
-    | (Value extends string ? undefined : never);
+  InputComponent: InputComponent<ValueType>;
+}
+
+export interface Option<Field, ValueType> extends OptionParams<ValueType> {
+  field: Field;
 }
 
 export interface FilterValue<Field, Value> {
@@ -62,6 +55,45 @@ const NewDataFilterChip = styled(DataFilterChip)({
   borderStyle: 'dashed',
 });
 
+export function StringInputComponent({
+  value,
+  onChange,
+}: InputComponentProps<string>) {
+  return (
+    <TextField
+      autoFocus
+      size="small"
+      value={value}
+      onChange={(event) => onChange?.(event.target.value)}
+    />
+  );
+}
+
+export function NumberInputComponent({
+  value,
+  onChange,
+}: InputComponentProps<number>) {
+  return (
+    <TextField
+      type="number"
+      autoFocus
+      size="small"
+      value={value}
+      onChange={(event) => onChange?.(Number(event.target.value))}
+    />
+  );
+}
+
+export const TYPE_STRING: OptionParams<string> = {
+  operators: ['contains', 'equals', 'starts with', 'ends with'],
+  InputComponent: StringInputComponent,
+};
+
+export const TYPE_NUMBER: OptionParams<number> = {
+  operators: ['=', '>', '<', '>=', '<='],
+  InputComponent: NumberInputComponent,
+};
+
 interface OptionEditorProps<Row extends object, Option extends OptionOf<Row>> {
   option: Option;
   onSubmit?: (operator: string, newvalue: Row[Option['field']]) => void;
@@ -74,7 +106,8 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
   onClose,
 }: OptionEditorProps<Row, Option>) {
   const [value, setValue] = React.useState<Row[Option['field']]>();
-  const [operator, setOperator] = React.useState('=');
+  const [operator, setOperator] = React.useState(option.operators[0]);
+  const { InputComponent } = option;
   return (
     <Stack direction="column">
       <Stack direction="row" alignItems="center" spacing={2} m={2} mb={1}>
@@ -84,17 +117,13 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
           value={operator}
           onChange={(event) => setOperator(event.target.value)}
         >
-          <MenuItem value="=">=</MenuItem>
-          <MenuItem value="contains">contains</MenuItem>
-          <MenuItem value="starts with">starts with</MenuItem>
-          <MenuItem value="ends with">ends with</MenuItem>
+          {option.operators.map((operator) => (
+            <MenuItem key={operator} value={operator}>
+              {operator}
+            </MenuItem>
+          ))}
         </Select>
-        <TextField
-          autoFocus
-          size="small"
-          value={value}
-          onChange={(event) => setValue(event.target.value as any)}
-        />
+        <InputComponent value={value} onChange={setValue} />
       </Stack>
       <Box m={1} display="flex" justifyContent="flex-end">
         <Button onClick={onClose}>cancel</Button>
@@ -172,7 +201,7 @@ export default function DataFilter<Row extends object>({
     return options.map((option, i) => {
       return (
         <MenuItem key={i} onClick={() => setEditedOption(option)}>
-          {option.field}
+          {option.label || option.field}
         </MenuItem>
       );
     });

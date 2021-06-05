@@ -5,6 +5,8 @@ import {
   DataFilter,
   Filter,
   FilterItem,
+  TYPE_STRING,
+  TYPE_NUMBER,
 } from 'mui-plus';
 
 interface Object {
@@ -16,12 +18,15 @@ interface Object {
 const options = [
   {
     field: 'test1',
+    ...TYPE_STRING,
   },
   {
     field: 'test2',
+    ...TYPE_STRING,
   },
   {
     field: 'test3',
+    ...TYPE_NUMBER,
   },
 ] as const;
 
