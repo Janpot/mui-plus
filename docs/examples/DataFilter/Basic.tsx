@@ -1,13 +1,5 @@
 import * as React from 'react';
-import {
-  FilterValueOf,
-  DataFilter2,
-  DataFilter,
-  Filter,
-  FilterItem,
-  TYPE_STRING,
-  TYPE_NUMBER,
-} from 'mui-plus';
+import { FilterValueOf, DataFilter, TYPE_STRING, TYPE_NUMBER } from 'mui-plus';
 
 interface Object {
   test1: string;
@@ -31,18 +23,11 @@ const options = [
 ] as const;
 
 export default function Basic() {
-  const [value, setValue] = React.useState<Filter>([]);
-  const [value2, setValue2] = React.useState<FilterValueOf<Object>[]>([]);
+  const [value, setValue] = React.useState<FilterValueOf<Object>[]>([]);
   return (
     <>
-      <DataFilter value={value} onChange={setValue}>
-        <FilterItem property="hello" condition={1}>
-          Hello
-        </FilterItem>
-      </DataFilter>
+      <DataFilter options={options} value={value} onChange={setValue} />
       <pre>{JSON.stringify(value, null, 2)}</pre>
-      <DataFilter2 options={options} value={value2} onChange={setValue2} />
-      <pre>{JSON.stringify(value2, null, 2)}</pre>
     </>
   );
 }
