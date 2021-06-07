@@ -206,9 +206,6 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
   );
 }
 
-let nextKey = 0;
-const itemKeys = new WeakMap();
-
 export interface DataFilterProps<Row extends object> {
   options: Readonly<OptionOf<Row>[]>;
   value?: FilterValueOf<Row>[];
@@ -225,6 +222,9 @@ export default function DataFilter<Row extends object>({
   const menuOpen = !!anchorEl;
   const [editedOption, setEditedOption] =
     React.useState<OptionOf<Row> | null>(null);
+
+  const nextKey = React.useRef(0);
+  const itemKeys = React.useRef(new WeakMap());
 
   const optionsMap = React.useMemo(
     () => Object.fromEntries(options.map((option) => [option.field, option])),
@@ -256,7 +256,6 @@ export default function DataFilter<Row extends object>({
     newValue: Row[K]
   ) => {
     const newItem = { field, operator, value: newValue };
-    itemKeys.set(newItem, `item-${nextKey++}`);
     if (typeof editedIndex === 'number') {
       onChange?.(
         value.map((oldItem, i) => (i === editedIndex ? newItem : oldItem))
@@ -296,10 +295,15 @@ export default function DataFilter<Row extends object>({
     <Box display="flex" alignItems="center" flexWrap="wrap">
       <TransitionGroup component={null}>
         {value.map((item, index) => {
+          let key = itemKeys.current.get(item);
+          if (!key) {
+            key = nextKey.current++;
+            itemKeys.current.set(item, key);
+          }
           return (
             <Collapse
               orientation="horizontal"
-              key={itemKeys.get(item) || index}
+              key={itemKeys.current.get(item) || index}
               in
               mountOnEnter
               unmountOnExit
