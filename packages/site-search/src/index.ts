@@ -103,77 +103,98 @@ export default async function run() {
       stdio: 'inherit',
     });
 
-    const siteReadyProbeUrl = new URL(config.siteReadyProbe, config.siteOrigin);
-    console.log(`Waiting until site ready at ${siteReadyProbeUrl}`);
-    await waitUntilSiteReady(siteReadyProbeUrl);
-    console.log(`Site ready`);
+    await Promise.race([
+      siteProcess.then(() => {
+        throw new Error(`Site process stopped unexpectedly`);
+      }),
+      (async () => {
+        const siteReadyProbeUrl = new URL(
+          config.siteReadyProbe,
+          config.siteOrigin
+        );
+        console.log(`Waiting until site ready at ${siteReadyProbeUrl}`);
+        await waitUntilSiteReady(siteReadyProbeUrl);
+        console.log(`Site ready`);
 
-    const queue = new PromiseQueue({ concurrency: 5 });
-    const seen: Set<string> = new Set();
+        const queue = new PromiseQueue({ concurrency: 5 });
+        const seen: Set<string> = new Set();
 
-    const corpus: IndexedDocument[] = [];
+        const corpus: IndexedDocument[] = [];
 
-    const crawl = async (url: string) => {
-      if (seen.has(url)) {
-        return;
-      }
+        const crawl = async (url: string) => {
+          if (seen.has(url)) {
+            return;
+          }
 
-      seen.add(url);
-      const { pathname } = new URL(url);
+          seen.add(url);
+          const { pathname } = new URL(url);
 
-      const links = await queue.add(async () => {
-        console.log(`Fetching ${url}`);
-        const res = await fetch(url);
-        const pageSrc = await res.text();
-        const { window } = new JSDOM(pageSrc, {
-          url,
-          contentType: res.headers.get('content-type') || 'text/html',
+          const links = await queue.add(async () => {
+            console.log(`Fetching ${url}`);
+            const res = await fetch(url);
+            const pageSrc = await res.text();
+            const { window } = new JSDOM(pageSrc, {
+              url,
+              contentType: res.headers.get('content-type') || 'text/html',
+            });
+
+            const records = extractRecords(
+              window.document.body,
+              config.selectors
+            );
+
+            corpus.push(
+              ...records.map((record) => ({ path: pathname, ...record }))
+            );
+
+            const links = extractLinks(window.document, config);
+
+            return links;
+          });
+
+          await Promise.all(links.map((link) => crawl(link)));
+        };
+
+        await crawl(siteReadyProbeUrl.toString());
+
+        const index = lunr(function () {
+          this.ref('id');
+          this.field('lvl0');
+          this.field('lvl1');
+          this.field('lvl2');
+          this.field('lvl3');
+          this.field('lvl4');
+          this.field('lvl5');
+          this.field('text');
+
+          this.metadataWhitelist = ['position'];
+          this.pipeline.remove(lunr.stemmer);
+
+          corpus.forEach((record, id) => {
+            this.add({ id, ...record });
+          });
         });
 
-        const records = extractRecords(window.document.body, config.selectors);
-
-        corpus.push(
-          ...records.map((record) => ({ path: pathname, ...record }))
+        console.log(`Writing output at "${resolvedOutputPath}"`);
+        await writeFile(
+          resolvedOutputPath,
+          JSON.stringify({
+            corpus,
+            index: index.toJSON(),
+          })
         );
+      })(),
+    ]);
 
-        const links = extractLinks(window.document, config);
+    await Promise.all([
+      siteProcess.cancel(),
+      siteProcess.catch(() => undefined),
+    ]);
 
-        return links;
-      });
-
-      await Promise.all(links.map((link) => crawl(link)));
-    };
-
-    await crawl(siteReadyProbeUrl.toString());
-
-    const index = lunr(function () {
-      this.ref('id');
-      this.field('lvl0');
-      this.field('lvl1');
-      this.field('lvl2');
-      this.field('lvl3');
-      this.field('lvl4');
-      this.field('lvl5');
-      this.field('text');
-
-      this.metadataWhitelist = ['position'];
-      this.pipeline.remove(lunr.stemmer);
-
-      corpus.forEach((record, id) => {
-        this.add({ id, ...record });
-      });
-    });
-
-    console.log(`Writing output at "${resolvedOutputPath}"`);
-    await writeFile(
-      resolvedOutputPath,
-      JSON.stringify({
-        corpus,
-        index: index.toJSON(),
-      })
-    );
+    console.log('Done');
   } finally {
-    console.log('Cleaning up');
-    await siteProcess?.cancel();
+    if (siteProcess) {
+      await siteProcess.cancel();
+    }
   }
 }
