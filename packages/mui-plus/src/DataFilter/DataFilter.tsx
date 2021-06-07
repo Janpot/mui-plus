@@ -42,7 +42,7 @@ export interface Option<Field, ValueType> extends OptionParams<ValueType> {
   field: Field;
 }
 
-export interface FilterValue<Field, Value> {
+export interface FilterValue<Field> {
   field: Field;
   operator: string;
   value: any;
@@ -53,7 +53,7 @@ export type OptionOf<Row extends object> = {
 }[keyof Row];
 
 export type FilterValueOf<Row extends object> = {
-  [Key in keyof Row]: FilterValue<Key, any>;
+  [Key in keyof Row]: FilterValue<Key>;
 }[keyof Row];
 
 const DataFilterChip = styled(Chip)(({ theme }) => ({
@@ -137,27 +137,31 @@ export const TYPE_NUMBER: OptionParams<number> = {
 };
 
 interface OptionEditorProps<Row extends object, Option extends OptionOf<Row>> {
+  value: FilterValueOf<Row>;
+  onChange: (newValue: FilterValueOf<Row>) => void;
   option: Option;
-  onSubmit?: (operator: string, newvalue: Row[Option['field']]) => void;
   onClose?: () => void;
+  okButtonText?: string;
 }
 
 function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
+  value,
+  onChange,
   option,
-  onSubmit,
   onClose,
+  okButtonText,
 }: OptionEditorProps<Row, Option>) {
   const [operatorIdx, setOperatorIdx] = React.useState(0);
 
   const { InputComponent, defaultValue } = option.operators[operatorIdx];
 
-  const [input, setInput] = React.useState<any>(defaultValue);
-  React.useEffect(() => setInput(defaultValue), [defaultValue]);
+  const [input, setInput] = React.useState<FilterValueOf<Row>>(value);
+  React.useEffect(() => setInput(value), [value]);
 
   const handleKeyUp = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (input && event.code === 'Enter') {
-        onSubmit?.(option.operators[operatorIdx].operator, input);
+        onChange?.(input);
       } else if (event.code === 'Esc') {
         onClose?.();
       }
@@ -172,28 +176,29 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
           <Typography>{option.field}</Typography>{' '}
           <Select
             size="small"
-            value={operatorIdx}
-            onChange={(event) => setOperatorIdx(Number(event.target.value))}
+            value={input.operator}
+            onChange={(event) =>
+              setInput((input) => ({ ...input, operator: event.target.value }))
+            }
           >
             {option.operators.map(({ operator, label = operator }, i) => (
-              <MenuItem key={i} value={i}>
+              <MenuItem key={operator} value={operator}>
                 {label}
               </MenuItem>
             ))}
           </Select>
-          <InputComponent value={input} onChange={setInput} />
+          <InputComponent
+            value={input.value}
+            onChange={(value) => setInput((input) => ({ ...input, value }))}
+          />
         </Stack>
         <Box m={1} display="flex" justifyContent="flex-end">
           <Button onClick={onClose}>cancel</Button>
           <Button
             disabled={!input}
-            onClick={() =>
-              input
-                ? onSubmit?.(option.operators[operatorIdx].operator, input)
-                : null
-            }
+            onClick={() => (input ? onChange?.(input) : null)}
           >
-            add
+            {okButtonText}
           </Button>
         </Box>
       </Stack>
@@ -220,7 +225,15 @@ export default function DataFilter<Row extends object>({
   const menuOpen = !!anchorEl;
   const [editedOption, setEditedOption] =
     React.useState<OptionOf<Row> | null>(null);
-  // @ts-ignore
+
+  const optionsMap = React.useMemo(
+    () => Object.fromEntries(options.map((option) => [option.field, option])),
+    [options]
+  );
+
+  const [editedPart, setEditedPart] =
+    React.useState<FilterValueOf<Row> | null>(null);
+
   const [editedIndex, setEditedIndex] = React.useState<number | null>(null);
 
   const handleDelete = (index: number) => () => {
@@ -244,14 +257,35 @@ export default function DataFilter<Row extends object>({
   ) => {
     const newItem = { field, operator, value: newValue };
     itemKeys.set(newItem, `item-${nextKey++}`);
-    onChange?.([...value, newItem]);
+    if (typeof editedIndex === 'number') {
+      onChange?.(
+        value.map((oldItem, i) => (i === editedIndex ? newItem : oldItem))
+      );
+    } else {
+      onChange?.([...value, newItem]);
+    }
     handleEditorClose();
+  };
+
+  const handleEdit = (index: number) => (event: React.MouseEvent) => {
+    setEditedIndex(index);
+    setEditedOption(optionsMap[value[index].field as string]);
+    setEditedPart(value[index]);
+    setAnchorEl(event.currentTarget);
   };
 
   const menuContent = React.useMemo(() => {
     return options.map((option, i) => {
+      const handleClick = () => {
+        setEditedOption(option);
+        setEditedPart({
+          field: option.field,
+          operator: option.operators[0].operator,
+          value: option.operators[0].defaultValue,
+        } as FilterValueOf<Row>);
+      };
       return (
-        <MenuItem key={i} onClick={() => setEditedOption(option)}>
+        <MenuItem key={i} onClick={handleClick}>
           {option.label || option.field}
         </MenuItem>
       );
@@ -273,6 +307,7 @@ export default function DataFilter<Row extends object>({
               <DataFilterChip
                 label={item.field}
                 onDelete={handleDelete(index)}
+                onClick={handleEdit(index)}
               />
             </Collapse>
           );
@@ -298,12 +333,14 @@ export default function DataFilter<Row extends object>({
           horizontal: 'left',
         }}
       >
-        {editedOption ? (
+        {editedOption && editedPart ? (
           <OptionEditor<Row, OptionOf<Row>>
-            option={editedOption}
-            onSubmit={(operator, value) =>
-              handleEditorSubmit(editedOption.field, operator, value)
+            value={editedPart}
+            onChange={({ field, operator, value }) =>
+              handleEditorSubmit(field, operator, value)
             }
+            option={editedOption}
+            okButtonText={typeof editedIndex === 'number' ? 'save' : 'add'}
             onClose={handleEditorClose}
           />
         ) : (
