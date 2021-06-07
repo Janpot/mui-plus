@@ -26,10 +26,21 @@ export type InputComponent<ValueType> = React.JSXElementConstructor<
   InputComponentProps<ValueType>
 >;
 
+function truncate(str: string, max = Infinity): string {
+  return str.length > max ? `${str.slice(0, max)}…` : str;
+}
+
+const DEFAULT_FORMAT_VALUE = (value: any) => {
+  const formatted = String(value);
+  return truncate(formatted, 20);
+};
+
 interface Operator<ValueType> {
   operator: string;
   label?: string;
   defaultValue: ValueType;
+  acceptValue?: (value?: ValueType) => boolean;
+  formatValue?: (value: ValueType) => string;
   InputComponent: InputComponent<ValueType>;
 }
 
@@ -101,6 +112,8 @@ export function stringCompareOperator(
     operator,
     label,
     defaultValue: '',
+    acceptValue: (value) => !!value,
+    formatValue: (value: string) => `"${truncate(value, 20)}"`,
     InputComponent: StringInputComponent,
   };
 }
@@ -153,24 +166,33 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
 }: OptionEditorProps<Row, Option>) {
   const [operatorIdx, setOperatorIdx] = React.useState(0);
 
-  const { InputComponent, defaultValue } = option.operators[operatorIdx];
+  const { InputComponent, acceptValue } = option.operators[operatorIdx];
 
   const [input, setInput] = React.useState<FilterValueOf<Row>>(value);
   React.useEffect(() => setInput(value), [value]);
 
-  const handleKeyUp = React.useCallback(
+  const canSubmit = React.useMemo(
+    () => (acceptValue ? acceptValue(input.value) : true),
+    [acceptValue, input.value]
+  );
+  const handleSubmit = React.useCallback(
+    () => (canSubmit ? onChange?.(input) : null),
+    [canSubmit, onChange, input]
+  );
+
+  const handleKeyPress = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (input && event.code === 'Enter') {
-        onChange?.(input);
+      if (event.code === 'Enter') {
+        handleSubmit();
       } else if (event.code === 'Esc') {
         onClose?.();
       }
     },
-    [input]
+    [handleSubmit]
   );
 
   return (
-    <div onKeyUp={handleKeyUp}>
+    <div onKeyPress={handleKeyPress}>
       <Stack direction="column">
         <Stack direction="row" alignItems="center" spacing={2} m={2} mb={1}>
           <Typography>{option.field}</Typography>{' '}
@@ -194,10 +216,7 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
         </Stack>
         <Box m={1} display="flex" justifyContent="flex-end">
           <Button onClick={onClose}>cancel</Button>
-          <Button
-            disabled={!input}
-            onClick={() => (input ? onChange?.(input) : null)}
-          >
+          <Button disabled={!canSubmit} onClick={handleSubmit}>
             {okButtonText}
           </Button>
         </Box>
@@ -210,12 +229,14 @@ export interface DataFilterProps<Row extends object> {
   options: Readonly<OptionOf<Row>[]>;
   value?: FilterValueOf<Row>[];
   onChange?: (newObject: FilterValueOf<Row>[]) => void;
+  size?: 'small' | 'medium';
 }
 
 export default function DataFilter<Row extends object>({
   options,
   value = [],
   onChange,
+  size,
 }: DataFilterProps<Row>) {
   const popperRef = React.useRef<PopoverActions>(null);
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
@@ -224,7 +245,7 @@ export default function DataFilter<Row extends object>({
     React.useState<OptionOf<Row> | null>(null);
 
   const nextKey = React.useRef(0);
-  const itemKeys = React.useRef(new WeakMap());
+  const itemKeys = React.useRef(new WeakMap<object, string>());
 
   const optionsMap = React.useMemo(
     () => Object.fromEntries(options.map((option) => [option.field, option])),
@@ -235,10 +256,6 @@ export default function DataFilter<Row extends object>({
     React.useState<FilterValueOf<Row> | null>(null);
 
   const [editedIndex, setEditedIndex] = React.useState<number | null>(null);
-
-  const handleDelete = (index: number) => () => {
-    onChange?.(value.filter((_, i) => i !== index));
-  };
 
   const handleCreateNew = React.useCallback((event: React.MouseEvent) => {
     setEditedOption(null);
@@ -258,7 +275,19 @@ export default function DataFilter<Row extends object>({
     const newItem = { field, operator, value: newValue };
     if (typeof editedIndex === 'number') {
       onChange?.(
-        value.map((oldItem, i) => (i === editedIndex ? newItem : oldItem))
+        value.map((oldItem, i) => {
+          if (i === editedIndex) {
+            const oldKey = itemKeys.current.get(oldItem);
+            if (typeof oldKey === 'string') {
+              // assign the old item key to the new item
+              itemKeys.current.delete(oldItem);
+              itemKeys.current.set(newItem, oldKey);
+            }
+            return newItem;
+          } else {
+            return oldItem;
+          }
+        })
       );
     } else {
       onChange?.([...value, newItem]);
@@ -266,12 +295,53 @@ export default function DataFilter<Row extends object>({
     handleEditorClose();
   };
 
-  const handleEdit = (index: number) => (event: React.MouseEvent) => {
-    setEditedIndex(index);
-    setEditedOption(optionsMap[value[index].field as string]);
-    setEditedPart(value[index]);
-    setAnchorEl(event.currentTarget);
-  };
+  const chipsContent = React.useMemo(() => {
+    return value.map((item, index) => {
+      let key = itemKeys.current.get(item);
+      if (typeof key !== 'string') {
+        key = `item-${nextKey.current++}`;
+        itemKeys.current.set(item, key);
+      }
+
+      const handleEdit = (index: number) => (event: React.MouseEvent) => {
+        setEditedIndex(index);
+        setEditedOption(optionsMap[value[index].field as string]);
+        setEditedPart(value[index]);
+        setAnchorEl(event.currentTarget);
+      };
+
+      const handleDelete = (index: number) => () => {
+        onChange?.(value.filter((_, i) => i !== index));
+      };
+
+      const option = optionsMap[item.field as string];
+      const operator = option.operators.find(
+        (op) => op.operator === item.operator
+      );
+      const formatValue = operator?.formatValue || DEFAULT_FORMAT_VALUE;
+
+      const displayField = String(option.label || item.field);
+      const displayOperator = operator?.label || item.operator;
+      const displayValue = formatValue(item.value);
+
+      return (
+        <Collapse
+          orientation="horizontal"
+          key={itemKeys.current.get(item) || index}
+          in
+          mountOnEnter
+          unmountOnExit
+        >
+          <DataFilterChip
+            size={size}
+            label={`${displayField} ${displayOperator} ${displayValue}`}
+            onDelete={handleDelete(index)}
+            onClick={handleEdit(index)}
+          />
+        </Collapse>
+      );
+    });
+  }, [value, optionsMap, onChange, size]);
 
   const menuContent = React.useMemo(() => {
     return options.map((option, i) => {
@@ -293,31 +363,9 @@ export default function DataFilter<Row extends object>({
 
   return (
     <Box display="flex" alignItems="center" flexWrap="wrap">
-      <TransitionGroup component={null}>
-        {value.map((item, index) => {
-          let key = itemKeys.current.get(item);
-          if (!key) {
-            key = nextKey.current++;
-            itemKeys.current.set(item, key);
-          }
-          return (
-            <Collapse
-              orientation="horizontal"
-              key={itemKeys.current.get(item) || index}
-              in
-              mountOnEnter
-              unmountOnExit
-            >
-              <DataFilterChip
-                label={item.field}
-                onDelete={handleDelete(index)}
-                onClick={handleEdit(index)}
-              />
-            </Collapse>
-          );
-        })}
-      </TransitionGroup>
+      <TransitionGroup component={null}>{chipsContent}</TransitionGroup>
       <NewDataFilterChip
+        size={size}
         icon={<AddIcon />}
         label="Add a filter"
         variant="outlined"
@@ -329,7 +377,7 @@ export default function DataFilter<Row extends object>({
         anchorEl={anchorEl}
         onClose={handleEditorClose}
         anchorOrigin={{
-          vertical: 'top',
+          vertical: 'bottom',
           horizontal: 'left',
         }}
         transformOrigin={{

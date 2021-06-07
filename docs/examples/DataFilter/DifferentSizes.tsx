@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { FilterValueOf, DataFilter, TYPE_STRING, TYPE_NUMBER } from 'mui-plus';
+import { Stack } from '@material-ui/core';
 
 interface Object {
   url: string;
@@ -27,12 +28,13 @@ const options = [
 
 export default function Basic() {
   const [value, setValue] = React.useState<FilterValueOf<Object>[]>([]);
+  const props = { options, value, onChange: setValue };
   return (
-    <>
+    <Stack spacing={2}>
       {/** preview-start */}
-      <DataFilter options={options} value={value} onChange={setValue} />
+      <DataFilter {...props} size="small" />
+      <DataFilter {...props} size="medium" />
       {/** preview-end */}
-      <pre>{JSON.stringify(value, null, 2)}</pre>
-    </>
+    </Stack>
   );
 }
