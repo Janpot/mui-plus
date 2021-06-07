@@ -26,7 +26,9 @@ export default function Basic() {
   const [value, setValue] = React.useState<FilterValueOf<Object>[]>([]);
   return (
     <>
+      {/** preview-start */}
       <DataFilter options={options} value={value} onChange={setValue} />
+      {/** preview-end */}
       <pre>{JSON.stringify(value, null, 2)}</pre>
     </>
   );

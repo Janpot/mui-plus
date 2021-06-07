@@ -17,24 +17,25 @@ import AddIcon from '@material-ui/icons/Add';
 import { Collapse } from '@material-ui/core';
 import { TransitionGroup } from 'react-transition-group';
 
-interface InputComponentProps<ValueType> {
+export interface InputComponentProps<ValueType> {
   value?: ValueType;
   onChange?: (newValue: ValueType) => void;
 }
 
-type InputComponent<ValueType> = React.JSXElementConstructor<
+export type InputComponent<ValueType> = React.JSXElementConstructor<
   InputComponentProps<ValueType>
 >;
 
-interface Operator {
+interface Operator<ValueType> {
   operator: string;
   label?: string;
+  defaultValue: ValueType;
+  InputComponent: InputComponent<ValueType>;
 }
 
 interface OptionParams<ValueType> {
-  operators: Operator[];
+  operators: readonly Operator<any>[];
   label?: string;
-  InputComponent: InputComponent<ValueType>;
 }
 
 export interface Option<Field, ValueType> extends OptionParams<ValueType> {
@@ -44,7 +45,7 @@ export interface Option<Field, ValueType> extends OptionParams<ValueType> {
 export interface FilterValue<Field, Value> {
   field: Field;
   operator: string;
-  value: Value;
+  value: any;
 }
 
 export type OptionOf<Row extends object> = {
@@ -52,7 +53,7 @@ export type OptionOf<Row extends object> = {
 }[keyof Row];
 
 export type FilterValueOf<Row extends object> = {
-  [Key in keyof Row]: FilterValue<Key, Row[Key]>;
+  [Key in keyof Row]: FilterValue<Key, any>;
 }[keyof Row];
 
 const DataFilterChip = styled(Chip)(({ theme }) => ({
@@ -92,25 +93,47 @@ export function NumberInputComponent({
   );
 }
 
+export function stringCompareOperator(
+  operator: string,
+  label?: string
+): Operator<string> {
+  return {
+    operator,
+    label,
+    defaultValue: '',
+    InputComponent: StringInputComponent,
+  };
+}
+
 export const TYPE_STRING: OptionParams<string> = {
   operators: [
-    { operator: 'contains' },
-    { operator: 'equals' },
-    { operator: 'starts with' },
-    { operator: 'ends with' },
+    stringCompareOperator('contains'),
+    stringCompareOperator('equals'),
+    stringCompareOperator('startsWith', 'starts with'),
+    stringCompareOperator('endsWith', 'ends with'),
   ],
-  InputComponent: StringInputComponent,
 };
+
+export function numericCompareOperator(
+  operator: string,
+  label?: string
+): Operator<number> {
+  return {
+    operator,
+    label,
+    defaultValue: 0,
+    InputComponent: NumberInputComponent,
+  };
+}
 
 export const TYPE_NUMBER: OptionParams<number> = {
   operators: [
-    { operator: '=' },
-    { operator: '>' },
-    { operator: '<' },
-    { operator: '>=', label: '≥' },
-    { operator: '<=', label: '≤' },
+    numericCompareOperator('='),
+    numericCompareOperator('>'),
+    numericCompareOperator('<'),
+    numericCompareOperator('>=', '≥'),
+    numericCompareOperator('<=', '≤'),
   ],
-  InputComponent: NumberInputComponent,
 };
 
 interface OptionEditorProps<Row extends object, Option extends OptionOf<Row>> {
@@ -124,40 +147,57 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
   onSubmit,
   onClose,
 }: OptionEditorProps<Row, Option>) {
-  const [value, setValue] = React.useState<Row[Option['field']]>();
   const [operatorIdx, setOperatorIdx] = React.useState(0);
-  const { InputComponent } = option;
+
+  const { InputComponent, defaultValue } = option.operators[operatorIdx];
+
+  const [input, setInput] = React.useState<any>(defaultValue);
+  React.useEffect(() => setInput(defaultValue), [defaultValue]);
+
+  const handleKeyUp = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (input && event.code === 'Enter') {
+        onSubmit?.(option.operators[operatorIdx].operator, input);
+      } else if (event.code === 'Esc') {
+        onClose?.();
+      }
+    },
+    [input]
+  );
+
   return (
-    <Stack direction="column">
-      <Stack direction="row" alignItems="center" spacing={2} m={2} mb={1}>
-        <Typography>{option.field}</Typography>{' '}
-        <Select
-          size="small"
-          value={operatorIdx}
-          onChange={(event) => setOperatorIdx(Number(event.target.value))}
-        >
-          {option.operators.map(({ operator, label = operator }, i) => (
-            <MenuItem key={i} value={i}>
-              {label}
-            </MenuItem>
-          ))}
-        </Select>
-        <InputComponent value={value} onChange={setValue} />
+    <div onKeyUp={handleKeyUp}>
+      <Stack direction="column">
+        <Stack direction="row" alignItems="center" spacing={2} m={2} mb={1}>
+          <Typography>{option.field}</Typography>{' '}
+          <Select
+            size="small"
+            value={operatorIdx}
+            onChange={(event) => setOperatorIdx(Number(event.target.value))}
+          >
+            {option.operators.map(({ operator, label = operator }, i) => (
+              <MenuItem key={i} value={i}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+          <InputComponent value={input} onChange={setInput} />
+        </Stack>
+        <Box m={1} display="flex" justifyContent="flex-end">
+          <Button onClick={onClose}>cancel</Button>
+          <Button
+            disabled={!input}
+            onClick={() =>
+              input
+                ? onSubmit?.(option.operators[operatorIdx].operator, input)
+                : null
+            }
+          >
+            add
+          </Button>
+        </Box>
       </Stack>
-      <Box m={1} display="flex" justifyContent="flex-end">
-        <Button onClick={onClose}>cancel</Button>
-        <Button
-          disabled={!value}
-          onClick={() =>
-            value
-              ? onSubmit?.(option.operators[operatorIdx].operator, value)
-              : null
-          }
-        >
-          add
-        </Button>
-      </Box>
-    </Stack>
+    </div>
   );
 }
 
@@ -202,26 +242,9 @@ export default function DataFilter<Row extends object>({
     operator: string,
     newValue: Row[K]
   ) => {
-    // if (typeof editedIndex === 'number') {
-    //   onChange(
-    //     value.map((filterValue, index) => {
-    //       if (index === editedIndex) {
-    //         return {
-    //           ...filterValue,
-    //           value: newValue,
-    //         };
-    //       } else {
-    //         return filterValue;
-    //       }
-    //     })
-    //   );
-    //   setEditedOption(null);
-    //   setEditedIndex(null);
-    // } else {
     const newItem = { field, operator, value: newValue };
     itemKeys.set(newItem, `item-${nextKey++}`);
     onChange?.([...value, newItem]);
-    // }
     handleEditorClose();
   };
 
