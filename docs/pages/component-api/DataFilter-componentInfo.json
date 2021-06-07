@@ -4,9 +4,26 @@
   "displayName": "DataFilter",
   "methods": [],
   "props": {
-    "value": {
+    "options": {
       "defaultValue": null,
-      "description": "",
+      "description": "Available options for the filter",
+      "name": "options",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+        "name": "DataFilterProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
+          "name": "DataFilterProps"
+        }
+      ],
+      "required": true,
+      "type": { "name": "readonly OptionOf<Row>[]" }
+    },
+    "value": {
+      "defaultValue": { "value": "[]" },
+      "description": "Actual filter value in controlled mode",
       "name": "value",
       "parent": {
         "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
@@ -18,12 +35,12 @@
           "name": "DataFilterProps"
         }
       ],
-      "required": true,
-      "type": { "name": "Filter" }
+      "required": false,
+      "type": { "name": "FilterValueOf<Row>[]" }
     },
     "onChange": {
       "defaultValue": null,
-      "description": "",
+      "description": "Value change handler for controlled mode",
       "name": "onChange",
       "parent": {
         "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
@@ -35,13 +52,13 @@
           "name": "DataFilterProps"
         }
       ],
-      "required": true,
-      "type": { "name": "(newFilter: Filter) => void" }
+      "required": false,
+      "type": { "name": "(newObject: FilterValueOf<Row>[]) => void" }
     },
-    "fixed": {
-      "defaultValue": { "value": 0 },
-      "description": "",
-      "name": "fixed",
+    "size": {
+      "defaultValue": null,
+      "description": "Filter chips size",
+      "name": "size",
       "parent": {
         "fileName": "mui-plus/packages/mui-plus/src/DataFilter/DataFilter.tsx",
         "name": "DataFilterProps"
@@ -53,7 +70,7 @@
         }
       ],
       "required": false,
-      "type": { "name": "number" }
+      "type": { "name": "\"small\" | \"medium\"" }
     }
   }
 }

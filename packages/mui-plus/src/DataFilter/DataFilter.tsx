@@ -75,7 +75,7 @@ const NewDataFilterChip = styled(DataFilterChip)({
   borderStyle: 'dashed',
 });
 
-export function StringInputComponent({
+function StringInputComponent({
   value,
   onChange,
 }: InputComponentProps<string>) {
@@ -89,7 +89,7 @@ export function StringInputComponent({
   );
 }
 
-export function NumberInputComponent({
+function NumberInputComponent({
   value,
   onChange,
 }: InputComponentProps<number>) {
@@ -226,9 +226,21 @@ function OptionEditor<Row extends object, Option extends OptionOf<Row>>({
 }
 
 export interface DataFilterProps<Row extends object> {
+  /**
+   *  Available options for the filter
+   */
   options: Readonly<OptionOf<Row>[]>;
+  /**
+   *  Actual filter value in controlled mode
+   */
   value?: FilterValueOf<Row>[];
+  /**
+   *  Value change handler for controlled mode
+   */
   onChange?: (newObject: FilterValueOf<Row>[]) => void;
+  /**
+   *  Filter chips size
+   */
   size?: 'small' | 'medium';
 }
 

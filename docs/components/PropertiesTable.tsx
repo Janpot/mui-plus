@@ -14,7 +14,10 @@ interface ApiDocProps {
 }
 
 export default function ApiDoc({ props }: ApiDocProps) {
-  const properties = React.useMemo(() => Object.entries(props), [props]);
+  const properties = React.useMemo(
+    () => Object.entries(props).sort((a, b) => a[0].localeCompare(b[0])),
+    [props]
+  );
   return (
     <TableContainer>
       <Table aria-label="properties table">
