@@ -1,16 +1,20 @@
 module.exports = {
   siteStartCmd: 'npm start',
   siteOrigin: 'http://localhost:3000',
-  siteReadyProbe: '/',
+  startUrl: '/',
   outputPath: './site-search.json',
-  selectors: {
-    lvl0: '.outline-lvl0-active',
-    lvl1: 'article h1',
-    lvl2: 'article h2',
-    lvl3: 'article h3',
-    lvl4: 'article h4',
-    lvl5: 'article h5',
-    lvl6: 'article h6',
-    text: 'article p',
-  },
+  rules: [
+    {
+      hierarchy: [
+        { selector: '.outline-lvl0-active' },
+        { selector: 'article h1' },
+        { selector: 'article h2' },
+        { selector: 'article h3' },
+        { selector: 'article h4' },
+        { selector: 'article h5' },
+        { selector: 'article h6' },
+      ],
+      text: { selector: 'article p' },
+    },
+  ],
 };

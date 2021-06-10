@@ -6,12 +6,12 @@
   ],
   "scripts": {
     "dev:docs": "next dev ./docs",
-    "fix": "yarn prettier --write .",
     "eslint": "eslint .",
-    "lint": "yarn prettier --write .",
     "docgen": "./scripts/api-docgen.ts",
     "fake-data": "./scripts/fake-data.ts",
-    "test": "jest --verbose"
+    "test": "jest --verbose",
+    "fix": "prettier --write .",
+    "lint": "prettier --check ."
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",

@@ -157,10 +157,10 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
       return [];
     } else {
       const lvl0Values = [
-        ...new Set(latestResults.map((result) => result.doc.lvl0)),
+        ...new Set(latestResults.map((result) => result.hierarchy[0]?.content)),
       ];
       return lvl0Values.flatMap((lvl0) =>
-        latestResults.filter((result) => result.doc.lvl0 === lvl0)
+        latestResults.filter((result) => result.hierarchy[0]?.content === lvl0)
       );
     }
   }, [latestResults]);
@@ -173,8 +173,7 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
       onChange={(_event, option) => {
         if (option && typeof option !== 'string') {
           router.push(
-            option.doc.path +
-              (option.doc.anchor ? `#${option.doc.anchor}` : ''),
+            option.path + (option.anchor ? `#${option.anchor}` : ''),
             undefined,
             {
               scroll: true,
@@ -188,34 +187,31 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
           inputProps={params.inputProps}
         />
       )}
-      groupBy={(option) => option.doc.lvl0 || ''}
+      groupBy={(option) => option.hierarchy[0]?.content || ''}
       PopperComponent={CustomPopper}
       freeSolo
       disableListWrap
+      getOptionLabel={(option) => option.snippet.parts.join('')}
       renderOption={(props, option) => {
-        const levels = [
-          option.doc.lvl0,
-          option.doc.lvl1,
-          option.doc.lvl2,
-          option.doc.lvl3,
-          option.doc.lvl4,
-          option.doc.lvl5,
-        ].filter(Boolean) as string[];
+        const levels = option.hierarchy.filter(Boolean);
 
         const section = levels.shift();
         const title = levels.shift() || section;
-        const subtitle = levels.join(' › ') || title;
+        const subtitle: string =
+          levels.map((level) => level?.content).join(' › ') ||
+          title?.content ||
+          '';
 
         return (
           <li {...props}>
             <SearchResult>
-              <SearchResultTitle>{title}</SearchResultTitle>
+              <SearchResultTitle>{title?.content}</SearchResultTitle>
               <Divider orientation="vertical" flexItem />
               <SearchResultBody>
                 <SearchResultSubtitle>{subtitle}</SearchResultSubtitle>
                 <SearchResultText>
-                  {option.snippets.text
-                    ? option.snippets.text.parts.map((part, i) =>
+                  {option.snippet
+                    ? option.snippet.parts.map((part, i) =>
                         i % 2 === 1 ? (
                           <Highlight key={i}>{part}</Highlight>
                         ) : (
@@ -229,7 +225,6 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
           </li>
         );
       }}
-      getOptionLabel={(option) => option.doc.text || 'dunno'}
     />
   );
 }
