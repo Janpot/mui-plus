@@ -253,8 +253,9 @@ export default function DataFilter<Row extends object>({
   const popperRef = React.useRef<PopoverActions>(null);
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
   const menuOpen = !!anchorEl;
-  const [editedOption, setEditedOption] =
-    React.useState<OptionOf<Row> | null>(null);
+  const [editedOption, setEditedOption] = React.useState<OptionOf<Row> | null>(
+    null
+  );
 
   const nextKey = React.useRef(0);
   const itemKeys = React.useRef(new WeakMap<object, string>());
@@ -264,8 +265,9 @@ export default function DataFilter<Row extends object>({
     [options]
   );
 
-  const [editedPart, setEditedPart] =
-    React.useState<FilterValueOf<Row> | null>(null);
+  const [editedPart, setEditedPart] = React.useState<FilterValueOf<Row> | null>(
+    null
+  );
 
   const [editedIndex, setEditedIndex] = React.useState<number | null>(null);
 

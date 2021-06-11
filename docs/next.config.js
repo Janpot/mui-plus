@@ -3,7 +3,7 @@ const withNextra = require('nextra')(
   './theme.config.js'
 );
 module.exports = withNextra({
-  future: { webpack5: true },
+  webpack5: true,
   webpack: (config) => {
     config.module.rules = [
       {

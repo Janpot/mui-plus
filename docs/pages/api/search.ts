@@ -1,3 +1,3 @@
 import handler from 'site-search/handler';
-import siteSearchData from '../../site-search.json';
-export default handler({ data: siteSearchData });
+const indexFileUrl = new URL('../../site-search.json', import.meta.url);
+export default handler({ filename: indexFileUrl.pathname });

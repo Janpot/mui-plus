@@ -10,10 +10,11 @@ import {
   Divider,
 } from '@material-ui/core';
 import * as React from 'react';
-import { SearchApiResponse } from 'site-search/handler';
+import { SearchApiResponse, SearchApiResult } from 'site-search/handler';
 import useSWR from 'swr';
 import SearchIcon from '@material-ui/icons/Search';
 import { useRouter } from 'next/router';
+import { nonNullable } from './utlis';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -49,9 +50,11 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: 'inherit',
   '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
+    padding: theme.spacing(1, 0, 1, 0),
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    // vertical padding + font size from clearIndicator
+    paddingRight: `calc(1em + ${theme.spacing(2)})`,
     transition: theme.transitions.create('width'),
     width: '100%',
     [theme.breakpoints.up('sm')]: {
@@ -110,7 +113,7 @@ function CustomPopper(props: PopperProps) {
 }
 
 const AppBarSearchField = React.forwardRef<HTMLDivElement, InputBaseProps>(
-  ({ className, ...props }, ref) => {
+  function AppBarSearchField({ className, ...props }, ref) {
     return (
       <Search ref={ref}>
         <SearchIconWrapper>
@@ -167,11 +170,15 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
 
   return (
     <Autocomplete
-      onInputChange={(_event, newValue) => setInput(newValue)}
+      onInputChange={(_event, newValue, reason) => {
+        if (reason !== 'reset') {
+          setInput(newValue);
+        }
+      }}
       options={sortedOptions}
       filterOptions={identity}
-      onChange={(_event, option) => {
-        if (option && typeof option !== 'string') {
+      onChange={(_event, option, reason) => {
+        if (reason === 'selectOption' && option && typeof option !== 'string') {
           router.push(
             option.path + (option.anchor ? `#${option.anchor}` : ''),
             undefined,
@@ -191,21 +198,24 @@ export default function SearchBox({ endpoint }: SearchBoxProps) {
       PopperComponent={CustomPopper}
       freeSolo
       disableListWrap
-      getOptionLabel={(option) => option.snippet.parts.join('')}
+      getOptionLabel={(option: SearchApiResult | string) => {
+        return typeof option === 'string'
+          ? option
+          : option.snippet.parts.join('');
+      }}
       renderOption={(props, option) => {
-        const levels = option.hierarchy.filter(Boolean);
+        const levels = option.hierarchy
+          .filter(nonNullable)
+          .map((level) => level.content);
 
-        const section = levels.shift();
+        const section = levels.shift() || '';
         const title = levels.shift() || section;
-        const subtitle: string =
-          levels.map((level) => level?.content).join(' › ') ||
-          title?.content ||
-          '';
+        const subtitle: string = levels.join(' › ') || title;
 
         return (
           <li {...props}>
             <SearchResult>
-              <SearchResultTitle>{title?.content}</SearchResultTitle>
+              <SearchResultTitle>{title}</SearchResultTitle>
               <Divider orientation="vertical" flexItem />
               <SearchResultBody>
                 <SearchResultSubtitle>{subtitle}</SearchResultSubtitle>
