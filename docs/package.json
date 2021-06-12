@@ -22,8 +22,9 @@
   },
   "scripts": {
     "dev": "next",
-    "build:mui-plus": "yarn workspaces mui-plus build",
-    "build": "yarn build:mui-plus && next build",
+    "build:mui-plus": "yarn workspace mui-plus build",
+    "build:nextra-theme-mui-docs": "yarn workspace nextra-theme-mui-docs build",
+    "build": "yarn build:nextra-theme-mui-docs && yarn build:mui-plus && next build",
     "start": "next start",
     "lint": "next lint",
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest",
