@@ -1479,25 +1479,25 @@
   resolved "https://registry.yarnpkg.com/@mdx-js/util/-/util-2.0.0-next.1.tgz#b17a046ed5cb1b13e75b29740504ec53a7e0b016"
   integrity sha512-F36kWTFdFXrbNIsM77dhVwYZsZonUIKHkYyYgnuw1NWskBfEn1ET5B5Z5mm58ckKNf7SimchnxR9sKCCtH38WA==
 
-"@next/env@10.2.4-canary.14":
-  version "10.2.4-canary.14"
-  resolved "https://registry.yarnpkg.com/@next/env/-/env-10.2.4-canary.14.tgz#6208e61bccadea5c6e7195da248b96251b80c166"
-  integrity sha512-jUFHzhGqCS+EW+M8vAHqzKLSwHNJ1DfHnRYcxak/3iWAdWX1Nlf5OXhex/t779HeLYAMk1LSGTkwTkeR0rjYIw==
+"@next/env@10.2.4-canary.15":
+  version "10.2.4-canary.15"
+  resolved "https://registry.yarnpkg.com/@next/env/-/env-10.2.4-canary.15.tgz#9516ad0e8fddc228d9414027192a234968f75e6e"
+  integrity sha512-1WLnTWMKujcYfz/q4mGw+EEniy/VweFNWP+bMoOkCUyrc135QfNmBkO4bE/BukrOhCQ1qKjzqVn1eRGzf5b4Vg==
 
 "@next/eslint-plugin-next@10.2.3":
   version "10.2.3"
   resolved "https://registry.yarnpkg.com/@next/eslint-plugin-next/-/eslint-plugin-next-10.2.3.tgz#5e62d0f029c435d0ba0222637b77611ff51f9e1a"
   integrity sha512-XkYm3cMxY2RZgbGyZLDN3vR9StFyiQVdwdS/EL6NxOerzt0To03/coY22p4jcFLtLYlQxAivJRicMTDNhRzPog==
 
-"@next/polyfill-module@10.2.4-canary.14":
-  version "10.2.4-canary.14"
-  resolved "https://registry.yarnpkg.com/@next/polyfill-module/-/polyfill-module-10.2.4-canary.14.tgz#bf3e10bd1ce4d2d590edba963f72f261dcfdce39"
-  integrity sha512-SszUe95s9oMwa42+ovvz3s7W4SMXtxHX9Rs9eh+WjpwHiZaW9kNBzxLQMe7H4+YjOCBzDC9fD+ntFt7dYCrVVw==
+"@next/polyfill-module@10.2.4-canary.15":
+  version "10.2.4-canary.15"
+  resolved "https://registry.yarnpkg.com/@next/polyfill-module/-/polyfill-module-10.2.4-canary.15.tgz#db3320b28203327aee213369f1ae15e1d8c01847"
+  integrity sha512-MR98b8OgpGaSaqI/4yIhsrsRllJ2e8CNb+ODMCpkHLsy/sTeV2xWyKA/nz4rk0S/hm1mokr5NLvuTJv+gMArwQ==
 
-"@next/react-dev-overlay@10.2.4-canary.14":
-  version "10.2.4-canary.14"
-  resolved "https://registry.yarnpkg.com/@next/react-dev-overlay/-/react-dev-overlay-10.2.4-canary.14.tgz#68bfdac5af56b5ec6176fbeac2059d1fc4845767"
-  integrity sha512-faGeUHwFvsBh/zWYNVRjmNm+4pY7awElRJ6DA0RLKeAzpmfjyoJkc5uArDFVLo0s2ARELEd9vo9O1Rft8ofd5Q==
+"@next/react-dev-overlay@10.2.4-canary.15":
+  version "10.2.4-canary.15"
+  resolved "https://registry.yarnpkg.com/@next/react-dev-overlay/-/react-dev-overlay-10.2.4-canary.15.tgz#2fef70439b51ecf061afc1891cf32f4e67897b03"
+  integrity sha512-TozyrXP7AX8IauaUcb3CsamCyrVSvIPezCsB7jAQMgco/k11NxcKzDufLQyXxVaBj/l7ja4j56gw2Ub/1c1EoA==
   dependencies:
     "@babel/code-frame" "7.12.11"
     anser "1.4.9"
@@ -1511,10 +1511,10 @@
     stacktrace-parser "0.1.10"
     strip-ansi "6.0.0"
 
-"@next/react-refresh-utils@10.2.4-canary.14":
-  version "10.2.4-canary.14"
-  resolved "https://registry.yarnpkg.com/@next/react-refresh-utils/-/react-refresh-utils-10.2.4-canary.14.tgz#79bce2e9f40112ed36d14c768d7f68f97aaa5bb7"
-  integrity sha512-WxkTZ4zT83xixCDa5OibMDCzXv0GErtiJCNTnXJdZhDs9z8ZNCmrDy41ZDlcqjK7AtqGAtmqlwDcq1RhSkbPEA==
+"@next/react-refresh-utils@10.2.4-canary.15":
+  version "10.2.4-canary.15"
+  resolved "https://registry.yarnpkg.com/@next/react-refresh-utils/-/react-refresh-utils-10.2.4-canary.15.tgz#fcf42a64d33f7e32b7854ec1c4b41c4202b134d0"
+  integrity sha512-MxXhriGir6UfZF6Lj+dZFSegKOPg+iV4gC2kJ1EOopUqXnS3ap1rBmlf2DXyWj+fxrbkqGMczG7zNm0HnVuwTA==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1783,7 +1783,7 @@
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.4.tgz#15925414e0ad2cd765bfef58842f7e26a7accb24"
   integrity sha512-1HcDas8SEj4z1Wc696tH56G8OlRaH/sqZOynNNB+HF0WOeXPaxTtbYzJY2oEfiUxjSKjhCKr+MvR7dCHcEelug==
 
-"@types/react-dom@latest":
+"@types/react-dom@^17.0.7":
   version "17.0.7"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.7.tgz#b8ee15ead9e5d6c2c858b44949fdf2ebe5212232"
   integrity sha512-Wd5xvZRlccOrCTej8jZkoFZuZRKHzanDDv1xglI33oBNFMWrqOSzrvWFw7ngSiZjrpJAzPKFtX7JvuXpkNmQHA==
@@ -1804,7 +1804,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@latest":
+"@types/react@*", "@types/react@^17.0.11":
   version "17.0.11"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.11.tgz#67fcd0ddbf5a0b083a0f94e926c7d63f3b836451"
   integrity sha512-yFRQbD+whVonItSk7ZzP/L+gPTJVBkL/7shLEF+i9GC/1cV3JmUxEQz6+9ylhUpWSDuqo1N9qEvqS6vTj4USUA==
@@ -2607,9 +2607,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001202, caniuse-lite@^1.0.30001219, caniuse-lite@^1.0.30001228, caniuse-lite@^1.0.30001230:
-  version "1.0.30001236"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001236.tgz#0a80de4cdf62e1770bb46a30d884fc8d633e3958"
-  integrity sha512-o0PRQSrSCGJKCPZcgMzl5fUaj5xHe8qA2m4QRvnyY4e1lITqoNkr7q/Oh1NcpGSy0Th97UZ35yoKcINPoq7YOQ==
+  version "1.0.30001237"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001237.tgz#4b7783661515b8e7151fc6376cfd97f0e427b9e5"
+  integrity sha512-pDHgRndit6p1NR2GhzMbQ6CkRrp4VKuSsqbcLeOQppYPKOYkKT/6ZvZDvKJUqcmtyWIAHuZq3SVS2vc1egCZzw==
 
 chalk@2.4.2, chalk@^2.0.0, chalk@^2.4.1, chalk@^2.4.2:
   version "2.4.2"
@@ -5837,9 +5837,9 @@ merge2@^1.3.0:
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
 microbundle@^0.13.0:
-  version "0.13.2"
-  resolved "https://registry.yarnpkg.com/microbundle/-/microbundle-0.13.2.tgz#e624aefa745eaff5ea0638e78a20b9c7ad81c284"
-  integrity sha512-LJN69gY7osa+KoLcR6J1pGTmH+CRWUI73sRc6BKpAwtJjjYWNhiCDXglB0yRBEyw1DTF9ZMH/VXkbf2o2AjLXA==
+  version "0.13.3"
+  resolved "https://registry.yarnpkg.com/microbundle/-/microbundle-0.13.3.tgz#cfc5055b50cf7a0bcc5eec441604f4520ccd07ec"
+  integrity sha512-nlP20UmyqGGeh6jhk8VaVFEoRlF+JAvnwixPLQUwHEcAF59ROJCyh34eylJzUAVNvF3yrCaHxIBv8lYcphDM1g==
   dependencies:
     "@babel/core" "^7.12.10"
     "@babel/plugin-proposal-class-properties" "7.12.1"
@@ -6060,16 +6060,16 @@ next-themes@^0.0.14:
   integrity sha512-x09OaM+wg3SIlEjOv8B21aw/E36jxTtfW3Dm/DPwMsSMluGt7twe1LigA6nc+mXP1u0qu9MxBaIrPPH6UTiKnA==
 
 next@^10.2.4-canary.13:
-  version "10.2.4-canary.14"
-  resolved "https://registry.yarnpkg.com/next/-/next-10.2.4-canary.14.tgz#4fc42d637e58156092f3c3b61f1d2cb81cb7d3fb"
-  integrity sha512-wQm0uiAbY64xr3nhTV7wZxxmX0UtXBezrpykbqzzaqh3yg5oHFiOdTTbJCVfUCkf6nh/gOudTLgnDCfXM55i9g==
+  version "10.2.4-canary.15"
+  resolved "https://registry.yarnpkg.com/next/-/next-10.2.4-canary.15.tgz#faf48144fc44c30b6c32be19393b0f7ab9cb9b46"
+  integrity sha512-VqMeV0OT/DwKwjFd33UfjpGxzTSNaCrCGhfwc4pQiRg9oJ6jdvAjyZ7XmtewlMnqJn8Mm1r7rZdEGxwJmiyWqQ==
   dependencies:
     "@babel/runtime" "7.12.5"
     "@hapi/accept" "5.0.2"
-    "@next/env" "10.2.4-canary.14"
-    "@next/polyfill-module" "10.2.4-canary.14"
-    "@next/react-dev-overlay" "10.2.4-canary.14"
-    "@next/react-refresh-utils" "10.2.4-canary.14"
+    "@next/env" "10.2.4-canary.15"
+    "@next/polyfill-module" "10.2.4-canary.15"
+    "@next/react-dev-overlay" "10.2.4-canary.15"
+    "@next/react-refresh-utils" "10.2.4-canary.15"
     assert "2.0.0"
     ast-types "0.13.2"
     browserify-zlib "0.2.0"
@@ -8397,9 +8397,9 @@ tslib@^1.8.1:
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
 tslib@^2.0.3:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
-  integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.0.tgz#803b8cdab3e12ba581a4ca41c8839bbb0dacb09e"
+  integrity sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==
 
 tsutils@^3.21.0:
   version "3.21.0"
@@ -8459,7 +8459,7 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@^4.1.3, typescript@^4.1.5, typescript@^4.3.2, typescript@latest:
+typescript@^4.1.3, typescript@^4.1.5, typescript@^4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.2.tgz#399ab18aac45802d6f2498de5054fcbbe716a805"
   integrity sha512-zZ4hShnmnoVnAHpVHWpTcxdv7dWP60S2FsydQLV8V5PbS3FifjWFFRiHSWpDJahly88PRyV5teTSLoq4eG7mKw==
