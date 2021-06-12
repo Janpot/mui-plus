@@ -4,6 +4,7 @@
     "docs",
     "packages/*"
   ],
+  "license": "MIT",
   "scripts": {
     "dev:docs": "next dev ./docs",
     "eslint": "eslint .",

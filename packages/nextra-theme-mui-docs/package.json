@@ -1,6 +1,7 @@
 {
   "name": "nextra-theme-mui-docs",
   "version": "1.0.0",
+  "license": "MIT",
   "dependencies": {
     "@mdx-js/react": "^1.6.22",
     "clsx": "^1.1.1",
