@@ -1,6 +1,6 @@
 {
   "name": "mui-plus",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "license": "MIT",
   "devDependencies": {
     "@types/resize-observer-browser": "^0.1.5",
@@ -20,7 +20,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "microbundle --jsxFragment React.Fragment --jsx 'React.createElement' --format es,cjs,modern",
-    "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern"
+    "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern",
+    "pub": "yarn publish"
   },
   "peerDependencies": {
     "@material-ui/core": "^5.0.0-alpha.34",
