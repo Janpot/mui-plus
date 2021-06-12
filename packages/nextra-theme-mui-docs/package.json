@@ -1,6 +1,6 @@
 {
   "name": "nextra-theme-mui-docs",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "license": "MIT",
   "dependencies": {
     "@mdx-js/react": "^1.6.22",
@@ -27,7 +27,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "microbundle --jsxFragment React.Fragment --jsx 'React.createElement' --format es,cjs,modern ./*.ts",
-    "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern ./*.ts"
+    "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern ./*.ts",
+    "pub": "yarn publish"
   },
   "peerDependencies": {
     "@material-ui/core": "^5.0.0-alpha.34",
