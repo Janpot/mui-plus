@@ -7,7 +7,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "10.2.3",
+    "next": "canary",
     "nextra": "0.4.5",
     "nextra-theme-mui-docs": "latest",
     "react": "17.0.2",
