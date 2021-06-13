@@ -71,8 +71,6 @@ async function main() {
         ## import
   
         \`\`\`tsx
-        import ${componentInfo.displayName} from 'mui-plus/${componentInfo.displayName}';
-        // or
         import { ${componentInfo.displayName} } from 'mui-plus';
         \`\`\`
   
