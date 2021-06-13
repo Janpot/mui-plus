@@ -4,36 +4,13 @@ A custom [`nextra`](https://nextra.vercel.app/) theme built on top of [`@materia
 
 ## Installation
 
-1. Install peer dependencies `yarn add next react react-dom nextra @material-ui/core@next @material-ui/icons@next`.
-2. install the theme `yarn add nextra-theme-mui-docs`.
-3. Create configuration
+1. Initialize with
 
-```tsx
-// next.config.js
-const withNextra = require('nextra')(
-  'nextra-theme-mui-docs',
-  './theme.config.js'
-);
-module.exports = withNextra({});
+```
+yarn create next-app --example https://github.com/Janpot/mui-plus/tree/master/examples/nextra-basic
 ```
 
-```tsx
-// theme.config.js
-import * as React from 'react';
-
-export default {
-  logo: <span>My App</span>,
-  title: 'App created with nextra and  nextra-theme-mui-docs.',
-};
-```
-
-4. Create your first page `pages/index.mdx`
-
-```mdx
-# My App
-```
-
-5. Run `yarn dev`
+2. Run `yarn dev` in the project folder.
 
 ## Site Structure
 

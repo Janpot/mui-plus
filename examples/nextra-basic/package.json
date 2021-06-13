@@ -8,8 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@material-ui/core": "5.0.0-alpha.35",
-    "@material-ui/icons": "5.0.0-alpha.35",
     "next": "10.2.3",
     "nextra": "0.4.5",
     "nextra-theme-mui-docs": "^0.0.3",
