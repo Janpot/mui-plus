@@ -10,7 +10,7 @@
     "mui-plus": "0.0.3",
     "next": "^10.2.4-canary.13",
     "nextra": "^0.4.3",
-    "nextra-theme-mui-docs": "0.0.3",
+    "nextra-theme-mui-docs": "0.0.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "site-search": "^0.0.10",
