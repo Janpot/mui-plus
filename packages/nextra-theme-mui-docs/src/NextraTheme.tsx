@@ -37,6 +37,8 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 import { ThemeProvider, useTheme as useNextTheme } from 'next-themes';
 import useIsMounted from './useIsMounted';
 import Head from 'next/head';
+import { parsePages, SiteStructureEntry } from './siteStructure';
+import { findRelativePages } from './siteStructure';
 
 declare module '@material-ui/core' {
   interface ThemeOptions {
@@ -147,6 +149,7 @@ const DrawerListItemText = styled(ListItemText)(({ styleProps }) => ({
 interface SideBarItemProps {
   level?: number;
   entry: SiteStructureEntry;
+  currentPath: SiteStructureEntry[];
 }
 
 function SideBarItem({ entry, ...props }: SideBarItemProps) {
@@ -160,17 +163,20 @@ function SideBarItem({ entry, ...props }: SideBarItemProps) {
 interface SideBarFileItemProps {
   level?: number;
   entry: SiteStructureEntry;
+  currentPath: SiteStructureEntry[];
 }
 
-function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
-  const { route } = useRouter();
-  const isInActiveRoute =
-    route === entry.route || route.startsWith(entry.route + '/');
-  const isActive = route === entry.route;
+function SideBarFileItem({
+  entry,
+  level = 0,
+  currentPath,
+}: SideBarFileItemProps) {
+  const isInCurrentPath = currentPath.includes(entry);
+  const isCurrent = currentPath[currentPath.length - 1] === entry;
   return (
     <ListItem
-      className={isInActiveRoute ? `outline-lvl${level}-active` : undefined}
-      selected={isActive}
+      className={isInCurrentPath ? `outline-lvl${level}-active` : undefined}
+      selected={isCurrent}
       button
       component={Link}
       noLinkStyle
@@ -185,13 +191,23 @@ function SideBarFileItem({ entry, level = 0 }: SideBarFileItemProps) {
 interface SideBarItemListProps {
   level?: number;
   entries: SiteStructureEntry[];
+  currentPath: SiteStructureEntry[];
 }
 
-function SideBarItemList({ entries, level = 0 }: SideBarItemListProps) {
+function SideBarItemList({
+  entries,
+  level = 0,
+  currentPath,
+}: SideBarItemListProps) {
   return (
     <List dense>
       {entries.map((entry) => (
-        <SideBarItem key={entry.name} entry={entry} level={level} />
+        <SideBarItem
+          key={entry.name}
+          entry={entry}
+          level={level}
+          currentPath={currentPath}
+        />
       ))}
     </List>
   );
@@ -200,19 +216,22 @@ function SideBarItemList({ entries, level = 0 }: SideBarItemListProps) {
 interface SideBarFolderItemProps {
   level?: number;
   entry: SiteStructureEntry;
+  currentPath: SiteStructureEntry[];
 }
 
-function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
-  const { route } = useRouter();
-  const isOpen = route === entry.route || route.startsWith(entry.route + '/');
-  const [open, setOpen] = React.useState(isOpen);
-  const isInActiveRoute =
-    route === entry.route || route.startsWith(entry.route + '/');
+function SideBarFolderItem({
+  entry,
+  level = 0,
+  currentPath,
+}: SideBarFolderItemProps) {
+  const isInCurrentPath = currentPath.includes(entry);
+  const isCurrent = currentPath[currentPath.length - 1] === entry;
+  const [open, setOpen] = React.useState(isInCurrentPath);
 
   return (
     <>
       <ListItem
-        className={isInActiveRoute ? `outline-lvl${level}-active` : undefined}
+        className={isInCurrentPath ? `outline-lvl${level}-active` : undefined}
         button
         onClick={() => setOpen((open) => !open)}
         style={{ paddingLeft: 8 + level * 16 }}
@@ -221,7 +240,11 @@ function SideBarFolderItem({ entry, level = 0 }: SideBarFolderItemProps) {
         <DrawerListItemText styleProps={{ level }} primary={entry.title} />
       </ListItem>
       <Collapse in={open}>
-        <SideBarItemList entries={entry.children} level={level + 1} />
+        <SideBarItemList
+          entries={entry.children}
+          level={level + 1}
+          currentPath={currentPath}
+        />
       </Collapse>
     </>
   );
@@ -263,6 +286,8 @@ interface LayoutProps {
 function Layout({ children, opts, config }: LayoutProps) {
   const muiTheme = useMuiTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { route: currentRoute } = useRouter();
+  const { pageMap } = opts;
 
   const slugger = new Slugger();
   const minLevel = 1;
@@ -289,10 +314,8 @@ function Layout({ children, opts, config }: LayoutProps) {
 
   const activeSection = useActiveSection();
 
-  const pageMap = React.useMemo(
-    () => parsePageMap(opts.pageMap),
-    [opts.pageMap]
-  );
+  const siteStructure = React.useMemo(() => parsePages(pageMap), [pageMap]);
+  const relativePages = findRelativePages(siteStructure, currentRoute);
 
   const drawer = (
     <div>
@@ -302,7 +325,10 @@ function Layout({ children, opts, config }: LayoutProps) {
         </Typography>
       </Toolbar>
       <Divider />
-      <SideBarItemList entries={pageMap} />
+      <SideBarItemList
+        entries={siteStructure}
+        currentPath={relativePages.current}
+      />
     </div>
   );
 
@@ -362,6 +388,20 @@ function Layout({ children, opts, config }: LayoutProps) {
         <Toolbar />
         <Container maxWidth="md">
           <MdxTheme>{children}</MdxTheme>
+          <Divider sx={{ mt: 5, mb: 3 }} />
+          <Box display="flex" flexDirection="row">
+            {relativePages.prev ? (
+              <Link href={relativePages.prev.route}>
+                ‹ {relativePages.prev.title}
+              </Link>
+            ) : null}
+            <FlexFill />
+            {relativePages.next ? (
+              <Link href={relativePages.next.route}>
+                {relativePages.next.title} ›
+              </Link>
+            ) : null}
+          </Box>
         </Container>
       </DocsMain>
       <DocsOutline>
@@ -471,52 +511,6 @@ function parseOrder(input: unknown): { name: string; title?: string }[] {
     }
   }
   return result;
-}
-
-interface SiteStructureEntry {
-  name: string;
-  title: string;
-  route: string;
-  children: SiteStructureEntry[];
-}
-
-function parsePageMap(pageMap: PageMap): SiteStructureEntry[] {
-  const entryMap = new Map(pageMap.map((entry) => [entry.name, entry]));
-  const indexEntry = entryMap.get('index');
-  const order = parseOrder(indexEntry?.frontMatter?.order);
-  const orderedEntryNames = new Set(order.map((entry) => entry.name));
-  const orderedEntries = order.map((orderEntry) => ({
-    ...orderEntry,
-    ...entryMap.get(orderEntry.name),
-  }));
-  const unorderedEntries = pageMap.filter(
-    (entry) => !orderedEntryNames.has(entry.name)
-  );
-  const allEntries = [...orderedEntries, ...unorderedEntries].filter(
-    Boolean
-  ) as NextraPageMapEntry[];
-  return allEntries
-    .map((entry) =>
-      entry.children
-        ? {
-            name: entry.name,
-            title: entry.frontMatter?.title ?? entry.name,
-            route: entry.route,
-            children: parsePageMap(entry.children),
-          }
-        : {
-            name: entry.name,
-            title: entry.frontMatter?.title ?? entry.name,
-            route: entry.route,
-            children: [],
-          }
-    )
-    .filter(
-      (entry) =>
-        !entry.name.startsWith('_') &&
-        entry.route !== '/api' &&
-        !entry.route.startsWith('/api/')
-    );
 }
 
 export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
