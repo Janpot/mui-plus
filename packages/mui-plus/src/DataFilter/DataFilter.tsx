@@ -244,6 +244,9 @@ export interface DataFilterProps<Row extends object> {
   size?: 'small' | 'medium';
 }
 
+/**
+ * mui-plus DataFilter Component
+ */
 export default function DataFilter<Row extends object>({
   options,
   value = [],
