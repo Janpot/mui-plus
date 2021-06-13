@@ -10,7 +10,7 @@
   "dependencies": {
     "next": "10.2.3",
     "nextra": "0.4.5",
-    "nextra-theme-mui-docs": "^0.0.3",
+    "nextra-theme-mui-docs": "latest",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   }
