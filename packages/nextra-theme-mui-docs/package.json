@@ -1,6 +1,6 @@
 {
   "name": "nextra-theme-mui-docs",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "dependencies": {
     "@emotion/react": "^11.4.0",
@@ -23,10 +23,22 @@
   "main": "./dist/index.js",
   "module": "./dist/index.module.js",
   "exports": {
-    ".": "./dist/index.modern.js",
-    "./CodeExample": "./dist/CodeExample.modern.js",
-    "./Code": "./dist/Code.modern.js",
-    "./Link": "./dist/Link.modern.js"
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.modern.js"
+    },
+    "./CodeExample": {
+      "require": "./dist/CodeExample.js",
+      "import": "./dist/CodeExample.modern.js"
+    },
+    "./Code": {
+      "require": "./dist/Code.js",
+      "import": "./dist/Code.modern.js"
+    },
+    "./Link": {
+      "require": "./dist/Link.js",
+      "import": "./dist/Link.modern.js"
+    }
   },
   "types": "./dist/index.d.ts",
   "scripts": {
