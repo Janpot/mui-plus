@@ -56,34 +56,35 @@ export function isRoutePrefix(prefix: string, route: string) {
   return prefix === route || route.startsWith(prefix + '/');
 }
 
+function findLeafs(structure: SiteStructureEntry[]): SiteStructureEntry[] {
+  return structure.flatMap((entry) =>
+    entry.children.length > 0 ? findLeafs(entry.children) : [entry]
+  );
+}
+
+function findPath(
+  structure: SiteStructureEntry[],
+  route: string
+): SiteStructureEntry[] {
+  const entry =
+    structure.find((entry) => entry.route === route) ||
+    structure.find((entry) => isRoutePrefix(entry.route, route));
+  return entry ? [entry, ...findPath(entry.children, route)] : [];
+}
+
 export function findRelativePages(
   structure: SiteStructureEntry[],
   route: string
 ): RelativePages {
-  let entryIdx = structure.findIndex((entry) => entry.route === route);
-  if (entryIdx < 0) {
-    entryIdx = structure.findIndex((entry) =>
-      isRoutePrefix(entry.route, route)
-    );
-  }
-  if (entryIdx >= 0) {
-    const entry = structure[entryIdx];
-    const childRelatives = findRelativePages(entry.children, route);
-    if (childRelatives.current.length > 0) {
-      return {
-        ...childRelatives,
-        current: [entry, ...childRelatives.current],
-      };
-    } else {
-      return {
-        current: [entry],
-        prev: entryIdx > 0 ? structure[entryIdx - 1] : null,
-        next: entryIdx < structure.length - 1 ? structure[entryIdx + 1] : null,
-      };
-    }
-  } else {
-    return { current: [], prev: null, next: null };
-  }
+  const allLeafs = findLeafs(structure);
+  const entryIdx = allLeafs.findIndex((entry) => entry.route === route);
+  const prev = entryIdx > 0 ? allLeafs[entryIdx - 1] : null;
+  const next =
+    entryIdx >= 0 && entryIdx < allLeafs.length - 1
+      ? allLeafs[entryIdx + 1]
+      : null;
+  const current = findPath(structure, route);
+  return { prev, next, current };
 }
 
 export function parsePages(pageMap: PageMap): SiteStructureEntry[] {

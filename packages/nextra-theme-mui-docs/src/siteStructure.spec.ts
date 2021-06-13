@@ -223,7 +223,7 @@ describe('active route', () => {
       expect.objectContaining({
         current: [structure[0]],
         prev: null,
-        next: structure[1],
+        next: structure[1].children[0],
       })
     );
   });
@@ -233,8 +233,8 @@ describe('active route', () => {
     expect(relatives).toEqual(
       expect.objectContaining({
         current: [structure[1]],
-        prev: structure[0],
-        next: structure[2],
+        prev: null,
+        next: null,
       })
     );
   });
@@ -245,7 +245,7 @@ describe('active route', () => {
       expect.objectContaining({
         current: [structure[1], structure[1].children[1]],
         prev: structure[1].children[0],
-        next: null,
+        next: structure[2].children[0],
       })
     );
   });
@@ -256,7 +256,7 @@ describe('active route', () => {
       expect.objectContaining({
         current: [structure[2], structure[2].children[0]],
         prev: null,
-        next: structure[2].children[1],
+        next: null,
       })
     );
   });
