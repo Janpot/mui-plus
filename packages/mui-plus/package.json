@@ -1,6 +1,6 @@
 {
   "name": "mui-plus",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "license": "MIT",
   "devDependencies": {
     "@types/resize-observer-browser": "^0.1.5",
