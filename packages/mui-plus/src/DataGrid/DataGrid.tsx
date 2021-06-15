@@ -36,13 +36,15 @@ const CenterHeader = styled('div')({
   overflow: 'hidden',
 });
 
-const PinnedStartHeader = styled('div')({
+const PinnedStartHeader = styled('div')(({ theme }) => ({
+  fontWeight: theme.typography.fontWeightBold,
   display: 'flex',
-});
+}));
 
-const PinnedEndHeader = styled('div')({
+const PinnedEndHeader = styled('div')(({ theme }) => ({
+  fontWeight: theme.typography.fontWeightBold,
   display: 'flex',
-});
+}));
 
 const TableHeadRenderPane = styled('div')(({ theme }) => ({
   fontWeight: theme.typography.fontWeightBold,
