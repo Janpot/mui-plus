@@ -1494,10 +1494,10 @@
   resolved "https://registry.yarnpkg.com/@next/env/-/env-11.0.0.tgz#bdd306a45e88ba3e4e7a36aa91806f6486bb61d0"
   integrity sha512-VKpmDvTYeCpEQjREg3J4pCmVs/QjEzoLmkM8shGFK6e9AmFd0G9QXOL8HGA8qKhy/XmNb7dHeMqrcMiBua4OgA==
 
-"@next/eslint-plugin-next@10.2.4-canary.19":
-  version "10.2.4-canary.19"
-  resolved "https://registry.yarnpkg.com/@next/eslint-plugin-next/-/eslint-plugin-next-10.2.4-canary.19.tgz#6da84b30d8967001ad9f3fab3f35c23a860c2428"
-  integrity sha512-XKQ/SeGuPUVlcMtn6Fw2Kjpspgo2flBriEcLp8Pm9V6B9H80lBcdTrya56BQK5huFY2iRXeoWr2XpKKRmkO7tw==
+"@next/eslint-plugin-next@11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@next/eslint-plugin-next/-/eslint-plugin-next-11.0.0.tgz#e6fb93a00bdaba371904f2b2698b184e6278d369"
+  integrity sha512-fPZ0904yY1box6bRpR9rJqIkNxJdvzzxH7doXS+cdjyBAdptMR7wj3mcx1hEikBHzWduU8BOXBvRg2hWc09YDQ==
 
 "@next/polyfill-module@11.0.0":
   version "11.0.0"
@@ -3614,12 +3614,12 @@ escodegen@^2.0.0:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-next@^10.2.4-canary.16:
-  version "10.2.4-canary.19"
-  resolved "https://registry.yarnpkg.com/eslint-config-next/-/eslint-config-next-10.2.4-canary.19.tgz#fc6aec7b21ec2480c0ee89746cde57e835ef9dea"
-  integrity sha512-y4OzWRo9F8qeRGHT72oMNBt0rMOJLfudVezrv/aXZO5M6xAfZwW/QdKiM6+omZwPMRXJ8qquAGNPnrpsf+PpuA==
+eslint-config-next@11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-next/-/eslint-config-next-11.0.0.tgz#0638a839dd46bbf5391076b13c48b6c0cc92ec2f"
+  integrity sha512-pmatg4zqb5Vygu2HrSPxbsCBudXO9OZQUMKQCyrPKRvfL8PJ3lOIOzzwsiW68eMPXOZwOc1yxTRZWKNY8OJT0w==
   dependencies:
-    "@next/eslint-plugin-next" "10.2.4-canary.19"
+    "@next/eslint-plugin-next" "11.0.0"
     "@rushstack/eslint-patch" "^1.0.6"
     "@typescript-eslint/parser" "^4.20.0"
     eslint-import-resolver-node "^0.3.4"
