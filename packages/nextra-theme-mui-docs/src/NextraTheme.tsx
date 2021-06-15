@@ -140,11 +140,18 @@ const DocsDrawer = styled(Drawer)({
   },
 });
 
-const DrawerListItemText = styled(ListItemText)(({ styleProps }) => ({
-  '& .MuiListItemText-primary':
-    // @ts-expect-error
-    styleProps?.level <= 0 ? { fontWeight: 'bold' } : {},
-}));
+interface DrawerListItemTextProps {
+  styleProps?: {
+    level?: number;
+  };
+}
+
+const DrawerListItemText = styled(ListItemText)<DrawerListItemTextProps>(
+  ({ styleProps }) => ({
+    '& .MuiListItemText-primary':
+      styleProps?.level ?? 0 <= 0 ? { fontWeight: 'bold' } : {},
+  })
+);
 
 interface SideBarItemProps {
   level?: number;

@@ -4,6 +4,9 @@ const withNextra = require('nextra')(
 );
 module.exports = withNextra({
   webpack5: true,
+  experimental: {
+    externalDir: true,
+  },
   webpack: (config) => {
     config.module.rules = [
       {

@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "mui-plus": ["../packages/mui-plus/src"],
+      // TODO: figure this out
+      "nextra-theme-mui-docs/*": ["../packages/nextra-theme-mui-docs/*"]
+    },
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
