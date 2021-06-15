@@ -15,7 +15,28 @@ import { clamp } from '../utils/math';
 import { getTableVirtualSlice } from '../utils/virtualization';
 import Scroller from './Scroller';
 
-const classes = {
+type TableClass =
+  | 'resizing'
+  | 'reverse'
+  | 'tableCell'
+  | 'centerHeader'
+  | 'pinnedStartHeader'
+  | 'pinnedEndHeader'
+  | 'tableHeadRenderPane'
+  | 'tableHead'
+  | 'tableBody'
+  | 'tableColumns'
+  | 'pinnedStartColumns'
+  | 'pinnedEndColumns'
+  | 'centerColumns'
+  | 'tableRowRoot'
+  | 'verticalFillRoot'
+  | 'cellContent'
+  | 'resizer';
+
+const classes: {
+  [Key in TableClass]: `MuiPlus${Capitalize<Key>}`;
+} = {
   resizing: 'MuiPlusResizing',
   reverse: 'MuiPlusReverse',
   tableCell: 'MuiPlusTableCell',
