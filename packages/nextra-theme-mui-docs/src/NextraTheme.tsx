@@ -149,7 +149,7 @@ interface DrawerListItemTextProps {
 const DrawerListItemText = styled(ListItemText)<DrawerListItemTextProps>(
   ({ styleProps }) => ({
     '& .MuiListItemText-primary':
-      styleProps?.level ?? 0 <= 0 ? { fontWeight: 'bold' } : {},
+      (styleProps?.level || 0) <= 0 ? { fontWeight: 'bold' } : {},
   })
 );
 
