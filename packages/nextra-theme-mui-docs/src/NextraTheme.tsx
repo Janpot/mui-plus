@@ -395,21 +395,22 @@ function Layout({ children, opts, config }: LayoutProps) {
         <Toolbar />
         <Container maxWidth="md">
           <MdxTheme>{children}</MdxTheme>
-          <Divider sx={{ mt: 5, mb: 3 }} />
-          <Box display="flex" flexDirection="row">
-            {relativePages.prev ? (
-              <Link href={relativePages.prev.route}>
-                ‹ {relativePages.prev.title}
-              </Link>
-            ) : null}
-            <FlexFill />
-            {relativePages.next ? (
-              <Link href={relativePages.next.route}>
-                {relativePages.next.title} ›
-              </Link>
-            ) : null}
-          </Box>
         </Container>
+        <FlexFill />
+        <Divider sx={{ mt: 5, mb: 3 }} />
+        <Box display="flex" flexDirection="row">
+          {relativePages.prev ? (
+            <Link href={relativePages.prev.route}>
+              ‹ {relativePages.prev.title}
+            </Link>
+          ) : null}
+          <FlexFill />
+          {relativePages.next ? (
+            <Link href={relativePages.next.route}>
+              {relativePages.next.title} ›
+            </Link>
+          ) : null}
+        </Box>
       </DocsMain>
       <DocsOutline>
         {docOutline.length > 0 ? (

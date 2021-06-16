@@ -139,12 +139,15 @@ const Root = styled('div')(({ theme }) => ({
   },
 
   [`& .${classes.tableCell}`]: {
-    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     height: '100%',
     flexShrink: 0,
     flexgrow: 0,
+  },
+
+  [`& .${classes.tableHead} .${classes.tableCell}`]: {
+    position: 'relative',
   },
 
   [`& .${classes.cellContent}`]: {

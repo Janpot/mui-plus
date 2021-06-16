@@ -1,18 +1,40 @@
 # nextra-theme-mui-docs
 
-A custom [`nextra`](https://nextra.vercel.app/) theme built on top of [`@material-ui`](https://material-ui.com/).
+`nextra-theme-mui-docs` is a theme for [Nextra](https://nextra.vercel.app/) that's built with the [Material UI](https://next.material-ui.com/) library.
 
 ## Installation
-
-1. Initialize with
 
 ```
 yarn create next-app --example https://github.com/Janpot/mui-plus/tree/master/examples/nextra-basic
 ```
 
-2. Run `yarn dev` in the project folder.
+The quickest way to get set up and running is to use [`create-next-app`](http://npmjs.com/package/create-next-app) with the example from the `nextra-theme-mui-docs` Github repository.
+
+Run:
+
+```
+yarn create next-app --example https://github.com/Janpot/mui-plus/tree/master/examples/nextra-basic
+```
+
+Then follow the instructions to create and run the application.
 
 ## Site Structure
+
+The pages hierarchy follows the way they are laid out but can be influenced in several ways. To change the order of pages in a folder, you can use frontmatter in the `index.mdx` of that folder. You can eitehr just specify the page name, or an object with `name`/`title` properties.
+
+```mdx
+---
+title: Introduction
+order:
+  - index
+  - name: components
+    title: Components
+  - name: component-api
+    title: Component Api
+  - name: more
+    title: More
+---
+```
 
 ## Built-in components
 
@@ -81,8 +103,4 @@ import srcExample from '../../examples/nextra-theme-mui-docs/Example?raw';
   <Example />
 </CodeExample>
 
-You can use `/// preview-start`, `/// preview-end` to create a preview block. Inside jsx `{/** preview-start */}` and `{/** preview-end */}` will also work.
-
-### Code
-
-### Link
+You can use doc comments to create source code previews. Use `/// preview-start` to start and `/// preview-end` to end a preview block. Inside jsx `{/** preview-start */}` and `{/** preview-end */}` will also work.

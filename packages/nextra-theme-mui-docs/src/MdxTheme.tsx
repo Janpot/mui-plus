@@ -13,6 +13,12 @@ import { useSection } from './useScrollSpy';
 import LinkIcon from '@material-ui/icons/Link';
 
 const Article = styled('article')(({ theme }) => ({
+  '& p code': {
+    color:
+      theme.palette.mode === 'light'
+        ? theme.palette.secondary.dark
+        : theme.palette.secondary.light,
+  },
   '& pre code': {
     display: 'block',
   },
