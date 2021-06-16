@@ -39,6 +39,7 @@ export default function Scroller({
   onScroll,
 }: ScrollerProps) {
   const { ref: rootRef, rect } = useResizeObserver();
+
   return (
     <Root ref={rootRef} className={className} onScroll={onScroll}>
       <ScrollPane style={{ width: scrollWidth, height: scrollHeight }}>

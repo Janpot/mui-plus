@@ -30,7 +30,6 @@ type TableClass =
   | 'pinnedEndColumns'
   | 'centerColumns'
   | 'tableRowRoot'
-  | 'verticalFillRoot'
   | 'cellContent'
   | 'resizer';
 
@@ -51,7 +50,6 @@ const classes: {
   pinnedEndColumns: 'MuiPlusPinnedEndColumns',
   centerColumns: 'MuiPlusCenterColumns',
   tableRowRoot: 'MuiPlusTableRowRoot',
-  verticalFillRoot: 'MuiPlusVerticalFillRoot',
   cellContent: 'MuiPlusCellContent',
   resizer: 'MuiPlusResizer',
 };
@@ -132,10 +130,6 @@ const Root = styled('div')(({ theme }) => ({
     [`&.${classes.reverse}`]: {
       flexDirection: 'row-reverse',
     },
-  },
-
-  [`& .${classes.verticalFillRoot}`]: {
-    width: '100%',
   },
 
   [`& .${classes.tableCell}`]: {
@@ -356,19 +350,6 @@ function TableRow({ height, children, reverse }: TableRowProps) {
   );
 }
 
-interface VerticalFillProps {
-  height: number;
-  children?: React.ReactNode;
-}
-
-function VerticalFill({ height, children }: VerticalFillProps) {
-  return (
-    <div className={classes.verticalFillRoot} style={{ height }}>
-      {children}
-    </div>
-  );
-}
-
 interface RenderColumnsOptions {
   reverse?: boolean;
   leftMargin?: number;
@@ -580,16 +561,11 @@ export default function DataGrid({
       virtualSlice.endColumn + 1
     );
 
-    const leftMargin =
-      pinnedStartWidth +
-      getCellBoundingrect(0, centerColumns[virtualSlice.startColumn].key).left;
-
     const renderHeader = (
       columns: ColumnDefinitions,
-      { leftMargin = 0, reverse = false }: RenderColumnsOptions = {}
+      { reverse = false }: RenderColumnsOptions = {}
     ) => (
       <TableRow height={56} reverse={reverse}>
-        {leftMargin > 0 ? <TableCell width={leftMargin} /> : null}
         {columns.map((column) => {
           const headerContent = column?.header ?? column.key;
           const { width } = getCellBoundingrect(0, column.key);
@@ -611,18 +587,16 @@ export default function DataGrid({
     );
 
     const pinnedStartHeaderElms = renderHeader(pinnedStartColumns);
-    const centerHeaderElms = renderHeader(columnsSlice, { leftMargin });
+    const centerHeaderElms = renderHeader(columnsSlice);
     const pinnedEndHeaderElms = renderHeader(pinnedEndColumns, {
       reverse: true,
     });
 
-    const topMargin = virtualSlice.startRow * rowHeight;
-
     const renderBody = (
       columns: ColumnDefinitions,
-      { leftMargin = 0, reverse = false }: RenderColumnsOptions = {}
+      { reverse = false }: RenderColumnsOptions = {}
     ) => {
-      const elms = [<VerticalFill key={-1} height={topMargin} />];
+      const elms = [];
       for (
         let rowIdx = virtualSlice.startRow;
         rowIdx <= virtualSlice.endRow;
@@ -630,7 +604,6 @@ export default function DataGrid({
       ) {
         elms.push(
           <TableRow key={rowIdx} height={rowHeight} reverse={reverse}>
-            {leftMargin > 0 ? <TableCell width={leftMargin} /> : null}
             {columns.map((column) => {
               const value = column.getValue
                 ? column.getValue(data[rowIdx])
@@ -653,7 +626,7 @@ export default function DataGrid({
     };
 
     const pinnedStartElms = renderBody(pinnedStartColumns);
-    const centerElms = renderBody(columnsSlice, { leftMargin });
+    const centerElms = renderBody(columnsSlice);
     const pinnedEndElms = renderBody(pinnedEndColumns, { reverse: true });
 
     return {
@@ -680,29 +653,35 @@ export default function DataGrid({
   const pinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
   const pinnedEndRenderPaneRef = React.useRef<HTMLDivElement>(null);
 
+  const sliceLeft = virtualSlice
+    ? getCellBoundingrect(0, centerColumns[virtualSlice.startColumn].key).left
+    : 0;
+
+  const sliceTop = virtualSlice ? virtualSlice.startRow * rowHeight : 0;
+
   const scrollPosition = React.useRef({ top: 0, left: 0 });
   const updateScroll = React.useCallback(() => {
     const { left: scrollLeft, top: scrollTop } = scrollPosition.current;
     updateVirtualSlice(scrollLeft, scrollTop);
+
+    const deltaX = sliceLeft - scrollLeft;
+    const deltaY = sliceTop - scrollTop;
+
     if (tableBodyRenderPaneRef.current) {
-      tableBodyRenderPaneRef.current.style.transform = `translate(${
-        -scrollLeft - pinnedStartWidth
-      }px, ${-scrollTop}px)`;
+      tableBodyRenderPaneRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
     }
     if (pinnedStartRenderPaneRef.current) {
-      pinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
+      pinnedStartRenderPaneRef.current.style.transform = `translate(0px, ${deltaY}px)`;
     }
     if (pinnedEndRenderPaneRef.current) {
-      pinnedEndRenderPaneRef.current.style.transform = `translate(0px, ${-scrollTop}px)`;
+      pinnedEndRenderPaneRef.current.style.transform = `translate(0px, ${deltaY}px)`;
     }
     if (tableHeadRenderPaneRef.current) {
-      tableHeadRenderPaneRef.current.style.transform = `translate(${
-        -scrollLeft - pinnedStartWidth
-      }px, 0px)`;
+      tableHeadRenderPaneRef.current.style.transform = `translate(${deltaX}px, 0px)`;
     }
-  }, [updateVirtualSlice, pinnedStartWidth]);
+  }, [updateVirtualSlice, sliceLeft, sliceTop]);
 
-  const handleVerticalScroll = React.useCallback(
+  const handleScroll = React.useCallback(
     (event: React.UIEvent<HTMLDivElement>) => {
       const { scrollTop, scrollLeft } = event.currentTarget;
       scrollPosition.current.top = scrollTop;
@@ -712,9 +691,7 @@ export default function DataGrid({
     [updateScroll]
   );
 
-  React.useEffect(() => {
-    updateScroll();
-  }, [updateScroll]);
+  React.useLayoutEffect(() => updateScroll(), [updateScroll]);
 
   // useEventListener(bodyRef, 'wheel', handleWheel, {
   //   passive: false,
@@ -749,7 +726,7 @@ export default function DataGrid({
       </div>
       <div ref={tableBodyRef} className={classes.tableBody}>
         <Scroller
-          onScroll={handleVerticalScroll}
+          onScroll={handleScroll}
           scrollHeight={totalHeight}
           scrollWidth={totalWidth}
         >
