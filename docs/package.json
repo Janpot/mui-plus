@@ -4,10 +4,12 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
+    "@material-ui/core": "5.0.0-alpha.37",
+    "@material-ui/icons": "5.0.0-alpha.37",
     "clsx": "^1.1.1",
     "eslint": "^7.23.0",
     "eslint-plugin-react": "^7.23.1",
-    "mui-plus": "0.0.7",
+    "mui-plus": "0.0.8",
     "next": "^11.0.0",
     "nextra": "^0.4.3",
     "nextra-theme-mui-docs": "0.0.7",
