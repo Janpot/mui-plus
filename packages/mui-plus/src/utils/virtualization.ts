@@ -21,23 +21,21 @@ function _getInterSectingIndexVariable(
 
   const pivot = sliceStart + Math.floor((sliceEnd - sliceStart) / 2);
   const itemOffset = getItemOffset(pivot);
-  if (offset <= itemOffset) {
-    return _getInterSectingIndexVariable(
-      itemCount,
-      getItemOffset,
-      offset,
-      sliceStart,
-      pivot
-    );
-  } else {
-    return _getInterSectingIndexVariable(
-      itemCount,
-      getItemOffset,
-      offset,
-      pivot + 1,
-      sliceEnd
-    );
-  }
+  return offset <= itemOffset
+    ? _getInterSectingIndexVariable(
+        itemCount,
+        getItemOffset,
+        offset,
+        sliceStart,
+        pivot
+      )
+    : _getInterSectingIndexVariable(
+        itemCount,
+        getItemOffset,
+        offset,
+        pivot + 1,
+        sliceEnd
+      );
 }
 
 function getInterSectingIndexVariable(
@@ -48,73 +46,56 @@ function getInterSectingIndexVariable(
   return _getInterSectingIndexVariable(itemCount, getItemOffset, offset);
 }
 
-function getVirtualSliceFixed(
+type Slice = [
+  /** Zero-based index of the start of the slice */
+  start: number,
+  /** Zero-based index of the end of the slice, but not included */
+  end: number
+];
+
+function createSlice(
+  start: number,
+  end: number,
+  itemCount: number,
+  overscan: number
+): Slice {
+  return [Math.max(0, start - overscan), Math.min(itemCount, end + overscan)];
+}
+
+/**
+ * Calculates a slice for a virtualized set of items of fixed size.
+ * The slice returns values that correspond to the `Array.prototype.slice` method
+ */
+export function getVirtualSliceFixed(
   itemCount: number,
   itemSize: number,
   start: number,
-  end: number
-): [number, number] {
-  return [
+  end: number,
+  overscan: number = 0
+): Slice {
+  return createSlice(
     getInterSectingIndexFixed(itemCount, itemSize, start),
-    getInterSectingIndexFixed(itemCount, itemSize, end),
-  ];
+    getInterSectingIndexFixed(itemCount, itemSize, end) + 1,
+    itemCount,
+    overscan
+  );
 }
 
-function getVirtualSliceVariable(
+/**
+ * Calculates a slice for a virtualized set of items of variable size.
+ * The slice returns values that correspond to the `Array.prototype.slice` method
+ */
+export function getVirtualSliceVariable(
   itemCount: number,
   getItemOffset: (index: number) => number,
   start: number,
-  end: number
-): [number, number] {
-  return [
+  end: number,
+  overscan: number = 0
+): Slice {
+  return createSlice(
     getInterSectingIndexVariable(itemCount, getItemOffset, start),
-    getInterSectingIndexVariable(itemCount, getItemOffset, end),
-  ];
-}
-
-interface GetVirtualSliceInput {
-  rowCount: number;
-  rowHeight: number;
-  columnCount: number;
-  getColumnStart: (index: number) => number;
-  viewportWidth: number;
-  viewportheight: number;
-  horizontalScroll: number;
-  verticalScroll: number;
-  overscan?: number;
-}
-
-export function getTableVirtualSlice({
-  rowCount,
-  rowHeight,
-  columnCount,
-  getColumnStart,
-  viewportWidth,
-  viewportheight,
-  horizontalScroll,
-  verticalScroll,
-  overscan = 0,
-}: GetVirtualSliceInput) {
-  const [firstVisibleRow, lastVisibleRow] = getVirtualSliceFixed(
-    rowCount,
-    rowHeight,
-    verticalScroll,
-    verticalScroll + viewportheight
+    getInterSectingIndexVariable(itemCount, getItemOffset, end) + 1,
+    itemCount,
+    overscan
   );
-  const [firstVisibleColumn, lastVisibleColumn] = getVirtualSliceVariable(
-    columnCount,
-    getColumnStart,
-    horizontalScroll,
-    horizontalScroll + viewportWidth
-  );
-  const startRow = Math.max(0, firstVisibleRow - overscan);
-  const endRow = Math.min(rowCount - 1, lastVisibleRow + overscan);
-  const startColumn = Math.max(0, firstVisibleColumn - overscan);
-  const endColumn = Math.min(columnCount - 1, lastVisibleColumn + overscan);
-  return {
-    startRow,
-    endRow,
-    startColumn,
-    endColumn,
-  };
 }

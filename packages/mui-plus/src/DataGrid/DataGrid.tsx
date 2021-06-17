@@ -12,7 +12,10 @@ import useResizeObserver from './useResizeObserver';
 import clsx from 'clsx';
 import { useControlled } from './useControlled';
 import { clamp } from '../utils/math';
-import { getTableVirtualSlice } from '../utils/virtualization';
+import {
+  getVirtualSliceFixed,
+  getVirtualSliceVariable,
+} from '../utils/virtualization';
 import Scroller from './Scroller';
 
 type TableClass =
@@ -463,27 +466,38 @@ export default function DataGrid({
   const { ref: tableBodyRef, rect: bodyRect } = useResizeObserver();
 
   const rowCount = data.length;
+  const centerColumnCount = centerColumns.length;
 
   const { ref: centerColumnsRef, rect: centerViewport } = useResizeObserver();
+
+  const getCenterColumnOffset = React.useCallback(
+    (columnIndex: number) =>
+      columnDimensions[centerColumns[columnIndex].key].offset,
+    [centerColumns, columnDimensions]
+  );
 
   const updateVirtualSlice = React.useCallback(
     (scrollLeft: number, scrollTop: number) => {
       if (!centerViewport) return;
-      const getColumnStart = (columnIndex: number) =>
-        columnDimensions[centerColumns[columnIndex].key].offset;
-      const { startRow, endRow, startColumn, endColumn } = getTableVirtualSlice(
-        {
-          rowCount,
-          rowHeight,
-          columnCount: centerColumns.length,
-          getColumnStart,
-          viewportWidth: centerViewport.width,
-          viewportheight: centerViewport.height,
-          horizontalScroll: scrollLeft,
-          verticalScroll: scrollTop,
-          overscan: 3,
-        }
+
+      const overscan = 3;
+
+      const [startRow, endRow] = getVirtualSliceFixed(
+        rowCount,
+        rowHeight,
+        scrollTop,
+        scrollTop + centerViewport.height,
+        overscan
       );
+
+      const [startColumn, endColumn] = getVirtualSliceVariable(
+        centerColumnCount,
+        getCenterColumnOffset,
+        scrollLeft,
+        scrollLeft + centerViewport.width,
+        overscan
+      );
+
       setVirtualSlice((slice) => {
         if (
           slice?.startRow === startRow &&
@@ -497,7 +511,13 @@ export default function DataGrid({
         }
       });
     },
-    [centerViewport, rowHeight, rowCount, centerColumns, columnDimensions]
+    [
+      centerViewport,
+      rowHeight,
+      rowCount,
+      getCenterColumnOffset,
+      centerColumnCount,
+    ]
   );
 
   const getColumnElements = React.useCallback((columnKey: string) => {
@@ -558,7 +578,7 @@ export default function DataGrid({
 
     const columnsSlice = centerColumns.slice(
       virtualSlice.startColumn,
-      virtualSlice.endColumn + 1
+      virtualSlice.endColumn
     );
 
     const renderHeader = (
@@ -599,7 +619,7 @@ export default function DataGrid({
       const elms = [];
       for (
         let rowIdx = virtualSlice.startRow;
-        rowIdx <= virtualSlice.endRow;
+        rowIdx < virtualSlice.endRow;
         rowIdx += 1
       ) {
         elms.push(
@@ -654,7 +674,7 @@ export default function DataGrid({
   const pinnedEndRenderPaneRef = React.useRef<HTMLDivElement>(null);
 
   const sliceLeft = virtualSlice
-    ? getCellBoundingrect(0, centerColumns[virtualSlice.startColumn].key).left
+    ? getCenterColumnOffset(virtualSlice.startColumn)
     : 0;
 
   const sliceTop = virtualSlice ? virtualSlice.startRow * rowHeight : 0;

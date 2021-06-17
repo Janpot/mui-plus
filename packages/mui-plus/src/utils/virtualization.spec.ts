@@ -1,58 +1,61 @@
 import * as virtualization from './virtualization';
 
 test('middle of slice 1', () => {
-  const slice = virtualization.getTableVirtualSlice({
-    rowCount: 100,
-    rowHeight: 50,
-    columnCount: 40,
-    getColumnStart: (i) => i * 100,
-    viewportWidth: 800,
-    viewportheight: 600,
-    horizontalScroll: 524,
-    verticalScroll: 273,
-  });
-  expect(slice).toEqual({
-    startRow: 5,
-    endRow: 17,
-    startColumn: 6,
-    endColumn: 14,
-  });
+  const [startRow, endRow] = virtualization.getVirtualSliceFixed(
+    100,
+    50,
+    273,
+    873
+  );
+  expect(startRow).toBe(5);
+  expect(endRow).toBe(18);
+
+  const [startColumn, endColumn] = virtualization.getVirtualSliceVariable(
+    100,
+    (i) => i * 100,
+    524,
+    1324
+  );
+  expect(startColumn).toBe(6);
+  expect(endColumn).toBe(15);
 });
 
 test('start of slice', () => {
-  const slice = virtualization.getTableVirtualSlice({
-    rowCount: 100,
-    rowHeight: 50,
-    columnCount: 40,
-    getColumnStart: (i) => i * 100,
-    viewportWidth: 800,
-    viewportheight: 600,
-    horizontalScroll: 0,
-    verticalScroll: 0,
-  });
-  expect(slice).toEqual({
-    startRow: 0,
-    endRow: 12,
-    startColumn: 0,
-    endColumn: 8,
-  });
+  const [startRow, endRow] = virtualization.getVirtualSliceFixed(
+    100,
+    50,
+    0,
+    600
+  );
+  expect(startRow).toBe(0);
+  expect(endRow).toBe(13);
+
+  const [startColumn, endColumn] = virtualization.getVirtualSliceVariable(
+    40,
+    (i) => i * 100,
+    0,
+    800
+  );
+  expect(startColumn).toBe(0);
+  expect(endColumn).toBe(9);
 });
 
 test('end of slice', () => {
-  const slice = virtualization.getTableVirtualSlice({
-    rowCount: 100,
-    rowHeight: 50,
-    columnCount: 40,
-    getColumnStart: (i) => i * 100,
-    viewportWidth: 800,
-    viewportheight: 600,
-    horizontalScroll: 3200,
-    verticalScroll: 4400,
-  });
-  expect(slice).toEqual({
-    startRow: 88,
-    endRow: 99,
-    startColumn: 32,
-    endColumn: 39,
-  });
+  const [startRow, endRow] = virtualization.getVirtualSliceFixed(
+    100,
+    50,
+    4400,
+    5000
+  );
+  expect(startRow).toBe(88);
+  expect(endRow).toBe(100);
+
+  const [startColumn, endColumn] = virtualization.getVirtualSliceVariable(
+    40,
+    (i) => i * 100,
+    3200,
+    4000
+  );
+  expect(startColumn).toBe(32);
+  expect(endColumn).toBe(40);
 });
