@@ -105,10 +105,13 @@ export default function CodeExample({ children, src = '' }: CodeExampleProps) {
     <div>
       <Container>{children}</Container>
       <SrcToolbar disableGutters>
-        <IconButton onClick={() => setExpanded((expanded) => !expanded)}>
+        <IconButton
+          aria-label="Expand"
+          onClick={() => setExpanded((expanded) => !expanded)}
+        >
           <CodeIcon />
         </IconButton>
-        <IconButton onClick={handleCopy}>
+        <IconButton aria-label="Copy Source" onClick={handleCopy}>
           <FileCopyIcon />
         </IconButton>
       </SrcToolbar>

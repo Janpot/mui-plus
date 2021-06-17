@@ -4,6 +4,7 @@ const withNextra = require('nextra')(
 );
 module.exports = withNextra({
   webpack5: true,
+  productionBrowserSourceMaps: true,
   experimental: {
     externalDir: true,
   },

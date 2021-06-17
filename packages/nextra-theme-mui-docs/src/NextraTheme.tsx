@@ -275,6 +275,7 @@ function ThemeSwitcher() {
 
   return (
     <IconButton
+      aria-label="Toggle Theme"
       disabled={theme === undefined}
       onClick={toggleTheme}
       color="inherit"
@@ -360,6 +361,7 @@ function Layout({ children, opts, config }: LayoutProps) {
           <Box mr={2}>{config.search}</Box>
           {config.repository && (
             <IconButton
+              aria-label="GitHub Repository"
               component={Link}
               noLinkStyle
               href={config.repository}
