@@ -526,20 +526,20 @@ function parseOrder(input: unknown): { name: string; title?: string }[] {
 export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
   return (
     <>
+      <Head>
+        <title>{config.title}</title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+        />
+      </Head>
       <CssBaseline />
       <ThemeProvider>
         <MuiThemedContent>
-          <Head>
-            <title>{config.title}</title>
-            <meta
-              name="viewport"
-              content="minimum-scale=1, initial-scale=1, width=device-width"
-            />
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-            />
-          </Head>
           <ScrollSpyProvider>
             <Layout {...props} opts={opts} config={config || {}} />
           </ScrollSpyProvider>

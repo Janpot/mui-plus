@@ -163,15 +163,26 @@ const Root = styled('div')(({ theme }) => ({
     bottom: 0,
     right: 0,
     cursor: 'col-resize',
+    width: 10,
     zIndex: 1,
-    transform: 'translateX(50%)',
     '&:hover': {
       color: theme.palette.action.active,
     },
   },
 
+  [`& .${classes.resizer} svg`]: {
+    pointerEvents: 'none',
+    position: 'absolute',
+    right: 0,
+    transform: 'translateX(50%)',
+  },
+
   [`& .${classes.reverse} .${classes.resizer}`]: {
     right: 'unset',
+    left: 0,
+  },
+
+  [`& .${classes.reverse} .${classes.resizer} svg`]: {
     left: 0,
     transform: 'translateX(-50%)',
   },
