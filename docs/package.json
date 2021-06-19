@@ -20,9 +20,8 @@
   },
   "scripts": {
     "dev": "next",
-    "build:mui-plus": "yarn workspace mui-plus build",
     "build:nextra-theme-mui-docs": "yarn workspace nextra-theme-mui-docs build",
-    "build": "yarn build:nextra-theme-mui-docs && yarn build:mui-plus && next build",
+    "build": "yarn build:nextra-theme-mui-docs && next build",
     "start": "next start",
     "lint": "next lint",
     "site-search": "site-search",
