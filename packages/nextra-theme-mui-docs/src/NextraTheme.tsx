@@ -39,6 +39,7 @@ import useIsMounted from './useIsMounted';
 import Head from 'next/head';
 import { parsePages, SiteStructureEntry } from './siteStructure';
 import { findRelativePages } from './siteStructure';
+import fontContent from './fontContent';
 
 declare module '@material-ui/core' {
   interface ThemeOptions {
@@ -532,10 +533,7 @@ export default function NextraTheme({ props, opts, config }: NextraThemeProps) {
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-        />
+        <style>{fontContent}</style>
       </Head>
       <CssBaseline />
       <ThemeProvider>
