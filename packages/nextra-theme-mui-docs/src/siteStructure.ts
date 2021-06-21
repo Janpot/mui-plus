@@ -3,7 +3,7 @@ type PageMap = NextraPageMapEntry[];
 interface NextraPageMapEntryBase {
   name: string;
   route: string;
-  frontMatter?: any;
+  frontMatter?: { [key: string]: any };
 }
 
 interface NextraPageMapFileEntry extends NextraPageMapEntryBase {
@@ -16,7 +16,9 @@ interface NextraPageMapFolderEntry extends NextraPageMapEntryBase {
 
 type NextraPageMapEntry = NextraPageMapFileEntry | NextraPageMapFolderEntry;
 
-function parseOrder(input: unknown): { name: string; title?: string }[] {
+function parseOrder(
+  input: unknown
+): { name: string; title?: string; hidden?: boolean }[] {
   const result = [];
   if (Array.isArray(input)) {
     for (const item of input) {
@@ -31,6 +33,7 @@ function parseOrder(input: unknown): { name: string; title?: string }[] {
           name: item.name as string,
           frontMatter: {
             title: typeof item.title === 'string' ? item.title : undefined,
+            hidden: item.hidden,
           },
         });
       }
@@ -118,16 +121,19 @@ export function parsePages(pageMap: PageMap): SiteStructureEntry[] {
             title: entry.frontMatter?.title ?? entry.name,
             route: entry.route,
             children: parsePages(entry.children),
+            hidden: entry.frontMatter?.hidden,
           }
         : {
             name: entry.name,
             title: entry.frontMatter?.title ?? entry.name,
             route: entry.route,
             children: [],
+            hidden: entry.frontMatter?.hidden,
           }
     )
     .filter(
       (entry) =>
+        !entry.hidden &&
         !entry.name.startsWith('_') &&
         entry.route !== '/api' &&
         !entry.route.startsWith('/api/')

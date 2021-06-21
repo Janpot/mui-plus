@@ -32,6 +32,42 @@ test('ignores internal pages', () => {
   expect(structure).toHaveLength(0);
 });
 
+test('ignores hidden pages', () => {
+  const structure = parsePages([
+    {
+      name: 'index',
+      route: '/',
+      frontMatter: {
+        hidden: true,
+        order: [{ name: 'foo', hidden: true }],
+      },
+    },
+    {
+      name: 'hello',
+      route: '/hello',
+      frontMatter: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'foo',
+      children: [
+        {
+          name: 'bar',
+          route: '/foo/bar',
+        },
+        {
+          name: 'baz',
+          route: '/foo/baz',
+        },
+      ],
+      route: '/foo',
+    },
+  ]);
+
+  expect(structure).toHaveLength(0);
+});
+
 test('simple pages', () => {
   const structure = parsePages([
     {

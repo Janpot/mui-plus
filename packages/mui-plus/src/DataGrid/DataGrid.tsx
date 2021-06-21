@@ -10,7 +10,7 @@ import { createSvgIcon, experimentalStyled as styled } from '@material-ui/core';
 import useResizeObserver from './useResizeObserver';
 // import useEventListener from './useEventListener';
 import clsx from 'clsx';
-import { useControlled } from './useControlled';
+import { useControlled } from '../utils/useControlled';
 import { clamp } from '../utils/math';
 import {
   getVirtualSliceFixed,
