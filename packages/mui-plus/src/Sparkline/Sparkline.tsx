@@ -31,11 +31,17 @@ const Root = styled('svg')(({ theme }) => ({
 }));
 
 export interface SparklineProps {
+  /** Width of the sparkline */
   width?: number;
+  /** Height of the sparkline */
   height?: number;
+  /** Sparkline series, as an array of y-values */
   data: number[];
+  /** Theme color of the sparkline */
   color?: 'primary' | 'secondary' | 'inherit' | 'success' | 'warning' | 'error';
+  /** @ignore */
   className?: string;
+  /** @ignore */
   sx?: SxProps;
 }
 
