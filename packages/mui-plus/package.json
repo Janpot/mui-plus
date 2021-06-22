@@ -29,8 +29,14 @@
   "peerDependencies": {
     "@material-ui/core": "^5.0.0-alpha.37",
     "@material-ui/icons": "^5.0.0-alpha.37",
+    "@visx/xychart": "^1.13.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@visx/xychart": {
+      "optional": true
+    }
   },
   "dependencies": {
     "clsx": "^1.1.1",

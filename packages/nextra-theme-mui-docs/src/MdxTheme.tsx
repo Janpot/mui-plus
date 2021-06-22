@@ -22,29 +22,29 @@ const Article = styled('article')(({ theme }) => ({
   '& pre code': {
     display: 'block',
   },
-  '& h1': {
+  [`& h1.${CLASS_HEADER}`]: {
     ...theme.typography.h3,
     fontSize: 40,
     margin: '16px 0',
   },
-  '& h2': {
+  [`& h2.${CLASS_HEADER}`]: {
     ...theme.typography.h4,
     fontSize: 30,
     margin: '40px 0 16px',
   },
-  '& h3': {
+  [`& h3.${CLASS_HEADER}`]: {
     ...theme.typography.h5,
     margin: '40px 0 16px',
   },
-  '& h4': {
+  [`& h4.${CLASS_HEADER}`]: {
     ...theme.typography.h6,
     margin: '32px 0 16px',
   },
-  '& h5': {
+  [`& h5.${CLASS_HEADER}`]: {
     ...theme.typography.subtitle1,
     margin: '32px 0 16px',
   },
-  '& h6': {
+  [`& h6.${CLASS_HEADER}`]: {
     ...theme.typography.subtitle2,
     margin: '32px 0 16px',
   },
@@ -108,7 +108,7 @@ function createMdxHeader(
 }
 
 function H1(props: any) {
-  return <Typography variant="h1" {...props} />;
+  return <Typography variant="h1" className={CLASS_HEADER} {...props} />;
 }
 
 function CodeBlock({ className, highlight, ...props }: any) {

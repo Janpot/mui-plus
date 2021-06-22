@@ -6,6 +6,7 @@
   "dependencies": {
     "@material-ui/core": "5.0.0-alpha.37",
     "@material-ui/icons": "5.0.0-alpha.37",
+    "@visx/xychart": "^1.13.0",
     "clsx": "^1.1.1",
     "eslint": "^7.23.0",
     "eslint-plugin-react": "^7.23.1",
@@ -15,6 +16,7 @@
     "nextra-theme-mui-docs": "0.0.7",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-spring": "^9.2.3",
     "site-search": "^0.0.10",
     "swr": "^0.5.6"
   },
