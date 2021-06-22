@@ -10,10 +10,14 @@ import {
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import TrendingDownIcon from '@material-ui/icons/TrendingDown';
 
-const data = [
-  9, 1, 14, 30, 34, 14, 29, 30, 20, 33, 38, 25, 4, 25, 38, 11, 15, 21, 31, 37,
-  16, 17, 8, 18, 37, 28, 31, 22, 30, 8, 31, 14, 4, 36, 34, 2, 26, 35, 17, 2, 19,
-  1, 30, 2, 16, 23, 35, 1, 14, 33,
+const data1 = [
+  23, 5, 36, 14, 8, 18, 22, 29, 6, 23, 20, 2, 16, 8, 38, 10, 15, 38, 17, 13, 14,
+  7, 3, 39, 24, 13, 38, 25, 21, 14, 28, 31, 14, 8, 13,
+];
+
+const data2 = [
+  11, 15, 21, 31, 37, 16, 17, 8, 18, 37, 28, 31, 22, 30, 8, 31, 14, 4, 36, 34,
+  2, 26, 35, 17, 2, 19, 1, 30, 2, 16, 23, 35, 1, 14, 33,
 ];
 
 const TrendText = styled(Typography)(({ theme }) => ({
@@ -34,7 +38,7 @@ export default function Colors() {
               <TrendingUpIcon sx={{ mr: 1 }} color="primary" /> +8%
             </TrendText>
             <Typography></Typography>
-            <Sparkline sx={{ mt: 2 }} data={data} color="primary" />
+            <Sparkline sx={{ mt: 2 }} data={data1} color="primary" />
           </Stack>
           <Stack direction="column">
             <Typography variant="subtitle2">Engagement</Typography>
@@ -42,7 +46,7 @@ export default function Colors() {
             <TrendText>
               <TrendingDownIcon sx={{ mr: 1 }} color="error" /> -11%
             </TrendText>
-            <Sparkline sx={{ mt: 2 }} data={data} color="error" />
+            <Sparkline sx={{ mt: 2 }} data={data2} color="error" />
           </Stack>
         </Stack>
       </CardContent>

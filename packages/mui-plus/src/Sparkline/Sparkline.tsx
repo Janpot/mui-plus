@@ -20,7 +20,6 @@ const Root = styled('svg')(({ theme }) => ({
     color: theme.palette.success.main,
   },
   [`&.${classes.warningColor}`]: {
-    x: console.log(theme.palette.error.main),
     color: theme.palette.warning.main,
   },
   [`&.${classes.errorColor}`]: {
