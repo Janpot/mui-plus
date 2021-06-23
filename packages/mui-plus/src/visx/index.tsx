@@ -33,6 +33,7 @@ export function makeTheme() {
                 : muiTheme.palette.grey[100],
             fontFamily: muiTheme.typography.fontFamily,
             fontWeight: muiTheme.typography.fontWeightRegular,
+            fontSize: 12,
           },
           svgLabelBig: {
             fill:
@@ -41,6 +42,7 @@ export function makeTheme() {
                 : muiTheme.palette.grey[100],
             fontFamily: muiTheme.typography.fontFamily,
             fontWeight: muiTheme.typography.fontWeightRegular,
+            fontSize: 12,
           },
           gridColor: muiTheme.palette.mode === 'light' ? grey[200] : grey[800],
           gridColorDark: grey[100],

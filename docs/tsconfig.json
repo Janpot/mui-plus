@@ -9,7 +9,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
-    "lib": ["dom", "es2019"],
+    "lib": ["dom", "es2020"],
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,

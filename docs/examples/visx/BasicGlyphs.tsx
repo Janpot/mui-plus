@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Axis, Grid, GlyphSeries, XYChart, ThemeContext } from '@visx/xychart';
+import { Axis, Grid, GlyphSeries, XYChart } from '@visx/xychart';
 import { GlyphCircle, GlyphSquare, GlyphTriangle } from '@visx/glyph';
 import { makeTheme } from 'mui-plus';
 
@@ -56,7 +56,7 @@ export default function BasicGlyphs() {
       theme={theme}
       height={300}
       width={600}
-      xScale={{ type: 'linear', nice: true }}
+      xScale={{ type: 'linear' }}
       yScale={{ type: 'linear', nice: true }}
     >
       <Grid numTicks={4} />
@@ -74,7 +74,6 @@ export default function BasicGlyphs() {
           />
         )}
       />
-      §
       <GlyphSeries
         dataKey="Glyphs 2"
         data={data2}
@@ -89,7 +88,6 @@ export default function BasicGlyphs() {
           />
         )}
       />
-      §
       <GlyphSeries
         dataKey="Glyphs 3"
         data={data3}
@@ -104,7 +102,6 @@ export default function BasicGlyphs() {
           />
         )}
       />
-      §
       <Axis orientation="bottom" hideTicks label="Units" labelOffset={20} />
       <Axis
         orientation="left"

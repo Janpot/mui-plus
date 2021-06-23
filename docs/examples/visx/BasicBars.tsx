@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Axis, Grid, BarSeries, XYChart, ThemeContext } from '@visx/xychart';
+import { Axis, Grid, BarSeries, XYChart } from '@visx/xychart';
 import { makeTheme } from 'mui-plus';
 
 interface Datum {
@@ -30,11 +30,11 @@ export default function BasicBars() {
       theme={theme}
       height={300}
       width={350}
-      xScale={{ type: 'band', padding: 0.6 }}
+      xScale={{ type: 'band', paddingInner: 0.6, paddingOuter: 0.1 }}
       yScale={{ type: 'linear', nice: true }}
     >
       <Grid columns={false} numTicks={4} />
-      <BarSeries dataKey="Line 1" data={data1} {...accessors} />§
+      <BarSeries dataKey="Line 1" data={data1} {...accessors} />
       <Axis orientation="bottom" hideTicks />
       <Axis
         orientation="right"
