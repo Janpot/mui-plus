@@ -64,11 +64,11 @@ export default function BasicGlyphs() {
         dataKey="Glyphs 1"
         data={data1}
         {...accessors}
-        size={150}
+        size={15}
         renderGlyph={(props) => (
           <GlyphCircle
             fill={props.color}
-            size={props.size}
+            size={(props.size / 2) ** 2 * Math.PI}
             top={props.y}
             left={props.x}
           />
@@ -78,11 +78,11 @@ export default function BasicGlyphs() {
         dataKey="Glyphs 2"
         data={data2}
         {...accessors}
-        size={150}
+        size={15}
         renderGlyph={(props) => (
           <GlyphSquare
             fill={props.color}
-            size={props.size}
+            size={(props.size / 2) ** 2 * Math.PI}
             top={props.y}
             left={props.x}
           />
@@ -92,11 +92,11 @@ export default function BasicGlyphs() {
         dataKey="Glyphs 3"
         data={data3}
         {...accessors}
-        size={150}
+        size={15}
         renderGlyph={(props) => (
           <GlyphTriangle
             fill={props.color}
-            size={props.size}
+            size={(props.size / 2) ** 2 * Math.PI}
             top={props.y}
             left={props.x}
           />
