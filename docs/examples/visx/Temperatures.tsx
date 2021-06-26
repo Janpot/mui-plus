@@ -8,25 +8,25 @@ import {
   useTheme as useMuiTheme,
 } from '@material-ui/core';
 
-type Datum = [number, number];
+type Datum = { x: number; y: number };
+
+const makeDatum = (y: number, x: number): Datum => ({ x, y });
 
 const avg = [
-  ...[3.5, 3.8, 6.4, 9.9, 13.5, 16.6, 18.5, 18, 15.3, 11.8, 7.3, 4.2].entries(),
-];
-const min = [
-  ...[1.2, 1, 2.6, 5.2, 9, 11.9, 14.1, 13.9, 11.5, 8.7, 4.9, 2].entries(),
-];
+  3.5, 3.8, 6.4, 9.9, 13.5, 16.6, 18.5, 18, 15.3, 11.8, 7.3, 4.2,
+].map(makeDatum);
+const min = [1.2, 1, 2.6, 5.2, 9, 11.9, 14.1, 13.9, 11.5, 8.7, 4.9, 2].map(
+  makeDatum
+);
 const max = [
-  ...[
-    5.8, 6.9, 10.3, 14.4, 17.7, 20.8, 22.5, 22.1, 19.2, 15, 9.9, 6.5,
-  ].entries(),
-];
+  5.8, 6.9, 10.3, 14.4, 17.7, 20.8, 22.5, 22.1, 19.2, 15, 9.9, 6.5,
+].map(makeDatum);
 
 const useTheme = makeTheme();
 
 const accessors = {
-  xAccessor: ([x]: Datum) => x,
-  yAccessor: ([, y]: Datum) => y,
+  xAccessor: ({ x }: Datum) => x,
+  yAccessor: ({ y }: Datum) => y,
 };
 
 const { format: formatTemperature } = new Intl.NumberFormat(undefined, {
@@ -75,7 +75,7 @@ const TooltipGlyph = React.forwardRef<SVGSVGElement, TooltipGlyphProps>(
   }
 );
 
-function VisxMuiTooltip<Datum extends object>(props: TooltipProps<Datum>) {
+function VisxMuiTooltip(props: Omit<TooltipProps<Datum>, 'renderTooltip'>) {
   return (
     <Tooltip<Datum>
       snapTooltipToDatumX
@@ -99,10 +99,10 @@ function VisxMuiTooltip<Datum extends object>(props: TooltipProps<Datum>) {
             title={
               <>
                 <Typography variant="h6">
-                  {formatTemperature(nearestDatum.datum[1])}
+                  {formatTemperature(nearestDatum.datum.x)}
                 </Typography>
                 <Typography variant="body2">
-                  {formatMonth(nearestDatum.datum[0])}
+                  {formatMonth(nearestDatum.datum.y)}
                 </Typography>
               </>
             }
@@ -148,7 +148,7 @@ export default function Temperatures() {
         numTicks={4}
         tickFormat={formatTemperature}
       />
-      <VisxMuiTooltip<Datum>
+      <VisxMuiTooltip
         snapTooltipToDatumX
         snapTooltipToDatumY
         showVerticalCrosshair
