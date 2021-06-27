@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { experimentalStyled as styled } from '@material-ui/core';
 import { SxProps } from '@material-ui/system';
 import clsx from 'clsx';

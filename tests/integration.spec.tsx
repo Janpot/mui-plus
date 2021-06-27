@@ -1,7 +1,6 @@
 import * as esbuild from 'esbuild';
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
 import puppeteer, { Browser } from 'puppeteer';
-import * as fs from 'fs/promises';
 
 async function buildExample(examplePath: string) {
   const bundle = await esbuild.build({
@@ -61,8 +60,17 @@ afterAll(async () => {
 });
 
 const EXAMPLES: [string][] = [
+  ['./docs/examples/DataFilter/Basic.tsx'],
+  ['./docs/examples/DataFilter/CustomOperator.tsx'],
+  ['./docs/examples/DataFilter/DifferentSizes.tsx'],
   ['./docs/examples/DataGrid/Basic.tsx'],
+  ['./docs/examples/DataGrid/Controlled.tsx'],
+  ['./docs/examples/DataGrid/Pinned.tsx'],
   ['./docs/examples/DataGrid/Virtualization.tsx'],
+  ['./docs/examples/SelectionList/Basic.tsx'],
+  ['./docs/examples/Sparkline/Basic.tsx'],
+  ['./docs/examples/Sparkline/Card.tsx'],
+  ['./docs/examples/Sparkline/Colors.tsx'],
 ];
 
 it.each(EXAMPLES)(
