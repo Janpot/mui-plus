@@ -71,6 +71,10 @@ const EXAMPLES: [string][] = [
   ['./docs/examples/Sparkline/Basic.tsx'],
   ['./docs/examples/Sparkline/Card.tsx'],
   ['./docs/examples/Sparkline/Colors.tsx'],
+  ['./docs/examples/Sparkline/Negative.tsx'],
+  ['./docs/examples/Sparkbars/Basic.tsx'],
+  ['./docs/examples/Sparkbars/Colors.tsx'],
+  ['./docs/examples/Sparkbars/Negative.tsx'],
 ];
 
 it.each(EXAMPLES)(

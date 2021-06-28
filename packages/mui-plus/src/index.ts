@@ -10,4 +10,7 @@ export * from './SelectionList';
 export { default as Sparkline } from './Sparkline';
 export * from './Sparkline';
 
+export { default as Sparkbars } from './Sparkbars';
+export * from './Sparkbars';
+
 export * from './visx';
