@@ -1,0 +1,113 @@
+{
+  "tags": {},
+  "filePath": "/Users/janpotoms/Projects/mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+  "description": "",
+  "displayName": "Sparkbars",
+  "methods": [],
+  "props": {
+    "width": {
+      "defaultValue": { "value": 120 },
+      "description": "Width of the sparkbars",
+      "name": "width",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+        "name": "SparkbarsProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+          "name": "SparkbarsProps"
+        }
+      ],
+      "required": false,
+      "type": { "name": "number" }
+    },
+    "height": {
+      "defaultValue": { "value": 25 },
+      "description": "Height of the sparkbars",
+      "name": "height",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+        "name": "SparkbarsProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+          "name": "SparkbarsProps"
+        }
+      ],
+      "required": false,
+      "type": { "name": "number" }
+    },
+    "data": {
+      "defaultValue": null,
+      "description": "Sparkbars series, as an array of y-values",
+      "name": "data",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+        "name": "SparkbarsProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+          "name": "SparkbarsProps"
+        }
+      ],
+      "required": true,
+      "type": { "name": "number[]" }
+    },
+    "color": {
+      "defaultValue": { "value": "primary" },
+      "description": "Theme color of the sparkbars",
+      "name": "color",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+        "name": "SparkbarsProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+          "name": "SparkbarsProps"
+        }
+      ],
+      "required": false,
+      "type": {
+        "name": "\"primary\" | \"secondary\" | \"inherit\" | \"success\" | \"warning\" | \"error\""
+      }
+    },
+    "className": {
+      "defaultValue": null,
+      "description": "@ignore",
+      "name": "className",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+        "name": "SparkbarsProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+          "name": "SparkbarsProps"
+        }
+      ],
+      "required": false,
+      "type": { "name": "string" }
+    },
+    "sx": {
+      "defaultValue": null,
+      "description": "@ignore",
+      "name": "sx",
+      "parent": {
+        "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+        "name": "SparkbarsProps"
+      },
+      "declarations": [
+        {
+          "fileName": "mui-plus/packages/mui-plus/src/Sparkbars/Sparkbars.tsx",
+          "name": "SparkbarsProps"
+        }
+      ],
+      "required": false,
+      "type": { "name": "SxProps<{}>" }
+    }
+  }
+}

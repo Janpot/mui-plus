@@ -9,6 +9,7 @@ const INPUT_FILES = [
   './packages/mui-plus/src/DataGrid/DataGrid.tsx',
   './packages/mui-plus/src/DataFilter/DataFilter.tsx',
   './packages/mui-plus/src/Sparkline/Sparkline.tsx',
+  './packages/mui-plus/src/Sparkbars/Sparkbars.tsx',
 ].map((relative) => resolve(ROOT, relative));
 
 const PROPERTIES_TABLE_COMPONENT = resolve(

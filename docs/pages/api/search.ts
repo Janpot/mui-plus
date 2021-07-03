@@ -1,3 +1,5 @@
 import handler from 'site-search/handler';
-const indexFileUrl = new URL('../../site-search.json', import.meta.url);
-export default handler({ filename: indexFileUrl.pathname });
+// This doesn't work anymore in latest Next.js
+// const indexFile = new URL('../../site-search.json', import.meta.url).pathname;
+const indexFile = './site-search.json';
+export default handler({ filename: indexFile });
