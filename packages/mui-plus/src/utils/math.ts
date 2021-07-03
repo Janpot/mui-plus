@@ -2,6 +2,18 @@ export function clamp(value: number, lower: number, upper: number): number {
   return Math.max(Math.min(value, upper), lower);
 }
 
+/**
+ * Round half away from zero ('commercial' rounding)
+ * Uses correction to offset floating-point inaccuracies.
+ * Works symmetrically for positive and negative numbers.
+ * See https://stackoverflow.com/a/48764436/419436
+ */
+export function round(num: number, decimalPlaces = 0): number {
+  var p = Math.pow(10, decimalPlaces);
+  var n = num * p * (1 + Number.EPSILON);
+  return Math.round(n) / p;
+}
+
 export function scaleLinear(
   rangeMin: number,
   rangeMax: number,

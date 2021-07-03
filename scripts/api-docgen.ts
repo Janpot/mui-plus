@@ -1,5 +1,3 @@
-#!/usr/bin/env ts-node-script
-
 import * as reactDocgen from 'react-docgen-typescript';
 import { resolve, relative } from 'path';
 import { writeFile, rm, mkdir } from 'fs/promises';

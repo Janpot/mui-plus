@@ -33,6 +33,9 @@ type TableClass =
   | 'pinnedEndColumns'
   | 'centerColumns'
   | 'tableRowRoot'
+  | 'columnAlignStart'
+  | 'columnAlignCenter'
+  | 'columnAlignEnd'
   | 'cellContent'
   | 'resizer';
 
@@ -53,8 +56,19 @@ const classes: {
   pinnedEndColumns: 'MuiPlusPinnedEndColumns',
   centerColumns: 'MuiPlusCenterColumns',
   tableRowRoot: 'MuiPlusTableRowRoot',
+  columnAlignStart: 'MuiPlusColumnAlignStart',
+  columnAlignCenter: 'MuiPlusColumnAlignCenter',
+  columnAlignEnd: 'MuiPlusColumnAlignEnd',
   cellContent: 'MuiPlusCellContent',
   resizer: 'MuiPlusResizer',
+};
+
+export { classes as dataGridClasses };
+
+const alignmentClass = {
+  start: classes.columnAlignStart,
+  center: classes.columnAlignCenter,
+  end: classes.columnAlignEnd,
 };
 
 const Root = styled('div')(({ theme }) => ({
@@ -137,10 +151,23 @@ const Root = styled('div')(({ theme }) => ({
 
   [`& .${classes.tableCell}`]: {
     display: 'flex',
+    position: 'relative',
     alignItems: 'center',
     height: '100%',
     flexShrink: 0,
     flexgrow: 0,
+
+    [`&.${classes.columnAlignStart}`]: {
+      justifyContent: 'flex-start',
+    },
+
+    [`&.${classes.columnAlignCenter}`]: {
+      justifyContent: 'center',
+    },
+
+    [`&.${classes.columnAlignEnd}`]: {
+      justifyContent: 'flex-end',
+    },
   },
 
   [`& .${classes.tableHead} .${classes.tableCell}`]: {
@@ -195,12 +222,14 @@ interface ResizingColumn {
   width: number;
 }
 
-export interface ColumnDefinition {
+export interface ColumnDefinition<R = any, V = any> {
   key: string;
   pin?: 'start' | 'end';
-  header?: string;
+  align?: 'start' | 'center' | 'end';
+  header?: React.ReactNode;
   visible?: boolean;
-  getValue?: (row: any) => any;
+  getValue?: (row: R) => V;
+  renderContent?: (params: { value: V }) => React.ReactNode;
   minWidth?: number;
   maxWidth?: number;
   width?: number;
@@ -373,13 +402,20 @@ interface TableCellProps {
   width: number;
   columnKey?: string;
   children?: React.ReactNode;
+  align?: 'start' | 'center' | 'end';
 }
 
-function TableCell({ width, columnKey, children }: TableCellProps) {
+function TableCell({
+  width,
+  columnKey,
+  children,
+  align = 'start',
+}: TableCellProps) {
+  const alignClass: string = alignmentClass[align];
   return (
     <div
       style={{ width }}
-      className={classes.tableCell}
+      className={clsx(classes.tableCell, alignClass)}
       data-column={columnKey}
     >
       {children}
@@ -601,7 +637,12 @@ export default function DataGrid({
           const headerContent = column?.header ?? column.key;
           const { width } = getCellBoundingrect(0, column.key);
           return (
-            <TableCell key={column.key} width={width} columnKey={column.key}>
+            <TableCell
+              key={column.key}
+              width={width}
+              columnKey={column.key}
+              align={column.align}
+            >
               <div className={classes.cellContent}>{headerContent}</div>
               <div
                 className={classes.resizer}
@@ -640,13 +681,19 @@ export default function DataGrid({
                 ? column.getValue(data[rowIdx])
                 : data[rowIdx][column.key];
               const { width } = getCellBoundingrect(rowIdx, column.key);
+              const content = column.renderContent ? (
+                column.renderContent({ value })
+              ) : (
+                <div className={classes.cellContent}>{String(value)}</div>
+              );
               return (
                 <TableCell
                   key={column.key}
                   width={width}
                   columnKey={column.key}
+                  align={column.align}
                 >
-                  <div className={classes.cellContent}>{String(value)}</div>
+                  {content}
                 </TableCell>
               );
             })}

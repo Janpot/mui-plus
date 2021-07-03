@@ -1,5 +1,3 @@
-#!/usr/bin/env ts-node-script
-
 import { resolve } from 'path';
 import { writeFile, rm, mkdir } from 'fs/promises';
 import { format } from 'prettier';
