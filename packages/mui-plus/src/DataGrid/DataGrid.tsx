@@ -7,8 +7,8 @@ TODO
 
 import * as React from 'react';
 import { createSvgIcon, experimentalStyled as styled } from '@material-ui/core';
+import { unstable_useEnhancedEffect as useEnhacedEffect } from '@material-ui/utils';
 import useResizeObserver from './useResizeObserver';
-// import useEventListener from './useEventListener';
 import clsx from 'clsx';
 import { useControlled } from '../utils/useControlled';
 import { clamp } from '../utils/math';
@@ -769,11 +769,7 @@ export default function DataGrid({
     [updateScroll]
   );
 
-  React.useLayoutEffect(() => updateScroll(), [updateScroll]);
-
-  // useEventListener(bodyRef, 'wheel', handleWheel, {
-  //   passive: false,
-  // });
+  useEnhacedEffect(() => updateScroll(), [updateScroll]);
 
   const hasPinnedStart = pinnedStartColumns.length > 0;
   const hasPinnedEnd = pinnedEndColumns.length > 0;
