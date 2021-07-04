@@ -29,6 +29,7 @@ const columns: ColumnDefinition[] = [
     width: 250,
     pin: 'start',
   },
+  /// preview-start
   {
     key: 'location',
     width: 150,
@@ -43,6 +44,7 @@ const columns: ColumnDefinition[] = [
     ),
     header: 'Location',
   },
+  /// preview-end
   {
     key: 'closed',
     header: 'Closed',
@@ -99,7 +101,7 @@ const columns: ColumnDefinition[] = [
   },
 ];
 
-export default function Basic() {
+export default function Weather() {
   return (
     <Paper style={{ height: 300 }}>
       <DataGrid data={data} defaultColumns={columns} />

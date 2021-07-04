@@ -1,0 +1,53 @@
+---
+title: Columns
+---
+
+import CodeExample from 'nextra-theme-mui-docs/CodeExample';
+
+# DataGrid Columns
+
+Columns are defined as an array of `ColumnDefinitions`. Several options are available to describe how cell content needs to be rendered. All columns definitions require a unique (per table) `key` property that unambiguously identifies it.
+
+## Value Selection
+
+By default, a cell's value is determined from the property in the data that corresponds to the `key` in the column definition. This can optionally be overriden with the `getValue` getter that allows you to select or compute a value based on a row.
+
+import Value from '../../../examples/DataGrid/Value';
+import srcValue from '../../../examples/DataGrid/Value?raw';
+
+<CodeExample src={srcValue}>
+  <Value />
+</CodeExample>
+
+## Alignment
+
+Use the `align` property to justify content at either edge of a cell, or to the center.
+
+import Alignment from '../../../examples/DataGrid/Alignment';
+import srcAlignment from '../../../examples/DataGrid/Alignment?raw';
+
+<CodeExample src={srcAlignment}>
+  <Alignment />
+</CodeExample>
+
+## Pinned Columns
+
+Use the `pin` property to pin columns at the start or end of the grid. It is possible to pin multiple columns at either side of the grid.
+
+import Pinned from '../../../examples/DataGrid/Pinned';
+import srcPinned from '../../../examples/DataGrid/Pinned?raw';
+
+<CodeExample src={srcPinned}>
+  <Pinned />
+</CodeExample>
+
+## Custom Content
+
+Use the `renderContent` option to gain more control over what exactly gets rendered in a cell. This works exactly like a render prop and you can return any valid react node from it.
+
+import Weather from '../../../examples/DataGrid/Weather';
+import srcWeather from '../../../examples/DataGrid/Weather?raw';
+
+<CodeExample src={srcWeather}>
+  <Weather />
+</CodeExample>

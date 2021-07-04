@@ -21,7 +21,7 @@ for (let rowIdx = 0; rowIdx < ROWS; rowIdx++) {
   rows.push({ idx: rowIdx });
 }
 
-export default function Basic() {
+export default function Virtualization() {
   return (
     <Paper style={{ height: 300 }}>
       <DataGrid data={rows} defaultColumns={columns} />

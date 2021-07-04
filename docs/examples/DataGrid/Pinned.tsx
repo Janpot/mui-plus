@@ -7,13 +7,11 @@ const columns: ColumnDefinitions = [
   /// preview-start
   {
     key: 'firstName',
-    header: 'First Name',
     pin: 'start',
   },
   /// preview-end
   {
     key: 'lastName',
-    header: 'Last Name',
     width: 200,
     pin: 'start',
   },
@@ -23,8 +21,7 @@ const columns: ColumnDefinitions = [
   },
   { key: 'birthDate', width: 200 },
   { key: 'email', width: 200 },
-  { key: 'userName', pin: 'end', width: 50 },
-  { key: 'phone', pin: 'end', width: 50 },
+  { key: 'phone', pin: 'end', width: 150 },
 ];
 
 export default function Pinned() {
