@@ -769,7 +769,9 @@ export default function DataGrid({
     [updateScroll]
   );
 
-  // React.useLayoutEffect, but defers to useEffect for SSR
+  // useEffect causes jittering when the virtualslice updates as the CSS transform
+  // gets updated on the next render. useLayoutEffect fixes this problem. We use
+  // useEnhancedEffect which deferes to useEffect on the server.
   useEnhancedEffect(() => updateScroll(), [updateScroll]);
 
   const hasPinnedStart = pinnedStartColumns.length > 0;
