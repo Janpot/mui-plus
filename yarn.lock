@@ -6772,14 +6772,6 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-mui-plus@0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/mui-plus/-/mui-plus-0.0.10.tgz#4c21c97c67a812d8ac53f1170235699b1d1ac133"
-  integrity sha512-5ih+2lGAqrbcSY1AfoCflZAY4SH0T8kBnyhNfv/WJl6jv7QHjbzw8h64UbjBOMtqtwMBN8jtzuaUkhoTHL6Jiw==
-  dependencies:
-    clsx "^1.1.1"
-    react-transition-group "^4.4.1"
-
 nanoid@^3.1.22, nanoid@^3.1.23:
   version "3.1.23"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.23.tgz#f744086ce7c2bc47ee0a8472574d5c78e4183a81"
