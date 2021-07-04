@@ -7,7 +7,7 @@ TODO
 
 import * as React from 'react';
 import { createSvgIcon, experimentalStyled as styled } from '@material-ui/core';
-import { unstable_useEnhancedEffect as useEnhacedEffect } from '@material-ui/utils';
+import { unstable_useEnhancedEffect as useEnhancedEffect } from '@material-ui/utils';
 import useResizeObserver from './useResizeObserver';
 import clsx from 'clsx';
 import { useControlled } from '../utils/useControlled';
@@ -769,7 +769,8 @@ export default function DataGrid({
     [updateScroll]
   );
 
-  useEnhacedEffect(() => updateScroll(), [updateScroll]);
+  // React.useLayoutEffect, but defers to useEffect for SSR
+  useEnhancedEffect(() => updateScroll(), [updateScroll]);
 
   const hasPinnedStart = pinnedStartColumns.length > 0;
   const hasPinnedEnd = pinnedEndColumns.length > 0;
