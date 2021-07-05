@@ -91,13 +91,16 @@ async function measureUrl(browser: puppeteer.Browser, url: string) {
 
 const CASES = [
   ['React Virtualized', 'https://csb-v5d0c.netlify.app/'],
-  ['MUI+', 'https://csb-4xgsl.netlify.app/'],
+  ['Mui+', 'https://csb-4xgsl.netlify.app/'],
   ['AG Grid', 'https://csb-4wb7n.netlify.app/'],
   ['XGrid', 'https://csb-6pyxl.netlify.app/'],
 ];
 
 async function main() {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: null,
+  });
   try {
     // await measureExample(
     //   browser,
