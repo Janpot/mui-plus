@@ -53,7 +53,7 @@ expect.extend({ toMatchImageSnapshot });
 let browser: Browser;
 beforeAll(async () => {
   browser = await puppeteer.launch({ headless: true });
-});
+}, 20000);
 
 afterAll(async () => {
   await browser.close();
