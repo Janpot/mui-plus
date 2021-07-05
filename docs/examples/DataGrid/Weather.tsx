@@ -28,6 +28,8 @@ const columns: ColumnDefinition[] = [
     getValue: (row) => [row.lat, row.long],
     renderContent: ({ value: [lat, long] }) => (
       <Link
+        noWrap
+        sx={{ display: 'block' }}
         href={`https://www.google.com/maps/search/?api=1&query=${lat},${long}`}
       >
         {lat}, {long}
