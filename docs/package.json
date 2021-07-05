@@ -10,7 +10,7 @@
     "clsx": "^1.1.1",
     "eslint": "^7.23.0",
     "eslint-plugin-react": "^7.23.1",
-    "mui-plus": "0.0.12",
+    "mui-plus": "0.0.13",
     "next": "^11.0.0",
     "nextra": "^0.4.3",
     "nextra-theme-mui-docs": "0.0.8",
