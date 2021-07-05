@@ -2,6 +2,6 @@
   "extends": "..",
   "compilerOptions": {
     "module": "CommonJS",
-    "lib": ["ES2020"]
+    "lib": ["ES2020", "DOM"]
   }
 }

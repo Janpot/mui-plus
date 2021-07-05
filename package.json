@@ -13,7 +13,8 @@
     "weather-data": "ts-node ./scripts/weather-data.ts",
     "test": "jest --verbose",
     "fix": "prettier --write .",
-    "lint": "prettier --check ."
+    "lint": "prettier --check .",
+    "benchmark": "ts-node scripts/benchmark"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",
