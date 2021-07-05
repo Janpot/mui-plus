@@ -102,10 +102,8 @@ async function main() {
     defaultViewport: null,
   });
   try {
-    // await measureExample(
-    //   browser,
-    //   './docs/examples/DataGrid/Virtualization.tsx'
-    // );
+    // console.log('local benchmark:');
+    // await measureExample(browser, './docs/examples/DataGrid/Benchmark.tsx');
 
     for (const [title, url] of CASES) {
       console.log(`${title}:`);

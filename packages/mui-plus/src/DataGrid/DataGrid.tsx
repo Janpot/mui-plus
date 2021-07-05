@@ -150,7 +150,7 @@ const Root = styled('div')(({ theme }) => ({
   },
 
   [`& .${classes.tableCell}`]: {
-    display: 'flex',
+    display: 'block',
     position: 'relative',
     alignItems: 'center',
     height: '100%',
@@ -158,20 +158,23 @@ const Root = styled('div')(({ theme }) => ({
     flexgrow: 0,
 
     [`&.${classes.columnAlignStart}`]: {
-      justifyContent: 'flex-start',
+      textAlign: 'start',
     },
 
     [`&.${classes.columnAlignCenter}`]: {
-      justifyContent: 'center',
+      textAlign: 'center',
     },
 
     [`&.${classes.columnAlignEnd}`]: {
-      justifyContent: 'flex-end',
+      textAlign: 'end',
     },
   },
 
-  [`& .${classes.tableHead} .${classes.tableCell}`]: {
-    position: 'relative',
+  [`& .${classes.tableBody} .${classes.tableCell}`]: {
+    padding: '0 16px',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
   },
 
   [`& .${classes.cellContent}`]: {
@@ -386,7 +389,7 @@ function TableRow({ height, children, reverse }: TableRowProps) {
   return (
     <div
       className={clsx(classes.tableRowRoot, { [classes.reverse]: reverse })}
-      style={{ height }}
+      style={{ height, lineHeight: `${height}px` }}
     >
       {children}
     </div>
@@ -681,11 +684,9 @@ export default function DataGrid({
                 ? column.getValue(data[rowIdx])
                 : data[rowIdx][column.key];
               const { width } = getCellBoundingrect(rowIdx, column.key);
-              const content = column.renderContent ? (
-                column.renderContent({ value })
-              ) : (
-                <div className={classes.cellContent}>{String(value)}</div>
-              );
+              const content = column.renderContent
+                ? column.renderContent({ value })
+                : String(value);
               return (
                 <TableCell
                   key={column.key}

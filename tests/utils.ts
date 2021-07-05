@@ -5,7 +5,7 @@ export async function bundle(examplePath: string) {
     bundle: true,
     write: false,
     target: 'es6',
-    minify: true,
+    //minify: true,
     define: {
       'process.env.NODE_ENV': "'production'",
     },
@@ -41,7 +41,7 @@ export async function bundle(examplePath: string) {
         />
       </head>
       <body>
-        <div style="padding:24px" id="container"></div>
+        <div style="padding:8px" id="container"></div>
         <script>
           ${script}
         </script>

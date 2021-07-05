@@ -1,10 +1,5 @@
 import * as React from 'react';
-import {
-  DataGrid,
-  ColumnDefinition,
-  Sparkbars,
-  dataGridClasses,
-} from 'mui-plus';
+import { DataGrid, ColumnDefinition, Sparkbars } from 'mui-plus';
 import { Paper, Link } from '@material-ui/core';
 import data from '../data/uk-station-data.json';
 
@@ -14,11 +9,8 @@ function numberColumn(
   const formatter = new Intl.NumberFormat(undefined, format);
   return {
     align: 'end',
-    renderContent: ({ value }) => (
-      <div className={dataGridClasses.cellContent}>
-        {value === null || value === undefined ? '' : formatter.format(value)}
-      </div>
-    ),
+    renderContent: ({ value }) =>
+      value === null || value === undefined ? '' : formatter.format(value),
   };
 }
 
@@ -36,7 +28,6 @@ const columns: ColumnDefinition[] = [
     getValue: (row) => [row.lat, row.long],
     renderContent: ({ value: [lat, long] }) => (
       <Link
-        className={dataGridClasses.cellContent}
         href={`https://www.google.com/maps/search/?api=1&query=${lat},${long}`}
       >
         {lat}, {long}
@@ -73,9 +64,11 @@ const columns: ColumnDefinition[] = [
   {
     key: 'rain12',
     header: 'Rain',
-    minWidth: 140,
+    minWidth: 160,
     align: 'center',
-    renderContent: ({ value }) => <Sparkbars data={value} />,
+    renderContent: ({ value }) => (
+      <Sparkbars sx={{ verticalAlign: 'middle' }} data={value} />
+    ),
   },
   {
     key: 'rain',
