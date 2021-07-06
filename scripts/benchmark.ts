@@ -1,5 +1,10 @@
 import { bundle } from '../tests/utils';
 import puppeteer from 'puppeteer';
+import { performance } from 'perf_hooks';
+import * as path from 'path';
+import * as fs from 'fs/promises';
+
+const FPS_METER_DIR = path.resolve(__dirname, `./fps-meter/`);
 
 async function delay(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -8,16 +13,28 @@ async function delay(ms: number): Promise<void> {
 async function simulateScroll(
   page: puppeteer.Page,
   {
-    duration = 0, // ms
-    deltaX = 0, //px
-    deltaY = 0, //px
-    interval = 16, // ms
+    duration = 0, // How long to scroll for [ms]
+    deltaX = 0, // How much to scroll horizontally on each tick [px]
+    deltaY = 0, // How much to scroll vertically on each tick [px]
+    interval = 16, // Tick interval [ms]
+    easingCycle = 0, // ease in/out scrolling in cycles of this duration [ms]
   } = {}
 ) {
   const startTime = Date.now();
+  const cycles = easingCycle / interval;
+  let i = 0;
   while (Date.now() < startTime + duration) {
-    await page.mouse.wheel({ deltaX, deltaY });
-    await delay(interval);
+    const fraction = cycles
+      ? (Math.sin((2 * i * Math.PI) / cycles - Math.PI / 2) + 1) / 2
+      : 1;
+    i += 1;
+    await Promise.race([
+      page.mouse.wheel({
+        deltaX: fraction * deltaX,
+        deltaY: fraction * deltaY,
+      }),
+      delay(interval),
+    ]);
   }
 }
 
@@ -29,7 +46,16 @@ interface Results {
   avg: number;
 }
 
-async function measure(page: puppeteer.Page): Promise<Results> {
+function slugify(input: string): string {
+  return input
+    .replace(/[^a-zA-Z0-9]/g, '-')
+    .replace(/\-+/g, '-')
+    .replace(/(^\-)|(\-$)/g, '');
+}
+
+async function measure(page: puppeteer.Page, title: string): Promise<Results> {
+  const devtools = await page.target().createCDPSession();
+  await devtools.send('Overlay.setShowFPSCounter', { show: true });
   page.evaluate(() => {
     (window as any).__fps = [];
     let lastFrameTime: number;
@@ -45,8 +71,11 @@ async function measure(page: puppeteer.Page): Promise<Results> {
   });
 
   await page.mouse.move(200, 200);
-  await simulateScroll(page, { duration: 4000, deltaY: 50 });
-  // await simulateScroll(page, { duration: 5000, deltaX: 50 });
+  await simulateScroll(page, { duration: 10000, deltaY: 100 });
+  await page.screenshot({
+    path: path.resolve(FPS_METER_DIR, `./${title}.png`),
+    clip: { x: 0, y: 0, width: 196, height: 185 },
+  });
 
   const fps: number[] = await page.evaluate(() => (window as any).__fps);
   const min = Math.min(...fps);
@@ -70,7 +99,7 @@ async function measureExample(browser: puppeteer.Browser, example: string) {
   try {
     await page.setContent(await bundle(example));
     await page.waitForFunction('window.__ready');
-    const results = await measure(page);
+    const results = await measure(page, slugify(example));
     printResults(results);
   } finally {
     await page.close();
@@ -82,7 +111,7 @@ async function measureUrl(browser: puppeteer.Browser, url: string) {
   try {
     await page.goto(url);
     await delay(1000);
-    const results = await measure(page);
+    const results = await measure(page, slugify(url));
     printResults(results);
   } finally {
     await page.close();
@@ -97,6 +126,7 @@ const CASES = [
 ];
 
 async function main() {
+  await fs.mkdir(FPS_METER_DIR, { recursive: true });
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: null,
