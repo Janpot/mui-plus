@@ -24,3 +24,27 @@ export function scaleLinear(
   const domain = domainMax - domainMin;
   return (x: number): number => ((x - rangeMin) / range) * domain + domainMin;
 }
+
+export function sum(numbers: number[]): number {
+  return numbers.reduce((a, b) => a + b, 0);
+}
+
+export function mean(numbers: number[]): number {
+  return sum(numbers) / numbers.length;
+}
+
+export function median(numbers: number[]): number {
+  const sorted = [...numbers].sort();
+  return (
+    (sorted[Math.floor(numbers.length / 2)] +
+      sorted[Math.ceil(numbers.length / 2)]) /
+    2
+  );
+}
+
+export function std(numbers: number[]): number {
+  const m = mean(numbers);
+  return Math.sqrt(
+    numbers.reduce((total, n) => total + (n - m) ** 2, 0) / numbers.length
+  );
+}

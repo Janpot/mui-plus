@@ -1,13 +1,24 @@
+// TODO: organize better?
 import { bundle } from '../tests/utils';
 import puppeteer from 'puppeteer';
 import { performance } from 'perf_hooks';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+// TODO: organize better (use external math package?)
+import * as math from '../packages/mui-plus/src/utils/math';
 
-const FPS_METER_DIR = path.resolve(__dirname, `./fps-meter/`);
+const FILES_DIR = path.resolve(__dirname, `./fps-meter/`);
 
 async function delay(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+async function screenshotFpsMeter(page: puppeteer.Page, filename: string) {
+  await fs.mkdir(FILES_DIR, { recursive: true });
+  await page.screenshot({
+    path: path.resolve(FILES_DIR, filename),
+    clip: { x: 0, y: 0, width: 196, height: 185 },
+  });
 }
 
 async function simulateScroll(
@@ -42,8 +53,8 @@ interface Results {
   fps: number[];
   min: number;
   max: number;
+  median: number;
   mean: number;
-  avg: number;
 }
 
 function slugify(input: string): string {
@@ -54,8 +65,13 @@ function slugify(input: string): string {
 }
 
 async function measure(page: puppeteer.Page, title: string): Promise<Results> {
+  // await page.tracing.start({
+  //   categories: ['-*', 'disabled-by-default-devtools.timeline.frame'],
+  // });
+
   const devtools = await page.target().createCDPSession();
   await devtools.send('Overlay.setShowFPSCounter', { show: true });
+
   page.evaluate(() => {
     (window as any).__fps = [];
     let lastFrameTime: number;
@@ -71,27 +87,57 @@ async function measure(page: puppeteer.Page, title: string): Promise<Results> {
   });
 
   await page.mouse.move(200, 200);
-  await simulateScroll(page, { duration: 10000, deltaY: 100 });
-  await page.screenshot({
-    path: path.resolve(FPS_METER_DIR, `./${title}.png`),
-    clip: { x: 0, y: 0, width: 196, height: 185 },
-  });
+  await simulateScroll(page, { duration: 5000, deltaY: 100 });
+
+  await screenshotFpsMeter(page, `fps-${title}.png`);
+
+  // const trace = JSON.parse(await (await page.tracing.stop()).toString('utf-8'));
+  // console.log(JSON.stringify(trace, null, 2));
 
   const fps: number[] = await page.evaluate(() => (window as any).__fps);
   const min = Math.min(...fps);
   const max = Math.max(...fps);
-  const mean = [...fps].sort()[Math.floor(fps.length / 2)];
-  const avg = fps.reduce((a, b) => a + b, 0) / fps.length;
-  return { fps, min, max, mean, avg };
+  const median = math.median(fps);
+  const mean = math.mean(fps);
+  return { fps, min, max, median, mean };
 }
 
 const formatter = new Intl.NumberFormat('en');
 
 function printResults(results: Results) {
-  console.log(`      Min: ${formatter.format(results.min)} fps`);
-  console.log(`      Max: ${formatter.format(results.max)} fps`);
-  console.log(`     Mean: ${formatter.format(results.mean)} fps`);
-  console.log(`  Average: ${formatter.format(results.avg)} fps`);
+  console.log(`     Min: ${formatter.format(results.min)} fps`);
+  console.log(`     Max: ${formatter.format(results.max)} fps`);
+  console.log(`  Median: ${formatter.format(results.median)} fps`);
+  console.log(`    Mean: ${formatter.format(results.mean)} fps`);
+}
+
+function printAggregatedResults(results: Results[]) {
+  const mins = results.map((result) => result.min);
+  const maxs = results.map((result) => result.max);
+  const medians = results.map((result) => result.median);
+  const means = results.map((result) => result.mean);
+  const min = math.mean(mins);
+  const minStd = math.std(mins);
+  const max = math.mean(maxs);
+  const maxStd = math.std(maxs);
+  const median = math.mean(medians);
+  const medianStd = math.std(medians);
+  const mean = math.mean(means);
+  const meanStd = math.std(means);
+  console.log(
+    `     Min: ${formatter.format(min)} fps (σ = ${formatter.format(minStd)})`
+  );
+  console.log(
+    `     Max: ${formatter.format(max)} fps (σ = ${formatter.format(maxStd)})`
+  );
+  console.log(
+    `  Median: ${formatter.format(median)} fps (σ = ${formatter.format(
+      medianStd
+    )})`
+  );
+  console.log(
+    `    Mean: ${formatter.format(mean)} fps (σ = ${formatter.format(meanStd)})`
+  );
 }
 
 async function measureExample(browser: puppeteer.Browser, example: string) {
@@ -101,6 +147,7 @@ async function measureExample(browser: puppeteer.Browser, example: string) {
     await page.waitForFunction('window.__ready');
     const results = await measure(page, slugify(example));
     printResults(results);
+    return results;
   } finally {
     await page.close();
   }
@@ -113,6 +160,7 @@ async function measureUrl(browser: puppeteer.Browser, url: string) {
     await delay(1000);
     const results = await measure(page, slugify(url));
     printResults(results);
+    return results;
   } finally {
     await page.close();
   }
@@ -126,20 +174,30 @@ const CASES = [
 ];
 
 async function main() {
-  await fs.mkdir(FPS_METER_DIR, { recursive: true });
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: null,
   });
   try {
-    // console.log('local benchmark:');
-    // await measureExample(browser, './docs/examples/DataGrid/Benchmark.tsx');
-
-    for (const [title, url] of CASES) {
-      console.log(`${title}:`);
-      await measureUrl(browser, url);
+    const allResults = [];
+    console.log('local benchmark:');
+    for (let i = 0; i < 10; i++) {
+      const results = await measureExample(
+        browser,
+        './docs/examples/DataGrid/Benchmark.tsx'
+      );
       console.log('');
+      allResults.push(results);
     }
+    console.log('');
+    console.log('Aggregated:');
+    printAggregatedResults(allResults);
+
+    // for (const [title, url] of CASES) {
+    //   console.log(`${title}:`);
+    //   await measureUrl(browser, url);
+    //   console.log('');
+    // }
   } finally {
     await browser.close();
   }

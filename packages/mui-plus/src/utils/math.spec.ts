@@ -22,3 +22,11 @@ test.each([
 ])('rounds %d with %d decimals to %d', (value, decimals, expected) => {
   expect(math.round(value, decimals)).toBe(expected);
 });
+
+test.each([
+  [[], 0],
+  [[1, 2, 3, 4], 10],
+  [[-1, 1], 0],
+])('sums %p to %d', (numbers, total) => {
+  expect(math.sum(numbers)).toBe(total);
+});
