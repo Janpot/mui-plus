@@ -7,7 +7,6 @@ TODO
 
 import * as React from 'react';
 import { createSvgIcon, experimentalStyled as styled } from '@material-ui/core';
-import { unstable_useEnhancedEffect as useEnhancedEffect } from '@material-ui/utils';
 import useResizeObserver from './useResizeObserver';
 import clsx from 'clsx';
 import { useControlled } from '../utils/useControlled';
@@ -17,6 +16,7 @@ import {
   getVirtualSliceVariable,
 } from '../utils/virtualization';
 import Scroller from './Scroller';
+import useCombinedRefs from './useCombinedRefs';
 
 type TableClass =
   | 'resizing'
@@ -71,17 +71,13 @@ const alignmentClass = {
   end: classes.columnAlignEnd,
 };
 
-const Root = styled('div')(({ theme }) => ({
+const DataGridRoot = styled('div')(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
   height: '100%',
   borderRadius: theme.shape.borderRadius,
   border: `1px solid ${theme.palette.divider}`,
-
-  [`&.${classes.resizing}`]: {
-    userSelect: 'none',
-  },
 
   [`& .${classes.centerHeader}`]: {
     flex: 1,
@@ -110,6 +106,10 @@ const Root = styled('div')(({ theme }) => ({
     flexDirection: 'row',
     width: '100%',
     overflow: 'hidden',
+
+    [`&.${classes.resizing}`]: {
+      userSelect: 'none',
+    },
   },
 
   [`& .${classes.tableBody}`]: {
@@ -236,6 +236,7 @@ export interface ColumnDefinition<R = any, V = any> {
   minWidth?: number;
   maxWidth?: number;
   width?: number;
+  flex?: number;
 }
 
 export type ColumnDefinitions = ColumnDefinition[];
@@ -437,17 +438,24 @@ function calculateColumnWidth(
   );
 }
 
-/**
- * mui-plus DataGrid Component
- */
-export default function DataGrid({
+interface DataGridContentProps extends DataGridProps {
+  width: number;
+  rootRef: React.RefObject<HTMLDivElement>;
+}
+
+function DataGridContent({
   data,
+  width: gridWidth,
+  rootRef,
   columns: columnsProp,
   onColumnsChange: onColumnsChangeProp,
   defaultColumns = [],
   rowHeight = 52,
-}: DataGridProps) {
-  const rootRef = React.useRef<HTMLDivElement>(null);
+}: DataGridContentProps) {
+  const tableHeadRenderPaneRef = React.useRef<HTMLDivElement>(null);
+  const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
+  const pinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
+  const pinnedEndRenderPaneRef = React.useRef<HTMLDivElement>(null);
 
   const [columns, setColumns] = useControlled(
     'columns',
@@ -507,13 +515,10 @@ export default function DataGrid({
       pinnedEndWidth,
       centerWidth,
     };
-  }, [columns]);
+  }, [columns, gridWidth]);
 
   const totalHeight = rowHeight * data.length;
   const totalWidth = pinnedStartWidth + centerWidth + pinnedEndWidth;
-
-  const tableHeadRenderPaneRef = React.useRef<HTMLDivElement>(null);
-  const { ref: tableBodyRef, rect: bodyRect } = useResizeObserver();
 
   const rowCount = data.length;
   const centerColumnCount = centerColumns.length;
@@ -570,13 +575,16 @@ export default function DataGrid({
     ]
   );
 
-  const getColumnElements = React.useCallback((columnKey: string) => {
-    return (
-      rootRef.current?.querySelectorAll<HTMLDivElement>(
-        `.${classes.tableCell}[data-column=${columnKey}]`
-      ) || []
-    );
-  }, []);
+  const getColumnElements = React.useCallback(
+    (columnKey: string) => {
+      return (
+        rootRef.current?.querySelectorAll<HTMLDivElement>(
+          `.${classes.tableCell}[data-column=${columnKey}]`
+        ) || []
+      );
+    },
+    [rootRef]
+  );
 
   const { handleResizerMouseDown, isResizing } = useColumnResizing({
     columns,
@@ -728,10 +736,6 @@ export default function DataGrid({
     pinnedEndColumns,
   ]);
 
-  const tableBodyRenderPaneRef = React.useRef<HTMLDivElement>(null);
-  const pinnedStartRenderPaneRef = React.useRef<HTMLDivElement>(null);
-  const pinnedEndRenderPaneRef = React.useRef<HTMLDivElement>(null);
-
   const sliceLeft = virtualSlice
     ? getCenterColumnOffset(virtualSlice.startColumn)
     : 0;
@@ -771,25 +775,23 @@ export default function DataGrid({
   );
 
   // useEffect causes jittering when the virtualslice updates as the CSS transform
-  // gets updated on the next render. useLayoutEffect fixes this problem. We use
-  // useEnhancedEffect which deferes to useEffect on the server.
-  useEnhancedEffect(() => updateScroll(), [updateScroll]);
+  // gets updated on the next render. useLayoutEffect fixes this problem.
+  React.useLayoutEffect(() => updateScroll(), [updateScroll]);
 
   const hasPinnedStart = pinnedStartColumns.length > 0;
   const hasPinnedEnd = pinnedEndColumns.length > 0;
 
   return (
-    <Root ref={rootRef} className={clsx({ [classes.resizing]: isResizing })}>
-      <div className={classes.tableHead}>
+    <>
+      <div
+        className={clsx(classes.tableHead, { [classes.resizing]: isResizing })}
+      >
         {hasPinnedStart && (
           <div className={classes.pinnedStartHeader}>
             {pinnedStartHeaderElms}
           </div>
         )}
-        <div
-          className={classes.centerHeader}
-          style={{ width: bodyRect?.width }}
-        >
+        <div className={classes.centerHeader} style={{ width: gridWidth }}>
           <div
             className={classes.tableHeadRenderPane}
             ref={tableHeadRenderPaneRef}
@@ -802,7 +804,7 @@ export default function DataGrid({
           <div className={classes.pinnedEndHeader}>{pinnedEndHeaderElms}</div>
         )}
       </div>
-      <div ref={tableBodyRef} className={classes.tableBody}>
+      <div className={classes.tableBody}>
         <Scroller
           onScroll={handleScroll}
           scrollHeight={totalHeight}
@@ -830,6 +832,27 @@ export default function DataGrid({
           </div>
         </Scroller>
       </div>
-    </Root>
+    </>
+  );
+}
+
+/**
+ * mui-plus DataGrid Component
+ */
+export default function DataGrid(props: DataGridProps) {
+  const rootRefObj = React.useRef<HTMLDivElement>(null);
+  const { ref: rootSizingRef, rect: bodyRect } = useResizeObserver();
+  const rootRef = useCombinedRefs(rootRefObj, rootSizingRef);
+
+  return (
+    <DataGridRoot ref={rootRef}>
+      {bodyRect ? (
+        <DataGridContent
+          {...props}
+          width={bodyRect.width}
+          rootRef={rootRefObj}
+        />
+      ) : null}
+    </DataGridRoot>
   );
 }
