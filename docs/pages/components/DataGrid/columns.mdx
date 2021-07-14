@@ -30,6 +30,17 @@ import srcAlignment from '../../../examples/DataGrid/Alignment?raw';
   <Alignment />
 </CodeExample>
 
+## Flex
+
+If the columns take up less space than available, you can make them flex to fill up the available space. Use a `flex` property on the column definition to specify how much of the available space you want to allocate to the column. This number is a unitless number that specifies the feaction of available space that this column will take. Resizing a column removes its ability to flex.
+
+import Flex from '../../../examples/DataGrid/Flex';
+import srcFlex from '../../../examples/DataGrid/Flex?raw';
+
+<CodeExample src={srcFlex}>
+  <Flex />
+</CodeExample>
+
 ## Pinned Columns
 
 Use the `pin` property to pin columns at the start or end of the grid. It is possible to pin multiple columns at either side of the grid.

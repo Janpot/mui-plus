@@ -2,7 +2,6 @@
 TODO
 - ltr
 - row hover
-- flex
 */
 
 import * as React from 'react';
@@ -332,8 +331,9 @@ function useColumnResizing({
       onColumnsChange(
         columns.map((column) => {
           if (column.key === resizingColumn.key) {
+            const { flex, ...withoutFlex } = column;
             return {
-              ...column,
+              ...withoutFlex,
               width: calculateResizedColumnWidth(event.clientX),
             };
           } else {
@@ -476,6 +476,43 @@ function DataGridContent({
     pinnedEndWidth,
     centerWidth,
   } = React.useMemo(() => {
+    let totalFlex = 0;
+    let totalWidth = 0;
+    const columnWidths: { [columnKey: string]: number } = {};
+    const flexColumns = new Set<ColumnDefinition<any, any>>();
+    for (const column of columns) {
+      if (column.visible !== false) {
+        const width = calculateColumnWidth(column);
+        if (typeof column.flex === 'number' && column.flex > 0) {
+          flexColumns.add(column);
+          totalFlex += column.flex;
+        }
+        totalWidth += width;
+        columnWidths[column.key] = width;
+      }
+    }
+
+    // Apply flex
+    let availableFlexSpace = gridWidth - totalWidth;
+    while (availableFlexSpace > 0 && flexColumns.size > 0) {
+      for (const column of flexColumns) {
+        const flex = column.flex!;
+        const fraction = flex / totalFlex;
+        const actualWidth = columnWidths[column.key];
+        const flexWidth = availableFlexSpace * fraction;
+        const proposedWidth = actualWidth + flexWidth;
+        const newWidth = calculateColumnWidth(column, proposedWidth);
+        columnWidths[column.key] = newWidth;
+        const actualFlexWidth = newWidth - actualWidth;
+        availableFlexSpace -= actualFlexWidth;
+        if (actualFlexWidth < flexWidth) {
+          // This column can't flex anymore
+          flexColumns.delete(column);
+          totalFlex -= flex;
+        }
+      }
+    }
+
     const pinnedStartColumns: ColumnDefinitions = [];
     const pinnedEndColumns: ColumnDefinitions = [];
     const centerColumns: ColumnDefinitions = [];
@@ -484,9 +521,10 @@ function DataGridContent({
     let pinnedStartWidth = 0;
     let pinnedEndWidth = 0;
     let centerWidth = 0;
+
     for (const column of columns) {
       if (column.visible !== false) {
-        const width = calculateColumnWidth(column);
+        const width = columnWidths[column.key];
         let offset;
         if (column.pin === 'start') {
           pinnedStartColumns.push(column);
@@ -505,6 +543,7 @@ function DataGridContent({
       }
       columnByKey[column.key] = column;
     }
+
     return {
       centerColumns,
       pinnedStartColumns,
