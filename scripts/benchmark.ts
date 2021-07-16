@@ -89,7 +89,7 @@ async function measure(page: puppeteer.Page, title: string): Promise<Results> {
   await page.mouse.move(200, 200);
   await simulateScroll(page, { duration: 5000, deltaY: 100 });
 
-  await screenshotFpsMeter(page, `fps-${title}.png`);
+  // await screenshotFpsMeter(page, `fps-${title}.png`);
 
   // const trace = JSON.parse(await (await page.tracing.stop()).toString('utf-8'));
   // console.log(JSON.stringify(trace, null, 2));
@@ -179,9 +179,10 @@ async function main() {
     defaultViewport: null,
   });
   try {
+    const COUNT = 1;
     const allResults = [];
     console.log('local benchmark:');
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < COUNT; i++) {
       const results = await measureExample(
         browser,
         './docs/examples/DataGrid/Benchmark.tsx'
@@ -190,7 +191,7 @@ async function main() {
       allResults.push(results);
     }
     console.log('');
-    console.log('Aggregated:');
+    console.log(`Aggregated (over ${COUNT} samples):`);
     printAggregatedResults(allResults);
 
     // for (const [title, url] of CASES) {

@@ -724,8 +724,10 @@ function DataGridContent({
         rowIdx < virtualSlice.endRow;
         rowIdx += 1
       ) {
+        // We construct a key that remains constant to avoid updating the DOM too often
+        const key = rowIdx - virtualSlice.startRow;
         elms.push(
-          <TableRow key={rowIdx} height={rowHeight} reverse={reverse}>
+          <TableRow key={key} height={rowHeight} reverse={reverse}>
             {columns.map((column) => {
               const value = column.getValue
                 ? column.getValue(data[rowIdx])
