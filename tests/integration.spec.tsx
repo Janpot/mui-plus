@@ -21,6 +21,7 @@ const EXAMPLES: [string][] = [
   ['./docs/examples/DataGrid/Basic.tsx'],
   ['./docs/examples/DataGrid/Controlled.tsx'],
   ['./docs/examples/DataGrid/Pinned.tsx'],
+  ['./docs/examples/DataGrid/Flex.tsx'],
   ['./docs/examples/DataGrid/Value.tsx'],
   ['./docs/examples/DataGrid/Virtualization.tsx'],
   ['./docs/examples/DataGrid/Weather.tsx'],
