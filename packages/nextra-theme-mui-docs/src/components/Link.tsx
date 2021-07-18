@@ -13,7 +13,7 @@ interface NextLinkComposedProps
   href?: NextLinkProps['href'];
 }
 
-export const NextLinkComposed = React.forwardRef<
+const NextLinkComposed = React.forwardRef<
   HTMLAnchorElement,
   NextLinkComposedProps
 >(function NextLinkComposed(props, ref) {

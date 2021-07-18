@@ -683,12 +683,12 @@ function DataGridContent({
       { reverse = false }: RenderColumnsOptions = {}
     ) => (
       <TableRow height={56} reverse={reverse}>
-        {columns.map((column) => {
+        {columns.map((column, i) => {
           const headerContent = column?.header ?? column.key;
           const { width } = getCellBoundingrect(0, column.key);
           return (
             <TableCell
-              key={column.key}
+              key={i}
               width={width}
               columnKey={column.key}
               align={column.align}
@@ -728,7 +728,7 @@ function DataGridContent({
         const key = rowIdx - virtualSlice.startRow;
         elms.push(
           <TableRow key={key} height={rowHeight} reverse={reverse}>
-            {columns.map((column) => {
+            {columns.map((column, i) => {
               const value = column.getValue
                 ? column.getValue(data[rowIdx])
                 : data[rowIdx][column.key];
@@ -738,7 +738,7 @@ function DataGridContent({
                 : String(value);
               return (
                 <TableCell
-                  key={column.key}
+                  key={i}
                   width={width}
                   columnKey={column.key}
                   align={column.align}

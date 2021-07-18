@@ -1,5 +1,5 @@
 module.exports = {
-  siteStartCmd: 'npm start',
+  siteStartCmd: 'yarn start',
   siteOrigin: 'http://localhost:3000',
   startUrl: '/',
   outputPath: './site-search.json',
