@@ -23,7 +23,8 @@
   "scripts": {
     "dev": "next",
     "build:nextra-theme-mui-docs": "yarn workspace nextra-theme-mui-docs build",
-    "build": "yarn build:nextra-theme-mui-docs && next build",
+    "build:next": "next build",
+    "build": "yarn build:nextra-theme-mui-docs && yarn build:next",
     "start": "next start",
     "lint": "next lint",
     "site-search": "site-search",

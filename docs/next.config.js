@@ -17,6 +17,13 @@ module.exports = withNextra({
             type: 'asset/source',
           },
           {
+            resourceQuery: /localFile/,
+            type: 'asset/resource',
+            generator: {
+              publicPath: './',
+            },
+          },
+          {
             rules: config.module.rules,
           },
         ],
