@@ -39,41 +39,26 @@ const { format: formatDate } = new Intl.DateTimeFormat(undefined, {
 const formatMonth = (month: number) => formatDate(new Date(0, month));
 
 interface TooltipGlyphProps {
-  radius: number;
+  radius?: number;
   color?: string;
 }
 
-const TooltipGlyph = React.forwardRef<SVGSVGElement, TooltipGlyphProps>(
-  ({ radius, color, ...props }, ref) => {
-    const muiTheme = useMuiTheme();
-    return (
-      <svg
-        width={radius * 2}
-        height={radius * 2}
-        ref={ref}
-        style={{
-          position: 'absolute',
-          top: -radius,
-          left: -radius,
-          pointerEvents: 'none',
-        }}
-        {...props}
-      >
-        <g transform={`translate(${radius}, ${radius})`}>
-          <circle r={radius} cx={0} cy={0} fill={color} opacity="0.3" />
-          <circle
-            r={radius / 2}
-            cx={0}
-            cy={0}
-            stroke={color}
-            fill={muiTheme.palette.background.paper}
-            strokeWidth={2}
-          />
-        </g>
-      </svg>
-    );
-  }
-);
+function TooltipGlyph({ radius = 12, color }: TooltipGlyphProps) {
+  const muiTheme = useMuiTheme();
+  return (
+    <g>
+      <circle r={radius} cx={0} cy={0} fill={color} opacity="0.3" />
+      <circle
+        r={radius / 2}
+        cx={0}
+        cy={0}
+        stroke={color}
+        fill={muiTheme.palette.background.paper}
+        strokeWidth={2}
+      />
+    </g>
+  );
+}
 
 function VisxMuiTooltip(props: Omit<TooltipProps<Datum>, 'renderTooltip'>) {
   return (
@@ -84,7 +69,7 @@ function VisxMuiTooltip(props: Omit<TooltipProps<Datum>, 'renderTooltip'>) {
       showDatumGlyph
       unstyled
       applyPositionStyle
-      offsetTop={0}
+      renderGlyph={({ color }) => <TooltipGlyph color={color} />}
       offsetLeft={0}
       renderTooltip={({ tooltipData, colorScale }) => {
         const nearestDatum = tooltipData?.nearestDatum;
@@ -109,19 +94,9 @@ function VisxMuiTooltip(props: Omit<TooltipProps<Datum>, 'renderTooltip'>) {
             placement="top"
             arrow
           >
-            <TooltipGlyph radius={12} color={colorScale?.(nearestDatum.key)} />
+            <div />
           </MuiTooltip>
         );
-        // return (
-        //   <div>
-        //     <div style={{ color: colorScale(tooltipData.nearestDatum.key) }}>
-        //       {tooltipData.nearestDatum.key}
-        //     </div>
-        //     {formatMonth(accessors.xAccessor(tooltipData.nearestDatum.datum))}
-        //     {', '}
-        //     {formatTemperature(accessors.yAccessor(tooltipData.nearestDatum.datum))}
-        //   </div>
-        // );
       }}
     />
   );
