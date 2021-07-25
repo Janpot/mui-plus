@@ -45,7 +45,7 @@
     "build": "microbundle --jsxFragment React.Fragment --jsx 'React.createElement' --format es,cjs,modern ./*.ts",
     "dev": "microbundle watch --jsxFragment React.Fragment --jsx 'React.createElement' --no-compress --raw --format es,cjs,modern ./*.ts",
     "prepare": "yarn build",
-    "pub": "yarn publish"
+    "release": "yarn publish"
   },
   "peerDependencies": {
     "next": ">=10.0.0",
