@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Axis, Grid, GlyphSeries, XYChart } from '@visx/xychart';
 import { GlyphCircle, GlyphSquare, GlyphTriangle } from '@visx/glyph';
-import { makeTheme } from 'mui-plus';
+import { makeVisxTheme } from 'mui-plus';
 
 interface Datum {
   x: number;
@@ -47,7 +47,7 @@ const accessors = {
   yAccessor: (d: Datum) => d.y,
 };
 
-const useTheme = makeTheme();
+const useTheme = makeVisxTheme();
 
 export default function BasicGlyphs() {
   const theme = useTheme();

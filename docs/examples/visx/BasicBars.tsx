@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Axis, Grid, BarSeries, XYChart } from '@visx/xychart';
-import { makeTheme } from 'mui-plus';
+import { makeVisxTheme } from 'mui-plus';
 
 interface Datum {
   x: string;
@@ -19,7 +19,7 @@ const accessors = {
   yAccessor: (d: Datum) => d.y,
 };
 
-const useTheme = makeTheme();
+const useTheme = makeVisxTheme();
 
 const percent = new Intl.NumberFormat(undefined, { style: 'percent' });
 

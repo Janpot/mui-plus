@@ -1,12 +1,8 @@
 import * as React from 'react';
-import { Axis, Grid, LineSeries, XYChart, Tooltip } from '@visx/xychart';
-import { makeTheme } from 'mui-plus';
-import { TooltipProps } from '@visx/xychart/lib/components/Tooltip';
-import {
-  Tooltip as MuiTooltip,
-  Typography,
-  useTheme as useMuiTheme,
-} from '@material-ui/core';
+import { Axis, Grid, LineSeries, XYChart } from '@visx/xychart';
+import { makeVisxTheme, VisxTooltip } from 'mui-plus';
+import { curveCatmullRom } from '@visx/curve';
+import { Typography } from '@material-ui/core';
 
 type Datum = { x: number; y: number };
 
@@ -22,7 +18,7 @@ const max = [
   5.8, 6.9, 10.3, 14.4, 17.7, 20.8, 22.5, 22.1, 19.2, 15, 9.9, 6.5,
 ].map(makeDatum);
 
-const useTheme = makeTheme();
+const useTheme = makeVisxTheme();
 
 const accessors = {
   xAccessor: ({ x }: Datum) => x,
@@ -38,70 +34,6 @@ const { format: formatDate } = new Intl.DateTimeFormat(undefined, {
 });
 const formatMonth = (month: number) => formatDate(new Date(0, month));
 
-interface TooltipGlyphProps {
-  radius?: number;
-  color?: string;
-}
-
-function TooltipGlyph({ radius = 12, color }: TooltipGlyphProps) {
-  const muiTheme = useMuiTheme();
-  return (
-    <g>
-      <circle r={radius} cx={0} cy={0} fill={color} opacity="0.3" />
-      <circle
-        r={radius / 2}
-        cx={0}
-        cy={0}
-        stroke={color}
-        fill={muiTheme.palette.background.paper}
-        strokeWidth={2}
-      />
-    </g>
-  );
-}
-
-function VisxMuiTooltip(props: Omit<TooltipProps<Datum>, 'renderTooltip'>) {
-  return (
-    <Tooltip<Datum>
-      snapTooltipToDatumX
-      snapTooltipToDatumY
-      showVerticalCrosshair
-      showDatumGlyph
-      unstyled
-      applyPositionStyle
-      renderGlyph={({ color }) => <TooltipGlyph color={color} />}
-      offsetLeft={0}
-      renderTooltip={({ tooltipData, colorScale }) => {
-        const nearestDatum = tooltipData?.nearestDatum;
-        if (!nearestDatum) return null;
-        return (
-          <MuiTooltip
-            sx={{ pointerEvents: 'none' }}
-            open
-            enterDelay={0}
-            disableHoverListener
-            disableInteractive
-            title={
-              <>
-                <Typography variant="h6">
-                  {formatTemperature(nearestDatum.datum.x)}
-                </Typography>
-                <Typography variant="body2">
-                  {formatMonth(nearestDatum.datum.y)}
-                </Typography>
-              </>
-            }
-            placement="top"
-            arrow
-          >
-            <div />
-          </MuiTooltip>
-        );
-      }}
-    />
-  );
-}
-
 export default function Temperatures() {
   const theme = useTheme();
   return (
@@ -113,9 +45,24 @@ export default function Temperatures() {
       yScale={{ type: 'linear', nice: true }}
     >
       <Grid columns={false} numTicks={4} />
-      <LineSeries dataKey="Average" data={avg} {...accessors} />§
-      <LineSeries dataKey="Min" data={min} {...accessors} />§
-      <LineSeries dataKey="Max" data={max} {...accessors} />§
+      <LineSeries
+        curve={curveCatmullRom}
+        dataKey="Average"
+        data={avg}
+        {...accessors}
+      />
+      <LineSeries
+        curve={curveCatmullRom}
+        dataKey="Min"
+        data={min}
+        {...accessors}
+      />
+      <LineSeries
+        curve={curveCatmullRom}
+        dataKey="Max"
+        data={max}
+        {...accessors}
+      />
       <Axis orientation="bottom" tickFormat={formatMonth} />
       <Axis
         orientation="right"
@@ -123,11 +70,25 @@ export default function Temperatures() {
         numTicks={4}
         tickFormat={formatTemperature}
       />
-      <VisxMuiTooltip
+      <VisxTooltip<Datum>
         snapTooltipToDatumX
         snapTooltipToDatumY
         showVerticalCrosshair
         showDatumGlyph
+        renderTooltip={({ tooltipData }) => {
+          const nearestDatum = tooltipData?.nearestDatum;
+          if (!nearestDatum) return null;
+          return (
+            <>
+              <Typography variant="h6">
+                {formatTemperature(nearestDatum.datum.x)}
+              </Typography>
+              <Typography variant="body2">
+                {formatMonth(nearestDatum.datum.y)}
+              </Typography>
+            </>
+          );
+        }}
       />
     </XYChart>
   );
