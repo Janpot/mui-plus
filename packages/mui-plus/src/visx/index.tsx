@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { buildChartTheme, Tooltip } from '@visx/xychart';
+import {
+  buildChartTheme,
+  Tooltip,
+  TooltipContext,
+  TooltipContextType,
+} from '@visx/xychart';
 import { grey, cyan, purple, orange } from '@material-ui/core/colors';
 import {
   useTheme as useMuiTheme,
@@ -56,12 +61,12 @@ export function makeVisxTheme() {
   };
 }
 
-interface TooltipGlyphProps {
+interface HighlightedGlyphProps {
   radius?: number;
   color?: string;
 }
 
-export function VisxTooltipGlyph({ radius = 12, color }: TooltipGlyphProps) {
+function HighlightedGlyph({ radius = 12, color }: HighlightedGlyphProps) {
   const muiTheme = useMuiTheme();
   return (
     <g>
@@ -78,37 +83,74 @@ export function VisxTooltipGlyph({ radius = 12, color }: TooltipGlyphProps) {
   );
 }
 
-export function VisxTooltip<Datum extends object>(props: TooltipProps<Datum>) {
+interface TooltipGlyphProps {
+  datumKey: string;
+  radius?: number;
+  color?: string;
+}
+
+function VisxTooltipGlyph<Datum extends object>({
+  datumKey,
+  radius = 4,
+  color,
+}: TooltipGlyphProps) {
+  const { tooltipData } = React.useContext(
+    TooltipContext
+  ) as TooltipContextType<Datum>;
+  const nearestDatumKey = tooltipData?.nearestDatum?.key;
+  return nearestDatumKey === datumKey ? (
+    <HighlightedGlyph radius={radius * 3} color={color} />
+  ) : (
+    <circle r={radius} cx={0} cy={0} fill={color} />
+  );
+}
+
+interface TooltipContentProps<Datum extends object> {
+  children?: React.ReactNode;
+}
+
+function TooltipContent<Datum extends object>({
+  children,
+}: TooltipContentProps<Datum>) {
+  return (
+    <MuiTooltip
+      sx={{ pointerEvents: 'none' }}
+      open
+      enterDelay={0}
+      disableHoverListener
+      disableInteractive
+      title={<>{children}</>}
+      placement="top"
+      arrow
+    >
+      <div />
+    </MuiTooltip>
+  );
+}
+
+export function VisxTooltip<Datum extends object>({
+  renderTooltip,
+  ...props
+}: TooltipProps<Datum>) {
   return (
     <Tooltip<Datum>
       snapTooltipToDatumX
       snapTooltipToDatumY
       showVerticalCrosshair
       showDatumGlyph
-      // showSeriesGlyphs
+      showSeriesGlyphs
       unstyled
       applyPositionStyle
-      renderGlyph={({ color }) => <VisxTooltipGlyph color={color} />}
+      renderGlyph={({ key, color }) => (
+        <VisxTooltipGlyph datumKey={key} color={color} />
+      )}
       offsetLeft={0}
-      renderTooltip={(params) => {
-        const { tooltipData } = params;
-        const nearestDatum = tooltipData?.nearestDatum;
-        if (!nearestDatum) return null;
-        return (
-          <MuiTooltip
-            sx={{ pointerEvents: 'none' }}
-            open
-            enterDelay={0}
-            disableHoverListener
-            disableInteractive
-            title={<>{props.renderTooltip(params)}</>}
-            placement="top"
-            arrow
-          >
-            <div />
-          </MuiTooltip>
-        );
-      }}
+      renderTooltip={(params) =>
+        params.tooltipData?.nearestDatum ? (
+          <TooltipContent>{renderTooltip(params)}</TooltipContent>
+        ) : null
+      }
+      {...props}
     />
   );
 }
