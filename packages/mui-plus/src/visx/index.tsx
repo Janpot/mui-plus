@@ -9,6 +9,9 @@ import { grey, cyan, purple, orange } from '@material-ui/core/colors';
 import {
   useTheme as useMuiTheme,
   Tooltip as MuiTooltip,
+  TooltipProps as MuiTooltipProps,
+  tooltipClasses as muiTooltipClasses,
+  experimentalStyled as styled,
 } from '@material-ui/core';
 import { TooltipProps } from '@visx/xychart/lib/components/Tooltip';
 
@@ -105,15 +108,39 @@ function VisxTooltipGlyph<Datum extends object>({
   );
 }
 
-interface TooltipContentProps<Datum extends object> {
+const StyledMuiTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
+  <MuiTooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${muiTooltipClasses.tooltip}`]: {
+    background:
+      theme.palette.mode === 'dark'
+        ? undefined
+        : theme.palette.background.paper,
+    color: theme.palette.text.secondary,
+    boxShadow: theme.shadows[1],
+  },
+  [`& .${muiTooltipClasses.arrow}`]: {
+    color:
+      theme.palette.mode === 'dark'
+        ? undefined
+        : theme.palette.background.paper,
+    '&:before': {
+      boxShadow:
+        theme.palette.mode === 'dark'
+          ? undefined
+          : // TODO: can this be improved? It seems a bit offset
+            theme.shadows[1],
+    },
+  },
+}));
+
+interface TooltipContentProps {
   children?: React.ReactNode;
 }
 
-function TooltipContent<Datum extends object>({
-  children,
-}: TooltipContentProps<Datum>) {
+function TooltipContent({ children }: TooltipContentProps) {
   return (
-    <MuiTooltip
+    <StyledMuiTooltip
       sx={{ pointerEvents: 'none' }}
       open
       enterDelay={0}
@@ -124,7 +151,7 @@ function TooltipContent<Datum extends object>({
       arrow
     >
       <div />
-    </MuiTooltip>
+    </StyledMuiTooltip>
   );
 }
 
