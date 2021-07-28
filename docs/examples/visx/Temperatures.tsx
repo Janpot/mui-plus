@@ -34,8 +34,24 @@ const { format: formatDate } = new Intl.DateTimeFormat(undefined, {
 });
 const formatMonth = (month: number) => formatDate(new Date(0, month));
 
+const series = [
+  {
+    dataKey: 'Avg',
+    data: avg,
+  },
+  {
+    dataKey: 'Min',
+    data: min,
+  },
+  {
+    dataKey: 'Max',
+    data: max,
+  },
+];
+
 export default function Temperatures() {
   const theme = useTheme();
+
   return (
     <DataProvider
       theme={theme}
@@ -48,24 +64,9 @@ export default function Temperatures() {
         margin={{ top: 0, bottom: 30, left: 20, right: 40 }}
       >
         <Grid columns={false} numTicks={4} />
-        <LineSeries
-          curve={curveCatmullRom}
-          dataKey="Avg"
-          data={avg}
-          {...accessors}
-        />
-        <LineSeries
-          curve={curveCatmullRom}
-          dataKey="Min"
-          data={min}
-          {...accessors}
-        />
-        <LineSeries
-          curve={curveCatmullRom}
-          dataKey="Max"
-          data={max}
-          {...accessors}
-        />
+        {series.map((props) => (
+          <LineSeries {...props} curve={curveCatmullRom} {...accessors} />
+        ))}
         <Axis orientation="bottom" tickFormat={formatMonth} />
         <Axis
           orientation="right"
@@ -74,10 +75,6 @@ export default function Temperatures() {
           tickFormat={formatTemperature}
         />
         <VisxTooltip<Datum>
-          snapTooltipToDatumX
-          snapTooltipToDatumY
-          showVerticalCrosshair
-          showDatumGlyph
           renderTooltip={({ tooltipData }) => {
             const nearestDatum = tooltipData?.nearestDatum;
             if (!nearestDatum) return null;
