@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {
   buildChartTheme,
+  DataContext,
+  DataContextType,
   Tooltip,
   TooltipContext,
   TooltipContextType,
@@ -14,6 +16,7 @@ import {
   experimentalStyled as styled,
 } from '@material-ui/core';
 import { TooltipProps } from '@visx/xychart/lib/components/Tooltip';
+import { LegendOrdinal } from '@visx/legend';
 
 export function makeVisxTheme() {
   return function useTheme() {
@@ -178,6 +181,26 @@ export function VisxTooltip<Datum extends object>({
         ) : null
       }
       {...props}
+    />
+  );
+}
+
+export function VisxLegend<Datum extends object>() {
+  const { colorScale, theme } = React.useContext(
+    DataContext
+  ) as DataContextType<any, any, Datum>;
+
+  return (
+    <LegendOrdinal
+      scale={colorScale}
+      direction="row"
+      itemMargin={`0 15px`}
+      shape="line"
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        fontSize: theme.htmlLabel?.fontSize,
+      }}
     />
   );
 }

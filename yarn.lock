@@ -2228,6 +2228,17 @@
     classnames "^2.3.1"
     prop-types "^15.6.2"
 
+"@visx/legend@^1.17.1":
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/@visx/legend/-/legend-1.17.1.tgz#3908321da90f3a30d3608cc572a6c13b34a3298b"
+  integrity sha512-vdB3EPHXYwTyS4g2MB/sVAvq6ddeyzjlTjsM6YNc6Nagwb4uTOuMeKT+t0jgLJejNMOcY7Q8eBjDDWAdiPNV1A==
+  dependencies:
+    "@types/react" "*"
+    "@visx/group" "1.17.1"
+    "@visx/scale" "1.14.0"
+    classnames "^2.3.1"
+    prop-types "^15.5.10"
+
 "@visx/point@1.7.0":
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/@visx/point/-/point-1.7.0.tgz#1df3c3425eae464f498473bcdda2fcae05c8ecbe"

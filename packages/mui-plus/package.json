@@ -39,6 +39,7 @@
     }
   },
   "dependencies": {
+    "@visx/legend": "^1.17.1",
     "clsx": "^1.1.1",
     "react-transition-group": "^4.4.1"
   }
