@@ -65,7 +65,12 @@ export default function Temperatures() {
       >
         <Grid columns={false} numTicks={4} />
         {series.map((props) => (
-          <LineSeries {...props} curve={curveCatmullRom} {...accessors} />
+          <LineSeries
+            key={props.dataKey}
+            {...props}
+            curve={curveCatmullRom}
+            {...accessors}
+          />
         ))}
         <Axis orientation="bottom" tickFormat={formatMonth} />
         <Axis
