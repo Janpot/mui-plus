@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Axis, Grid, GlyphSeries, XYChart } from '@visx/xychart';
+import { Axis, Grid, GlyphSeries, XYChart, GlyphProps } from '@visx/xychart';
 import { GlyphCircle, GlyphSquare, GlyphTriangle } from '@visx/glyph';
 import { makeVisxTheme } from 'mui-plus';
 
@@ -49,6 +49,63 @@ const accessors = {
 
 const useTheme = makeVisxTheme();
 
+function renderCircleGlyph(props: React.PropsWithChildren<GlyphProps<Datum>>) {
+  return (
+    <GlyphCircle
+      fill={props.color}
+      size={(props.size / 2) ** 2 * Math.PI}
+      top={props.y}
+      left={props.x}
+    />
+  );
+}
+
+function renderSquareGlyph(props: React.PropsWithChildren<GlyphProps<Datum>>) {
+  return (
+    <GlyphSquare
+      fill={props.color}
+      size={(props.size / 2) ** 2 * Math.PI}
+      top={props.y}
+      left={props.x}
+    />
+  );
+}
+
+function renderTriangleGlyph(
+  props: React.PropsWithChildren<GlyphProps<Datum>>
+) {
+  return (
+    <GlyphTriangle
+      fill={props.color}
+      size={(props.size / 2) ** 2 * Math.PI}
+      top={props.y}
+      left={props.x}
+    />
+  );
+}
+
+const series = [
+  {
+    dataKey: 'Glyphs 1',
+    data: data1,
+    renderGlyph: renderCircleGlyph,
+  },
+  {
+    dataKey: 'Glyphs 2',
+    data: data2,
+    renderGlyph: renderSquareGlyph,
+  },
+  {
+    dataKey: 'Glyphs 3',
+    data: data3,
+    renderGlyph: renderTriangleGlyph,
+  },
+];
+
+function yAxisTickFormat(value: any): string {
+  return `${Math.round(value / 1000000)}$`;
+}
+
 export default function BasicGlyphs() {
   const theme = useTheme();
   return (
@@ -60,54 +117,15 @@ export default function BasicGlyphs() {
       yScale={{ type: 'linear', nice: true }}
     >
       <Grid numTicks={4} />
-      <GlyphSeries
-        dataKey="Glyphs 1"
-        data={data1}
-        {...accessors}
-        size={15}
-        renderGlyph={(props) => (
-          <GlyphCircle
-            fill={props.color}
-            size={(props.size / 2) ** 2 * Math.PI}
-            top={props.y}
-            left={props.x}
-          />
-        )}
-      />
-      <GlyphSeries
-        dataKey="Glyphs 2"
-        data={data2}
-        {...accessors}
-        size={15}
-        renderGlyph={(props) => (
-          <GlyphSquare
-            fill={props.color}
-            size={(props.size / 2) ** 2 * Math.PI}
-            top={props.y}
-            left={props.x}
-          />
-        )}
-      />
-      <GlyphSeries
-        dataKey="Glyphs 3"
-        data={data3}
-        {...accessors}
-        size={15}
-        renderGlyph={(props) => (
-          <GlyphTriangle
-            fill={props.color}
-            size={(props.size / 2) ** 2 * Math.PI}
-            top={props.y}
-            left={props.x}
-          />
-        )}
-      />
+      {series.map((props) => (
+        <GlyphSeries key={props.dataKey} {...accessors} size={15} {...props} />
+      ))}
       <Axis orientation="bottom" hideTicks label="Units" labelOffset={20} />
       <Axis
         orientation="left"
         numTicks={4}
         hideTicks
-        tickFormat={(value) => `${Math.round(value / 1000000)}$`}
+        tickFormat={yAxisTickFormat}
         label="millions"
       />
     </XYChart>
