@@ -25,6 +25,7 @@ type TableClass =
   | 'pinnedStartHeader'
   | 'pinnedEndHeader'
   | 'tableHeadRenderPane'
+  | 'tableBodyRenderPane'
   | 'tableHead'
   | 'tableBody'
   | 'tableColumns'
@@ -48,6 +49,7 @@ const classes: {
   pinnedStartHeader: 'MuiPlusPinnedStartHeader',
   pinnedEndHeader: 'MuiPlusPinnedEndHeader',
   tableHeadRenderPane: 'MuiPlusTableHeadRenderPane',
+  tableBodyRenderPane: 'MuiPlusTableBodyRenderPane',
   tableHead: 'MuiPlusTableHead',
   tableBody: 'MuiPlusTableBody',
   tableColumns: 'MuiPlusTableColumns',
@@ -97,7 +99,11 @@ const DataGridRoot = styled('div')(({ theme }) => ({
     fontWeight: theme.typography.fontWeightBold,
     position: 'relative',
     height: '100%',
-    display: 'flex',
+    minWidth: '100%',
+  },
+
+  [`& .${classes.tableBodyRenderPane}`]: {
+    minWidth: '100%',
   },
 
   [`& .${classes.tableHead}`]: {
@@ -139,7 +145,7 @@ const DataGridRoot = styled('div')(({ theme }) => ({
 
   [`& .${classes.tableRowRoot}`]: {
     borderBottom: `1px solid ${theme.palette.divider}`,
-    width: '100%',
+
     position: 'relative',
     display: 'flex',
     overflow: 'visible',
@@ -859,6 +865,7 @@ function DataGridContent({
             )}
             <div className={classes.centerColumns} ref={centerColumnsRef}>
               <div
+                className={classes.tableBodyRenderPane}
                 ref={tableBodyRenderPaneRef}
                 style={{ width: totalWidth, height: totalHeight }}
               >
