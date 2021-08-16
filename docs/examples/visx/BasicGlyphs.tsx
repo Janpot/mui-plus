@@ -42,9 +42,10 @@ const data3: Datum[] = [
   { x: 111, y: 10987365 },
 ];
 
+// https://github.com/airbnb/visx/issues/1247
 const accessors = {
-  xAccessor: (d: Datum) => d.x,
-  yAccessor: (d: Datum) => d.y,
+  xAccessor: (d: Datum) => d?.x,
+  yAccessor: (d: Datum) => d?.y,
 };
 
 const useTheme = makeVisxTheme();

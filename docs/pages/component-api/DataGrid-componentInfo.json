@@ -40,7 +40,7 @@
       "type": { "name": "(newValue: ColumnDefinitions) => void" }
     },
     "defaultColumns": {
-      "defaultValue": { "value": "[]" },
+      "defaultValue": null,
       "description": "",
       "name": "defaultColumns",
       "parent": {
@@ -74,7 +74,7 @@
       "type": { "name": "any[]" }
     },
     "rowHeight": {
-      "defaultValue": { "value": 52 },
+      "defaultValue": null,
       "description": "",
       "name": "rowHeight",
       "parent": {
