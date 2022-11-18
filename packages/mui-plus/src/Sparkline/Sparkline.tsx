@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { experimentalStyled as styled } from '@material-ui/core';
-import { SxProps } from '@material-ui/system';
+import { experimentalStyled as styled, SxProps } from '@mui/material';
 import clsx from 'clsx';
 import { scaleLinear } from '../utils/math';
 

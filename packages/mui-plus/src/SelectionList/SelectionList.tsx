@@ -7,10 +7,10 @@ import {
   ListItemText,
   experimentalStyled as styled,
   useControlled as useMuiControlled,
-} from '@material-ui/core';
+} from '@mui/material';
 import * as React from 'react';
 import { useControlled } from '../utils/useControlled';
-import DragIndicator from '@material-ui/icons/DragIndicator';
+import { DragIndicator } from '@mui/icons-material';
 
 const CLASS_DRAG_ITEM = 'MuiPlusListItem';
 const CLASS_DRAG_HANDLE = 'MuiPlusDragHandle';
