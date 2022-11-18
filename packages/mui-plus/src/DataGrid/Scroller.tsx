@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { experimentalStyled as styled } from '@material-ui/core';
+import { experimentalStyled as styled } from '@mui/material';
 import useResizeObserver from './useResizeObserver';
 
 const Root = styled('div')({

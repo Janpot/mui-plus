@@ -7,14 +7,14 @@ import {
   TooltipContext,
   TooltipContextType,
 } from '@visx/xychart';
-import { grey, cyan, purple, orange } from '@material-ui/core/colors';
+import { grey, cyan, purple, orange } from '@mui/material/colors';
 import {
   useTheme as useMuiTheme,
   Tooltip as MuiTooltip,
   TooltipProps as MuiTooltipProps,
   tooltipClasses as muiTooltipClasses,
   experimentalStyled as styled,
-} from '@material-ui/core';
+} from '@mui/material';
 import { TooltipProps } from '@visx/xychart/lib/components/Tooltip';
 import { LegendOrdinal } from '@visx/legend';
 

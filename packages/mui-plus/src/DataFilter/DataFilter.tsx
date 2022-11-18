@@ -11,10 +11,10 @@ import {
   Stack,
   Select,
   Typography,
-} from '@material-ui/core';
+  Collapse
+} from '@mui/material';
 import * as React from 'react';
-import AddIcon from '@material-ui/icons/Add';
-import { Collapse } from '@material-ui/core';
+import { Add } from '@mui/icons-material';
 import { TransitionGroup } from 'react-transition-group';
 
 export interface InputComponentProps<ValueType> {
@@ -383,7 +383,7 @@ export default function DataFilter<Row extends object>({
       <TransitionGroup component={null}>{chipsContent}</TransitionGroup>
       <NewDataFilterChip
         size={size}
-        icon={<AddIcon />}
+        icon={<Add />}
         label="Add a filter"
         variant="outlined"
         onClick={handleCreateNew}

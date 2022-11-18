@@ -5,7 +5,7 @@ TODO
 */
 
 import * as React from 'react';
-import { createSvgIcon, experimentalStyled as styled } from '@material-ui/core';
+import { createSvgIcon, experimentalStyled as styled } from '@mui/material';
 import useResizeObserver from './useResizeObserver';
 import clsx from 'clsx';
 import { useControlled } from '../utils/useControlled';
